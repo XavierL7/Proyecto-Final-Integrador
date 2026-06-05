@@ -1,4 +1,4 @@
-const express = require('express');
+import express from 'express'; // <-- CAMBIADO: De require a import
 const router = express.Router();
 
 // Datos de ejemplo
@@ -8,7 +8,7 @@ const siteInfo = {
   version: '1.0.0'
 };
 
-// GET - Obtener información del sitio
+
 router.get('/info', (req, res) => {
   res.json(siteInfo);
 });
@@ -20,4 +20,4 @@ router.post('/contact', (req, res) => {
   res.json({ success: true, message: 'Mensaje recibido correctamente' });
 });
 
-module.exports = router;
+export default router; // 
