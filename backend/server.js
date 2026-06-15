@@ -1,27 +1,18 @@
+// backend/server.js
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv'
-import apiRoutes from './routes/api.js'
-
-dotenv.config();
+import apiRouter from './routes/api.js'; // Importamos tu archivo unificado
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors()); // Permite que tu frontend de Vue (puerto 5173) haga peticiones
+app.use(express.json()); // Clave para que Express pueda leer los req.body en formato JSON
 
-// Rutas
-app.use('/api', apiRoutes);
+// Vinculamos las rutas. Ahora tus endpoints serán: 
+// http://localhost:3000/api/auth/register y http://localhost:3000/api/auth/login
+app.use('/api', apiRouter); 
 
-// Ruta de prueba
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Servidor funcionando correctamente' });
-});
-
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`API disponible en http://localhost:${PORT}/api/info`);
+  console.log(`Servidor de Kairo corriendo en http://localhost:${PORT}`);
 });

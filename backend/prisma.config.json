@@ -1,6 +1,0 @@
-{
-  "earlyAccess": true,
-  "migrate": {
-    "url": "env(\"DIRECT_URL\")"
-  }
-}
