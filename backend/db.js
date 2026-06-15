@@ -1,16 +1,18 @@
-// db.js
-import { PrismaClient } from '@prisma/client'
-import dotenv from 'dotenv'
+// backend/db.js
+import { PrismaClient } from '@prisma/client';
+import pg from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
+import 'dotenv/config'; // Carga tu archivo .env automáticamente
 
-// 1. Cargamos las variables de entorno del archivo .env
-dotenv.config()
+// 1. Configuramos el pool de conexión nativo de Postgres
+// Aquí es donde se pasa de forma segura tu variable de entorno DATABASE_URL
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
-// 2. Inicializamos el cliente de Prisma.
-// En Prisma 7, le pasamos la URL del Session Pooling (puerto 5432) 
-// directamente en la propiedad 'datasourceUrl'.
-const prisma = new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
-})
+// 2. Creamos el adaptador oficial exigido por Prisma 7
+const adapter = new PrismaPg(pool);
 
-// 3. Exportamos la instancia para usarla en tus rutas y controladores
-export default prisma
+// 3. Inicializamos PrismaClient pasando SOLO el adaptador
+// ¡Ya no incluyas la propiedad "datasources" ni "datasource" aquí!
+const prisma = new PrismaClient({ adapter });
+
+export default prisma;
