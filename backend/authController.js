@@ -9,17 +9,15 @@ export const registrarTrabajador = async (req, res) => {
 
     // Hasheamos la contraseña por seguridad
     const salt = await bcrypt.genSalt(10)
-    const contrasena_hash = await bcrypt.hash(contrasena, salt)
+    const contraseña_hash = await bcrypt.hash(contrasena, salt)
 
     // Insertamos en la tabla 'trabajadores' usando Prisma
     const nuevoTrabajador = await prisma.trabajador.create({
       data: {
         nombre,
         apellido,
-        contrasena_hash,
+        contraseña_hash,
         id_rol: 2, // Por defecto: Trabajador común (como pediste)
-        limite_retiro_diario: 0.00, // Valor inicial obligatorio por el tipo Decimal
-        permiso_manejo_caja: false
       }
     })
 
@@ -49,7 +47,7 @@ export const loginTrabajador = async (req, res) => {
     }
 
     // Validamos la contraseña hasheada
-    const contrasenaValida = await bcrypt.compare(contrasena, trabajador.contrasena_hash)
+    const contrasenaValida = await bcrypt.compare(contrasena, trabajador.contraseña_hash)
     if (!contrasenaValida) {
       return res.status(401).json({ error: 'Credenciales inválidas (Contraseña incorrecta)' })
     }

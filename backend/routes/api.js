@@ -13,7 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'kairo_secret_key_2026';
 router.post('/auth/register', async (req, res) => {
   try {
     // Tomamos solo lo que tu schema permite
-    const { nombre, apellido, password, limite_retiro } = req.body;
+    const { nombre, apellido, password} = req.body;
 
     if (!nombre || !apellido || !password) {
       return res.status(400).json({ error: 'Nombre, apellido y contraseña son obligatorios.' });
@@ -40,10 +40,8 @@ router.post('/auth/register', async (req, res) => {
       data: {
         nombre: nombre,
         apellido: apellido,
-        contrasena_hash: passwordHash,
-        id_rol: 2, // Forzado a Nutricionista
-        limite_retiro_diario: parseFloat(limite_retiro || 50000.00),
-        permiso_manejo_caja: false
+        contraseña_hash: passwordHash,
+        id_rol: 2
       }
     });
 
@@ -75,7 +73,7 @@ router.post('/auth/login', async (req, res) => {
       include: {
         rol: {
           include: {
-            funciones: {
+            roles_funcionalidades: {
               where: { activo: true },
               include: { funcionalidad: true }
             }
@@ -88,12 +86,13 @@ router.post('/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'El trabajador no existe.' });
     }
 
-    const contrasenaValida = await bcrypt.compare(password, trabajador.contrasena_hash);
+    const contrasenaValida = await bcrypt.compare(password, trabajador.contraseña_hash);
     if (!contrasenaValida) {
       return res.status(401).json({ error: 'Contraseña incorrecta.' });
     }
 
-    const funcionalidades = trabajador.rol?.funciones.map(f => f.funcionalidad.nombre_func) || [];
+    const funcionalidades = trabajador.rol?.roles_funcionalidades
+    ?.map(rf => rf.funcionalidad.nombre_func) || [];
     const token = jwt.sign({ id: trabajador.id_trabajador }, JWT_SECRET, { expiresIn: '8h' });
 
     res.json({
@@ -113,4 +112,41 @@ router.post('/auth/login', async (req, res) => {
   }
 });
 
-export default router;
+// backend/routes/api.js - AGREGAR AL FINAL DEL ARCHIVO, ANTES DEL export default router
+
+// =========================================================================
+// 3. ENDPOINT PARA BUSCAR PRODUCTOS (GET)
+// =========================================================================
+router.get('/productos/buscar', async (req, res) => {
+  try {
+    const { q } = req.query
+
+    // Verificar si se envió el término de búsqueda
+    if (!q || q.trim() === '') {
+      return res.status(400).json({ error: 'Falta el término de búsqueda' })
+    }
+
+    // Buscar producto por código de barras o por nombre (insensible a mayúsculas)
+    const producto = await prisma.producto.findFirst({
+      where: {
+        OR: [
+          { codigo_barras: q.trim() },
+          { nombre_producto: { contains: q.trim(), mode: 'insensitive' } }
+        ]
+      }
+    })
+
+    if (!producto) {
+      return res.status(404).json({ error: 'Producto no encontrado' })
+    }
+
+    // Devolver el producto encontrado
+    res.json(producto)
+
+  } catch (error) {
+    console.error('Error buscando producto:', error)
+    res.status(500).json({ error: 'Error al buscar producto' })
+  }
+})
+
+export default router // 👈 Asegúrate que esto esté al final

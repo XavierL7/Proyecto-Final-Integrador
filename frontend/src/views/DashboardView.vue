@@ -1,64 +1,121 @@
+<!-- frontend/src/views/DashboardView.vue -->
+<!-- frontend/src/views/DashboardView.vue -->
 <template>
-  <div>
-    <h1>Panel de Control - Proyecto Kairo</h1>
-
-    <button @click="cerrarSesion">Cerrar Sesión</button>
+  <div class="dashboard">
+    <h1>Panel de Control - Kairo</h1>
     
-
-    <div v-if="authStore.trabajador?.rol?.nombre_rol === 'admin'">
-      <button @click="irACrearRoles">Crear Roles</button>
+    <div class="user-info">
+      <p>👤 {{ authStore.trabajador?.nombre }} {{ authStore.trabajador?.apellido }}</p>
+      <p>📋 Rol: {{ authStore.rolActual }}</p>
+      <p>🔑 Permisos: {{ authStore.funcionalidades.join(', ') || 'Ninguno' }}</p>
     </div>
 
+    <div class="dashboard-grid">
+      <!-- SOLO ADMIN VE ESTE BOTÓN -->
+      <button 
+        v-if="authStore.tienePermiso('crear_roles')"
+        class="btn-admin"
+        @click="navigateTo('/crear-roles')"
+      >
+        👑 Crear Roles
+      </button>
+
+      <!-- Botón Ventas -->
+      <button 
+        class="btn-ventas"
+        @click="navigateTo('/ventas')"
+      >
+        📊 Ventas
+      </button>
+
+      <!-- Botón Cajas -->
+      <button 
+        class="btn-cajas"
+        @click="navigateTo('/cajas')"
+      >
+        💰 Cajas
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth' // Importamos tu tienda de Pinia
 
-const items = ref([])
+const authStore = useAuthStore()
 const router = useRouter()
-const authStore = useAuthStore() // Instanciamos la tienda
 
-const cargarDatos = async () => {
-  try {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-    const token = localStorage.getItem('token')
-
-    const response = await fetch(`${baseUrl}/api/dashboard/datos`, {
-      headers: { 
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    items.value = await response.json()
-  } catch (error) {
-    console.error("Error cargando el panel:", error)
-  }
+const navigateTo = (path) => {
+  router.push(path)
 }
-
-// FUNCIÓN PARA CERRAR SESIÓN
-const cerrarSesion = () => {
-  // Limpiamos los estados de Pinia
-  authStore.token = null
-  authStore.trabajador = null
-  authStore.funcionalidades = []
-
-  // Limpiamos el almacenamiento del navegador
-  localStorage.removeItem('token')
-  
-  // Lo mandamos de patitas a la pantalla de Login
-  router.push({ name: 'Login' })
-}
-
-// FUNCIÓN PARA IR A LA VISTA DE CREAR ROLES
-const irACrearRoles = () => {
-  // Te redirige a la vista correspondiente. 
-  // Asegurate de que en tu router/index.js la ruta tenga name: 'CrearRoles'
-  router.push({ name: 'CrearRoles' })
-}
-
-onMounted(() => {
-  cargarDatos()
-})
 </script>
+
+<style scoped>
+.dashboard {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.user-info {
+  background: #f8f9fa;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border: 1px solid #dee2e6;
+}
+
+.user-info p {
+  margin: 5px 0;
+}
+
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+button {
+  padding: 18px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.btn-admin {
+  background: #ffc107;
+  color: #212529;
+  border: 2px solid #ffc107;
+}
+
+.btn-admin:hover {
+  background: #e0a800;
+}
+
+.btn-ventas {
+  background: #4CAF50;
+  color: white;
+}
+
+.btn-ventas:hover {
+  background: #45a049;
+}
+
+.btn-cajas {
+  background: #2196F3;
+  color: white;
+}
+
+.btn-cajas:hover {
+  background: #1976D2;
+}
+</style>
