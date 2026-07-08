@@ -19,14 +19,6 @@
           >
             Ventas
           </router-link>
-          
-          <router-link 
-            v-if="authStore.tienePermiso('gestionar_trabajadores')"
-            to="/admin" 
-            class="nav-link admin-link"
-          >
-            Admin
-          </router-link>
         </template>
         
         <!-- Enlaces para NO autenticados -->
@@ -64,21 +56,15 @@ const cerrarSesion = () => {
 
 <style scoped>
 .header {
-  background: #2c3e50;
+  background: #021120;
   color: white;
   padding: 0 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  position: sticky;
-  top: 0;
-  z-index: 100;
 }
 
 .nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
   height: 64px;
 }
 
@@ -92,7 +78,6 @@ const cerrarSesion = () => {
   font-size: 1.5rem;
   font-weight: bold;
   color: white;
-  text-decoration: none;
 }
 
 .brand:hover {
@@ -112,20 +97,6 @@ const cerrarSesion = () => {
   color: white;
 }
 
-.nav-link.router-link-active {
-  background: rgba(255,255,255,0.15);
-  color: white;
-}
-
-.admin-link {
-  border: 1px solid #ffc107;
-  color: #ffc107;
-}
-
-.admin-link:hover {
-  background: #ffc107;
-  color: #2c3e50;
-}
 
 .user-info {
   display: flex;
