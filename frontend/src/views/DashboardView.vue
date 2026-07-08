@@ -5,10 +5,11 @@
     <h1>Panel de Control - Kairo</h1>
     
     <div class="user-info">
-      <p>👤 {{ authStore.trabajador?.nombre }} {{ authStore.trabajador?.apellido }}</p>
-      <p>📋 Rol: {{ authStore.rolActual }}</p>
-      <p>🔑 Permisos: {{ authStore.funcionalidades.join(', ') || 'Ninguno' }}</p>
+      <p>Usuario: {{ authStore.trabajador?.nombre }} {{ authStore.trabajador?.apellido }}</p>
+      <p>Rol: {{ authStore.rolActual }}</p>
+      <p>Permisos: {{ authStore.funcionalidades.join(', ') || 'Ninguno' }}</p>
     </div>
+
 
     <div class="dashboard-grid">
       <!-- SOLO ADMIN VE ESTE BOTÓN -->
@@ -17,7 +18,7 @@
         class="btn-admin"
         @click="navigateTo('/crear-roles')"
       >
-        👑 Crear Roles
+      Crear Roles
       </button>
 
       <!-- Botón Ventas -->
@@ -25,7 +26,7 @@
         class="btn-ventas"
         @click="navigateTo('/ventas')"
       >
-        📊 Ventas
+       Ventas
       </button>
 
       <!-- Botón Cajas -->
@@ -33,7 +34,7 @@
         class="btn-cajas"
         @click="navigateTo('/cajas')"
       >
-        💰 Cajas
+       Cajas
       </button>
     </div>
   </div>
@@ -58,6 +59,11 @@ const navigateTo = (path) => {
   margin: 0 auto;
 }
 
+h1 {
+  font-size: 1.5rem;
+
+}
+
 .user-info {
   background: #f8f9fa;
   padding: 15px 20px;
@@ -77,18 +83,15 @@ const navigateTo = (path) => {
 }
 
 button {
-  padding: 18px 20px;
+  padding: 10px 15px;
   border: none;
-  border-radius: 10px;
+  border-radius: 5px;
   font-size: 1.2rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: bold;
 }
 
 button:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transform: scale(1.01);
 }
 
 .btn-admin {
@@ -103,7 +106,7 @@ button:hover {
 
 .btn-ventas {
   background: #4CAF50;
-  color: white;
+  color: #212529;
 }
 
 .btn-ventas:hover {
@@ -112,7 +115,7 @@ button:hover {
 
 .btn-cajas {
   background: #2196F3;
-  color: white;
+  color: #212529;
 }
 
 .btn-cajas:hover {
