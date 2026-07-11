@@ -1,9 +1,10 @@
 <!-- frontend/src/views/DashboardView.vue -->
-<!-- frontend/src/views/DashboardView.vue -->
+<!-- dashboard para acceder slo a ventas por ahora -->
 <template>
   <div class="dashboard">
     <h1>Panel de Control - Kairo</h1>
     
+    <!-- muestra info del vendednor, nombre, apellido, rol y funcionalidades -->
     <div class="user-info">
       <p>Usuario: {{ authStore.trabajador?.nombre }} {{ authStore.trabajador?.apellido }}</p>
       <p>Rol: {{ authStore.rolActual }}</p>
@@ -12,7 +13,7 @@
 
 
     <div class="dashboard-grid">
-      <!-- SOLO ADMIN VE ESTE BOTÓN -->
+      <!-- solo admin -->
       <button 
         v-if="authStore.tienePermiso('crear_roles')"
         class="btn-admin"
@@ -21,7 +22,7 @@
       Crear Roles
       </button>
 
-      <!-- Botón Ventas -->
+      <!-- boton quelleva a Ventas -->
       <button 
         class="btn-ventas"
         @click="navigateTo('/ventas')"
@@ -29,7 +30,7 @@
        Ventas
       </button>
 
-      <!-- Botón Cajas -->
+      <!-- boton que lleva a Cajas -->
       <button 
         class="btn-cajas"
         @click="navigateTo('/cajas')"
@@ -44,6 +45,8 @@
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 
+
+//usa router para redirigir a otras paginas y authstore para autenticar usuarios
 const authStore = useAuthStore()
 const router = useRouter()
 
@@ -52,7 +55,7 @@ const navigateTo = (path) => {
 }
 </script>
 
-<style scoped>
+<style scoped> 
 .dashboard {
   padding: 20px;
   max-width: 600px;

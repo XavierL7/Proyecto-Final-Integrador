@@ -5,10 +5,12 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// REGISTRO (con DNI)
+// funcion que maneja el registro del usuario
 export const registrarTrabajador = async (req, res) => {
   try {
+    
     //datos que recibe del frontend RegisterView
+
     const { nombre, apellido, dni, password } = req.body;
 
     // Validar que todos los campos estén presentes
@@ -72,7 +74,7 @@ export const registrarTrabajador = async (req, res) => {
   }
 };
 
-// LOGIN (con DNI)
+// funcion que maneja el login del usuario
 export const loginTrabajador = async (req, res) => {
   try {
     //recibe los datos de LoginView

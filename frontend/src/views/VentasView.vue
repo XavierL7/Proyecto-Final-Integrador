@@ -1,4 +1,5 @@
 <!-- frontend/src/views/VentasView.vue -->
+ <!-- Pagina de ventas -->
 <template>
   <div class="ventas-container">
     <h1>Ventas</h1>

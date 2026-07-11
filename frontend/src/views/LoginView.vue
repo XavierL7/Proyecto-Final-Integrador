@@ -1,8 +1,10 @@
+<!--Login -->
 <template>
   <div class="login-container">
     <h2>Proyecto Kairo - Login</h2>
     <form @submit.prevent="entrarTradicional">
       
+      <!-- campo del login que pide que pongas un nombre requerido -->
       <div class="form-group">
         <input 
           type="text" 
@@ -12,6 +14,7 @@
         />
       </div>
 
+      <!--campo del login que pide que pongas un apellido requerido -->
       <div class="form-group">
         <input 
           type="text" 
@@ -21,7 +24,7 @@
         />
       </div>
 
-      <!-- 👇 NUEVO CAMPO DNI -->
+      <!-- campo del login que pide que pongas un dni requerido -->
       <div class="form-group">
         <input 
           type="number" 
@@ -31,6 +34,7 @@
         />
       </div>
 
+     <!-- campo del login que pide que pongas una contrasea requerido -->
       <div class="form-group">
         <input 
           type="password" 
@@ -47,24 +51,25 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useAuthStore } from '../stores/auth';
-import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth'; //autorizacion
+import { useRouter } from 'vue-router'; //router
 
-const authStore = useAuthStore();
-const router = useRouter();
+const authStore = useAuthStore(); //autorizacion de ponia
+const router = useRouter(); //para acceder a otras rutas
 
-const credentials = ref({ 
+const credentials = ref({  //credenciales del usuario que se usan en cont resultado =
   nombre: '', 
   apellido: '', 
-  dni: '',        // 👈 NUEVO
+  dni: '',    
   password: '' 
 });
 
+//fuuncion encargada de verificar que existis como usuario
 const entrarTradicional = async () => {
-  const resultado = await authStore.loginConContrasena(credentials.value);
+  const resultado = await authStore.loginConContrasena(credentials.value); //resultado es = a la funcion loginConContrasena del auth.js en stores
   
   if (resultado.success) {
-    router.push('/');
+    router.push('/'); //si seinicio sesion te envia a / que es el dashboard
   } else {
     alert(resultado.message || 'Error al iniciar sesión');
   }
