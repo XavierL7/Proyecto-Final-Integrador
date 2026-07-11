@@ -9,7 +9,6 @@ const router = express.Router();
 // Rutas de autenticación (usan el controlador)
 router.post('/auth/register', registrarTrabajador);
 router.post('/auth/login', loginTrabajador);
-router.get('/metodos-pago', obtenerMetodosPago); //aun no se usa
 
 
 // verificarToken se ejecuta antes de buscarProducto
