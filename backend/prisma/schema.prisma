@@ -1,4 +1,6 @@
 // prisma/schema.prisma
+
+// Archivo ORM encargado de mappear la base de datos
 generator client {
   provider = "prisma-client-js"
 }
@@ -44,10 +46,13 @@ model Trabajador {
   id_trabajador           Int                     @id @default(autoincrement())
   nombre                  String                  @db.VarChar(50)
   apellido                String                  @db.VarChar(50)
+  dni                     Int                     
   contraseña_hash         String                  @db.VarChar(255)
   hash_huella             String?                 @unique @db.VarChar(255)
   id_rol                  Int
   fecha_registro          DateTime                @default(now()) @db.Date
+
+  @@unique([nombre, apellido, dni])
   rol                     Rol                     @relation(fields: [id_rol], references: [id_rol])
   
   // Relaciones
@@ -79,6 +84,17 @@ model Producto {
   productos_etiquetas     Productos_Etiquetas[]
   
   @@map("Productos")
+}
+
+
+model MetodoPago {
+  id_metodo_pago   Int     @id @default(autoincrement())
+  nombre           String  @db.VarChar(50)
+  activo           Boolean @default(true)
+  
+  detalle_pago_venta Detalle_Pago_Venta[]
+
+  @@map("Metodos_Pago")
 }
 
 // 6. Cajas
@@ -145,13 +161,14 @@ model Venta {
 
 // 9. Detalle_Pago_Venta
 model Detalle_Pago_Venta {
-  id_detalle_pago         Int                     @id @default(autoincrement())
-  id_venta                Int
-  metodo_pago             MetodoPago
-  monto                   Decimal                 @db.Decimal(10, 2)
-  cambio_devuelto         Decimal?                @db.Decimal(10, 2)
+  id_detalle_pago   Int      @id @default(autoincrement())
+  id_venta          Int
+  id_metodo_pago    Int      // 👈 En lugar del ENUM
+  monto             Decimal  @db.Decimal(10, 2)
+  cambio_devuelto   Decimal? @db.Decimal(10, 2)
   
-  venta                   Venta                   @relation(fields: [id_venta], references: [id_venta])
+  venta       Venta      @relation(fields: [id_venta], references: [id_venta])
+  metodo_pago MetodoPago @relation(fields: [id_metodo_pago], references: [id_metodo_pago])
   
   @@map("Detalle_Pago_Venta")
 }
@@ -224,23 +241,24 @@ model Log_Ventas_Huella {
 }
 
 // 14. Promociones
+
 model Promocion {
   id_promocion            Int                     @id @default(autoincrement())
   nombre_promo            String                  @db.VarChar(100)
   tipo_promo              TipoPromo
   porcentaje_descuento    Decimal?                @db.Decimal(5, 2)
   cantidad_minima         Int?
-  metodo_pago_requerido   MetodoPago?
+  metodo_pago_requerido   String?                 @db.VarChar(50)  // Simple: "Efectivo", "Tarjeta"
   fecha_inicio            DateTime
   fecha_fin               DateTime
   activa                  Boolean                 @default(true)
   
-  // Relaciones
   detalle_ventas          Detalle_Venta[]
   productos_promociones   Productos_Promociones[]
   
   @@map("Promociones")
 }
+
 
 // 15. Productos_Promociones
 model Productos_Promociones {
@@ -304,13 +322,8 @@ enum ModoAutenticacion {
   por_venta
 }
 
-enum MetodoPago {
-  Efectivo
-  Debito
-  Transferencia
-  Credito
-  Otro
-}
+
+
 
 enum TipoMovimiento {
   ingreso_venta

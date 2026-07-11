@@ -21,6 +21,16 @@
         />
       </div>
 
+      <!-- 👇 NUEVO CAMPO DNI -->
+      <div class="form-group">
+        <input 
+          type="number" 
+          v-model="credentials.dni" 
+          placeholder="DNI" 
+          required 
+        />
+      </div>
+
       <div class="form-group">
         <input 
           type="password" 
@@ -43,22 +53,20 @@ import { useRouter } from 'vue-router';
 const authStore = useAuthStore();
 const router = useRouter();
 
-// Ajustamos la estructura de las credenciales a tu tabla Trabajador
 const credentials = ref({ 
   nombre: '', 
   apellido: '', 
+  dni: '',        // 👈 NUEVO
   password: '' 
 });
 
 const entrarTradicional = async () => {
-  // Mandamos el objeto con nombre, apellido y password
   const resultado = await authStore.loginConContrasena(credentials.value);
   
   if (resultado.success) {
-    router.push('/'); // El guard lo procesa y te deja pasar al Dashboard
+    router.push('/');
   } else {
     alert(resultado.message || 'Error al iniciar sesión');
   }
 };
 </script>
-
