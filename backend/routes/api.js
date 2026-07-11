@@ -2,7 +2,6 @@ import express from 'express';
 import { registrarTrabajador, loginTrabajador } from '../controllers/authController.js';
 import { buscarProducto } from '../controllers/productoController.js';
 import { verificarToken } from '../middleware/auth.js';
-import { obtenerMetodosPago } from '../controllers/metodoPagoController.js';
 
 const router = express.Router();
 

@@ -2,19 +2,19 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
-// 1. Definimos las rutas de la aplicación
+// router/index.js sirve para definir las rutas de la aplicación
 const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/LoginView.vue'), // Se creará luego
+    component: () => import('../views/LoginView.vue'), 
     meta: { requiereAuth: false }
   },
 
   {
     path: '/register',
     name: 'Register',
-    component: () => import('../views/RegisterView.vue'), // Se creará luego
+    component: () => import('../views/RegisterView.vue'), 
     meta: { requiereAuth: false }
   },
   {
@@ -33,7 +33,6 @@ const routes = [
     }
   },
 
-  // Agrega esto dentro del array "routes" en src/router/index.js
   {
     path: '/crear-roles',
     name: 'CrearRoles',
@@ -49,7 +48,7 @@ const routes = [
     component: () => import('../views/CajasView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'abrir_caja' // O 'cerrar_caja', según cómo manejes la vista
+      permiso: 'abrir_caja'
     }
   },
   {
@@ -58,7 +57,7 @@ const routes = [
     component: () => import('../views/AdminView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'ver_modulo_admin' // Solo perfiles autorizados (ej: Admin)
+      permiso: 'ver_modulo_admin' // Solo perfiles autorizados (eladmin)
     }
   },
   // Ruta de escape por si intentan entrar a un lugar prohibido o inexistente
@@ -73,9 +72,9 @@ const router = createRouter({
   routes
 })
 
-// =========================================================================
-// 2. NAVIGATION GUARD (El guardia de seguridad del Router)
-// =========================================================================
+
+// 2. Guardia de navegacion (el guardia de seguridad del Router)
+
 router.beforeEach(async (to, from, next) => {
   // Inicializamos la tienda de Pinia dentro del guard
   const authStore = useAuthStore()

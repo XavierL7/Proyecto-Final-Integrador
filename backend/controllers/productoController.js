@@ -1,6 +1,7 @@
 // backend/controllers/productoController.js
 import prisma from '../db.js';
 
+//funcion que se encarga de buscar los prudctos
 export const buscarProducto = async (req, res) => {
   try {
     const { q } = req.query;

@@ -1,58 +1,57 @@
 // src/stores/auth.js
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed } from 'vue' //ref crea datos reactivos (que se actualizan automáticamente) y computed	crea datos calculados (que dependen de otros datos
 import axios from 'axios'
 
+
+
+//este es el el archivo encargado de: guardar los datos del usuario logueado, recordar la sesión (con localStorage)
+// verificar permisos e iniciar y cerrar sesión en el frontend
+
+
 export const useAuthStore = defineStore('auth', () => {
-  // =========================================================================
-  // 1. STATE (Los estantes del almacén)
-  // =========================================================================
-// Modificá solo la parte del STATE al inicio de tu src/stores/auth.js:
-    const trabajador = ref(JSON.parse(localStorage.getItem('trabajador')) || null)
-    const token = ref(localStorage.getItem('token') || null)
-    const funcionalidades = ref(JSON.parse(localStorage.getItem('funcionalidades')) || [])
 
-    // =========================================================================
-    // 2. GETTERS (Los mostradores de exhibición rápida)
-    // =========================================================================
-    const estaAutenticado = computed(() => !!token.value && !!trabajador.value)
+  // 1 STATE (Los datos que se guardan)      
+    const trabajador = ref(JSON.parse(localStorage.getItem('trabajador')) || null) //datos del trabajdor (nombre, apellido, etc.)
+    const token = ref(localStorage.getItem('token') || null) //JWT
+    const funcionalidades = ref(JSON.parse(localStorage.getItem('funcionalidades')) || []) //funcionalidades del trabjador
 
+    //2  GETTERS (Datos calculados)      
+    const estaAutenticado = computed(() => !!token.value && !!trabajador.value) //true solo si hay token y trabajador
     // Devuelve el nombre del rol del trabajador actual
     const rolActual = computed(() => trabajador.value?.rol?.nombre_rol || null)
-
-    // Cambiamos el computed por una FUNCIÓN plana (Action) para que el router lo entienda directo:
+    // Pregunta por los permisos del trabjador
     function tienePermiso(permisoRequerido) {
       return funcionalidades.value.includes(permisoRequerido)
     }
-  // =========================================================================
-  // 3. ACTIONS (Los encargados de hacer el trabajo pesado)
-  // =========================================================================
+  // 3 ACTIONS (Funciones que modifican el estado)    
   
-  // Iniciar sesión con contraseña tradicional
+  // iniciar sesión con contraseña 
   async function loginConContrasena(credentials) {
     try {
-      // Usamos tu variable de entorno o cae en el puerto 3000 por defecto
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+      // usamos la variable de entorno o localhost 3000 para la urlbase
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000' 
       
       //credentials contiene: { nombre: '...', apellido: '...', password: '...' }
       const response = await axios.post(`${baseUrl}/api/auth/login`, credentials)
       
       // Guardamos la información en el estado de Pinia
-      token.value = response.data.token
-      trabajador.value = response.data.trabajador
-      funcionalidades.value = response.data.funcionalidades
+      token.value = response.data.token //token.value = el token del que hizo el login
+      trabajador.value = response.data.trabajador //trabjador.value = el nombre, apellido, dni y contrasela del que hizo ellogin
+      funcionalidades.value = response.data.funcionalidades // funcionalidades.value son las funciones que puede hacer ese usuario
 
-      // Persistencia de la sesión
+      // persistencia de la sesión
       localStorage.setItem('token', response.data.token)
       
-      // Seteamos el token para todas las futuras peticiones de Axios
+      // configura Axios para que automáticamente incluya el token en todas las peticiones HTTP que se hagan al backend.
+      //sino tendria que poner 'Authorization': `Bearer ${token}` en cada peticion
       axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
       
-      return { success: true }
+      return { success: true } //retorna succes para que se use en la verificaion del login
     } catch (error) {
       console.error('Error en el login:', error)
       
-      // Si falla, nos aseguramos de limpiar cualquier rastro viejo por seguridad
+      // si falla, nos aseguramos de limpiar cualquier rastro viejo por seguridad
       token.value = null
       trabajador.value = null
       funcionalidades.value = []
@@ -66,28 +65,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Iniciar sesión mediante huella biométrica (Modo sesión inicial)
-  async function loginConHuella(hashHuella) {
-    try {
-      const response = await axios.post('http://localhost:3000/api/auth/login-huella', { hash_huella: hashHuella })
-      
-      token.value = response.data.token
-      trabajador.value = response.data.trabajador
-      funcionalidades.value = response.data.funcionalidades
-
-      localStorage.setItem('token', response.data.token)
-      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
-      
-      return { success: true }
-    } catch (error) {
-      console.error('Error en el login biométrico:', error)
-      return { 
-        success: false, 
-        message: error.response?.data?.error || 'Huella no reconocida' 
-      }
-    }
-  }
-
   // Cerrar sesión y vaciar la tienda
     function logout() {
     trabajador.value = null
@@ -97,6 +74,8 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('trabajador')
     localStorage.removeItem('funcionalidades')
     }
+
+
   // Retornamos todo para que pueda ser usado en los componentes de Vue
   return {
     trabajador,
@@ -106,7 +85,6 @@ export const useAuthStore = defineStore('auth', () => {
     rolActual,
     tienePermiso,
     loginConContrasena,
-    loginConHuella,
     logout
   }
 })

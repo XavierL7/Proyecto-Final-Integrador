@@ -1,5 +1,6 @@
 <!-- frontend/src/components/Header.vue -->
 <template>
+  <!-- muestra el encabezado de todas las paginas -->
   <header class="header">
     <nav class="nav">
       <div class="nav-left">
@@ -13,7 +14,7 @@
           
           <!-- Enlaces con permisos -->
           <router-link 
-            v-if="authStore.tienePermiso('dashboard_ventas')"
+            v-if="authStore.tienePermiso('dashboard_ventas')" 
             to="/ventas" 
             class="nav-link"
           >
@@ -28,6 +29,7 @@
         </template>
       </div>
       
+      <!-- si el usuario esta autenticando muestra nombre, apellido y rol junto a un boton para cerrar sesion -->
       <div class="nav-right" v-if="authStore.estaAutenticado">
         <span class="user-info">
            {{ authStore.trabajador?.nombre }} {{ authStore.trabajador?.apellido }}
@@ -41,13 +43,15 @@
   </header>
 </template>
 
-<script setup>
+<script setup> //setup significa que el código se ejecuta antes de renderizar
+
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 
-const authStore = useAuthStore()
-const router = useRouter()
+const authStore = useAuthStore() //llama authstore de pinia
+const router = useRouter() //llama a router
 
+// funcion para cerrar la sesion
 const cerrarSesion = () => {
   authStore.logout()
   router.push('/login')
