@@ -12,7 +12,6 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 
 // 3. Inicializamos PrismaClient pasando SOLO el adaptador
-// ¡Ya no incluyas la propiedad "datasources" ni "datasource" aquí!
 const prisma = new PrismaClient({ adapter });
 
 export default prisma;
