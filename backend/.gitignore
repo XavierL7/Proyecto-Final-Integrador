@@ -1,4 +1,34 @@
-node_modules
-# Keep environment variables out of version control
+# ================================================================
+# BACKEND (Express + Prisma)
+# ================================================================
 
-/generated/prisma
+# Variables de entorno (¡NUNCA SUBIR! Contienen contraseñas)
+.env
+.env.local
+.env.*.local
+
+# Dependencias de Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Archivos de Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Archivos de construcción
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
