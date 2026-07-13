@@ -1,8 +1,3 @@
-# ================================================================
-# BACKEND (Express + Prisma)
-# ================================================================
-
-# Variables de entorno (¡NUNCA SUBIR! Contienen contraseñas)
 .env
 .env.local
 .env.*.local
