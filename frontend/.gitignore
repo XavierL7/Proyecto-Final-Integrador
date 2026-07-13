@@ -37,3 +37,33 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+
+
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Dependencias
+node_modules/
+pnpm-lock.yaml     # ⚠️ Opcional: subir o ignorar (ver nota abajo)
+package-lock.json  # ⚠️ Opcional: subir o ignorar
+yarn.lock          # ⚠️ Opcional: subir o ignorar
+
+# Archivos de construcción
+dist/
+dist-ssr/
+*.local
+
+# Archivos de cobertura de pruebas
+coverage/
+*.lcov
+
+# Archivos de editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

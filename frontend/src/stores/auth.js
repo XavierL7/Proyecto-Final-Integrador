@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
     function tienePermiso(permisoRequerido) {
       return funcionalidades.value.includes(permisoRequerido)
     }
-  // 3 ACTIONS (Funciones que modifican el estado)    
+  // 3 ACTIONS (Funciones que modifican el estado o realizan operaciones asincronas)    
   
   // iniciar sesión con contraseña 
   async function loginConContrasena(credentials) {
