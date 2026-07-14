@@ -1,4 +1,5 @@
 // backend/server.js
+//archivo encargado de crear el servidor y la aplicacion web, tambien permite la conexion con el frontend al agregar CORS y express.json
 import express from 'express';
 import cors from 'cors';
 import apiRouter from './routes/api.js'; // Importamos tu archivo unificado

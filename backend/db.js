@@ -1,4 +1,5 @@
 // backend/db.js
+//archivo  dedicado a la conexion de la base de datos. en sencarga de configurar la conexion del backend con la base de datos.
 import { PrismaClient } from '@prisma/client';
 import pg from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
