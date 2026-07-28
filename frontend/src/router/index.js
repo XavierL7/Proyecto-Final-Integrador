@@ -79,7 +79,7 @@ router.beforeEach(async (to, from, next) => {
   // Inicializamos la tienda de Pinia dentro del guard
   const authStore = useAuthStore()
 
-  // CASO 1: La ruta requiere autenticación y el usuario NO está logueado
+  // CASO 1: La ruta requiere autenticación y el usuario no está logueado
   if (to.meta.requiereAuth && !authStore.estaAutenticado) {
     return next({ name: 'Login' })
   }
