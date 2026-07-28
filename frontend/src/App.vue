@@ -1,28 +1,39 @@
 <!-- frontend/src/App.vue -->
- <!-- las paginas .vue realmente se ejecutan aca adentro, mas especificamente dentro de router-view -->
 <template>
-  <div id="app">
-    <!-- carga el componente header que se importa en script -->
-    <Header />
-    
-    <!-- aca se van a cargar las otras paginas view -->
-    <!-- Si el usuario no está autenticado, ponle la clase auth-page al <main>, esto se hace para mostrar diferentes estilos en el login/regster-->
-    <main :class="{ 'auth-page': !authStore.estaAutenticado }"> 
-      <router-view />
-    </main>
+  <div id="app" class="flex min-h-screen bg-gray-50">
+    <!-- Sidebar - SOLO si está autenticado -->
+    <Sidebar v-if="authStore.estaAutenticado" />
 
+    <!-- Contenido principal -->
+    <div
+      :class="[
+        'flex-1 transition-all duration-300',
+        authStore.estaAutenticado ? 'ml-20 md:ml-64' : 'ml-0'
+      ]"
+    >
+      <!-- 
+        ACA VA EL CONTENIDO DE LA PÁGINA (Login, Register, Dashboard, etc.)
+      -->
+      <main 
+        :class="[
+          'p-6',
+          !authStore.estaAutenticado ? 'auth-page' : ''
+        ]"
+      >
+        <router-view />
+      </main>
+    </div>
   </div>
 </template>
 
-<script setup> //setup significa que el código se ejecuta antes de renderizar
-import { useAuthStore } from './stores/auth' // importa el store de autenticación de Pinia
+<script setup>
+import { useAuthStore } from './stores/auth'
+import Sidebar from './components/Sidebar.vue'
 
-
-import Header from './components/Header.vue' //este es el header
-
-const authStore = useAuthStore() //gracia a esto puedo usar authStore.estaAutenticado en el template
+const authStore = useAuthStore()
 </script>
 
 <style>
-@import "./assets/main.css"; /*llamma estilos  */
+@import "./assets/main.css";
+
 </style>
