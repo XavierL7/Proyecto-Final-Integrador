@@ -42,6 +42,8 @@ export const useAuthStore = defineStore('auth', () => {
 
       // persistencia de la sesión
       localStorage.setItem('token', response.data.token)
+      localStorage.setItem('trabajador', JSON.stringify(response.data.trabajador)) 
+      localStorage.setItem('funcionalidades', JSON.stringify(response.data.funcionalidades))
       
       // configura Axios para que automáticamente incluya el token en todas las peticiones HTTP que se hagan al backend.
       //sino tendria que poner 'Authorization': `Bearer ${token}` en cada peticion
