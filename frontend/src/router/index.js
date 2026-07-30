@@ -60,6 +60,16 @@ const routes = [
       permiso: 'crear_roles' // Solo perfiles autorizados (eladmin)
     }
   },
+
+  {
+    path: '/etiquetas',
+    name: 'Etiquetas',
+    component: () => import('../views/EtiquetasView.vue'),
+    meta: { 
+      requiereAuth: true,
+      permiso: 'gestionar_etiquetas'  // Solo usuarios con este permiso
+    }
+  },
   // Ruta de escape por si intentan entrar a un lugar prohibido o inexistente
   {
     path: '/:pathMatch(.*)*',

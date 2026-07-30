@@ -157,8 +157,22 @@
         <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Trabajadores</span>
         <span v-else class="text-sm font-medium">T</span>
       </router-link>
+<!-- gestionar etiquetas-->
 
-      <!-- Estadísticas -->
+      <router-link
+        v-if="authStore.tienePermiso('gestionar_etiquetas')"
+        to="/etiquetas"
+        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
+        :class="[
+            $route.path === '/etiquetas' ? 'bg-blue-50 text-blue-600' : 'text-gray-700',
+            isOpen ? 'justify-start' : 'justify-center'
+        ]"
+        >
+        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Etiquetas</span>
+        <span v-else class="text-sm font-medium">E</span>
+            
+      </router-link>
+<!-- Estadísticas -->
       <router-link
         v-if="authStore.tienePermiso('ver_reportes')"
         to="/estadisticas"
