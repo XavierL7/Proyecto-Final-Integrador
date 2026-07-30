@@ -17,9 +17,9 @@
       <button 
         v-if="authStore.tienePermiso('crear_roles')"
         class="btn-admin"
-        @click="navigateTo('/crear-roles')"
+        @click="navigateTo('/administracion')"
       >
-      Crear Roles
+      Panel Admin
       </button>
 
       <!-- boton quelleva a Ventas -->

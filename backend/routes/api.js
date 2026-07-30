@@ -2,8 +2,12 @@ import express from 'express';
 import { registrarTrabajador, loginTrabajador } from '../controllers/authController.js';
 import { buscarProducto } from '../controllers/productoController.js';
 import { verificarToken } from '../middleware/auth.js';
+import adminRoutes from './adminRoutes.js';
 
 const router = express.Router();
+
+// rutas de admin
+router.use('/admin', adminRoutes);
 
 // Rutas de autenticación (usan el controlador)
 router.post('/auth/register', registrarTrabajador);

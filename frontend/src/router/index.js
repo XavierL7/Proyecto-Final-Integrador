@@ -57,7 +57,7 @@ const routes = [
     component: () => import('../views/AdminView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'ver_modulo_admin' // Solo perfiles autorizados (eladmin)
+      permiso: 'crear_roles' // Solo perfiles autorizados (eladmin)
     }
   },
   // Ruta de escape por si intentan entrar a un lugar prohibido o inexistente
