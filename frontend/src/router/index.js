@@ -12,6 +12,16 @@ const routes = [
   },
 
   {
+    path: '/stock',
+    name: 'Stock',
+    component: () => import('../views/StockView.vue'),
+    meta: { 
+      requiereAuth: true,
+      permiso: 'gestionar_productos'
+    }
+  },
+
+  {
     path: '/register',
     name: 'Register',
     component: () => import('../views/RegisterView.vue'), 

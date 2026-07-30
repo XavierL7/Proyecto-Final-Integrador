@@ -230,6 +230,22 @@
         <span v-else class="text-sm font-medium">A</span>
       </router-link>
 
+
+      <!-- frontend/src/components/Sidebar.vue -->
+
+        <router-link
+        v-if="authStore.tienePermiso('gestionar_productos')"
+        to="/stock"
+        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
+        :class="[
+            $route.path === '/stock' ? 'bg-blue-50 text-blue-600' : 'text-gray-700',
+            isOpen ? 'justify-start' : 'justify-center'
+        ]"
+        >
+        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Stock</span>
+        <span v-else class="text-sm font-medium">S</span>
+        </router-link>
+
       <!-- Separador -->
       <div class="border-t my-4" style="border-color: #0a2a40;"></div>
 
