@@ -5,6 +5,8 @@ import { verificarToken } from '../middleware/auth.js';
 import adminRoutes from './adminRoutes.js';
 import etiquetaRoutes from './etiquetaRoutes.js'  
 import productoRoutes from './productoRoutes.js'
+import metodoPagoRoutes from './metodoPagoRoutes.js'
+import ventaRoutes from './ventaRoutes.js'
 
 const router = express.Router();
 
@@ -14,6 +16,10 @@ router.use('/admin', adminRoutes);
 router.use('/etiquetas', etiquetaRoutes)
 //ruta de productos
 router.use('/productos', productoRoutes) 
+//metodos de pago
+router.use('/metodos-pago', metodoPagoRoutes)
+//ventas
+router.use('/ventas', ventaRoutes)
 
 // Rutas de autenticación (usan el controlador)
 router.post('/auth/register', registrarTrabajador);

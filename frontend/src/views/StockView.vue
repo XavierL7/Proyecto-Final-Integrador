@@ -2,7 +2,7 @@
 <template>
   <div class="p-6 max-w-6xl mx-auto">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">📦 Stock</h1>
+      <h1 class="text-2xl font-bold text-gray-800">Stock</h1>
       <button
         @click="abrirModal()"
         class="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition shadow-sm hover:shadow"
@@ -70,7 +70,7 @@
               <span :class="producto.stock_actual < producto.stock_minimo ? 'text-red-500 font-bold' : 'text-gray-900'">
                 {{ producto.stock_actual }}
               </span>
-              <span v-if="producto.stock_actual < producto.stock_minimo" class="text-red-500 text-xs ml-1">⚠️</span>
+              <span v-if="producto.stock_actual < producto.stock_minimo" class="text-red-500 text-xs ml-1"></span>
             </td>
             <td class="px-4 py-3 text-sm">
               <button @click="abrirModal(producto)" class="text-blue-500 hover:text-blue-700 mr-2">Editar</button>

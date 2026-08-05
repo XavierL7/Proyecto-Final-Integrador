@@ -26,7 +26,7 @@ axios.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // El token expiró o es inválido
-      console.warn('⚠️ Sesión expirada. Redirigiendo al login...')
+      console.warn('Sesión expirada. Redirigiendo al login...')
       
       // Limpiar localStorage
       localStorage.removeItem('token')

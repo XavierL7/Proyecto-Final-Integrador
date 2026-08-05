@@ -1,200 +1,191 @@
-<!-- frontend/src/views/VentasView.vue -->
- <!-- Pagina de ventas -->
+<!-- frontend/src/views/CajaView.vue -->
 <template>
-  <div class="ventas-container">
-    <h1>Ventas</h1>
-    
-    <!-- Buscador de productos -->
-    <div class="buscador">
-      <input 
-        type="text" 
-        v-model="codigoBuscado" 
-        placeholder="Ingresa código de barras o nombre del producto"
-        @keyup.enter="buscarProducto"
-      />
-      <button @click="buscarProducto" class="btn-buscar">Buscar</button>
+  <div class="p-6 max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Caja Registradora</h1>
+      <button
+        @click="cerrarCaja"
+        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+      >
+        Cerrar Caja
+      </button>
     </div>
 
-    <!-- Producto encontrado -->
-    <div v-if="productoEncontrado" class="producto-card">
-      <h3>{{ productoEncontrado.nombre_producto }}</h3>
-      <p><strong>Código:</strong> {{ productoEncontrado.codigo_barras || 'Sin código' }}</p>
-      <p><strong>Precio:</strong> ${{ productoEncontrado.precio_unitario }}</p>
-      <p><strong>Stock disponible:</strong> {{ productoEncontrado.stock_actual }}</p>
-      
-      <div class="acciones">
-        <label>Cantidad:</label>
-        <input type="number" v-model.number="cantidad" min="1" :max="productoEncontrado.stock_actual" />
-        <button @click="agregarAlCarrito" class="btn-agregar"> Agregar</button>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Columna izquierda: Buscador y carrito -->
+      <div class="lg:col-span-2">
+        <!-- Buscador -->
+        <BuscadorProducto @agregar="agregarAlCarrito" />
+
+        <!-- Carrito -->
+        <CarritoCompras
+          :items="carrito"
+          @actualizar-cantidad="actualizarCantidad"
+          @eliminar="eliminarDelCarrito"
+        />
       </div>
-    </div>
 
-    <p v-else-if="buscando && !productoEncontrado" class="no-encontrado">
-      Producto no encontrado
-    </p>
+      <!-- Columna derecha: Resumen y pago -->
+      <div class="lg:col-span-1">
+        <!-- Resumen -->
+        <ResumenVenta
+          :subtotal="subtotal"
+          :descuento="descuento"
+          :total="total"
+        />
 
-    <!-- Carrito de compras -->
-    <div v-if="carrito.length > 0" class="carrito">
-      <h2>Carrito</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Precio</th>
-            <th>Subtotal</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in carrito" :key="index">
-            <td>{{ item.nombre_producto }}</td>
-            <td>{{ item.cantidad }}</td>
-            <td>${{ item.precio_unitario }}</td>
-            <td>${{ (item.cantidad * item.precio_unitario).toFixed(2) }}</td>
-            <td><button @click="eliminarDelCarrito(index)" class="btn-eliminar">X</button></td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="3"><strong>Total</strong></td>
-            <td><strong>${{ totalCarrito.toFixed(2) }}</strong></td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
-      <button @click="finalizarVenta" class="btn-finalizar">Finalizar Venta</button>
-    </div>
+        <!-- Métodos de pago -->
+        <MetodosPago
+          :metodos="metodosPago"
+          @seleccionar="seleccionarMetodoPago"
+        />
 
-    <!-- Mensaje de venta realizada -->
-    <div v-if="ventaRealizada" class="venta-exitosa">
-      <h2>Venta realizada con éxito</h2>
-      <p>Total: ${{ ultimaVentaTotal }}</p>
-      <button @click="ventaRealizada = false" class="btn-volver">Volver</button>
+        <!-- Formulario según método -->
+        <div v-if="metodoSeleccionado" class="mt-4">
+          <PagoEfectivo
+            v-if="metodoSeleccionado === 'Efectivo'"
+            :total="total"
+            @confirmar="finalizarVenta"
+          />
+          <PagoTarjeta
+            v-else-if="metodoSeleccionado === 'Tarjeta Débito' || metodoSeleccionado === 'Tarjeta Crédito'"
+            :tipo="metodoSeleccionado"
+            :total="total"
+            @confirmar="finalizarVenta"
+          />
+          <PagoTransferencia
+            v-else-if="metodoSeleccionado === 'Transferencia' || metodoSeleccionado === 'Mercado Pago'"
+            :tipo="metodoSeleccionado"
+            :total="total"
+            @confirmar="finalizarVenta"
+          />
+          <PagoCheque
+            v-else-if="metodoSeleccionado === 'Cheque'"
+            :total="total"
+            @confirmar="finalizarVenta"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
+import BuscadorProducto from '../components/caja/BuscadorProducto.vue'
+import CarritoCompras from '../components/caja/CarritoCompras.vue'
+import ResumenVenta from '../components/caja/ResumenVenta.vue'
+import MetodosPago from '../components/caja/MetodosPago.vue'
+import PagoEfectivo from '../components/caja/PagoEfectivo.vue'
+import PagoTransferencia from '../components/caja/PagoTransferencia.vue'
+import PagoCheque from '../components/caja/PagoCheque.vue'
+import PagoTarjeta from '../components/caja/PagoTarjeta.vue'
 
 const authStore = useAuthStore()
-const codigoBuscado = ref('')
-const productoEncontrado = ref(null)
-const buscando = ref(false)
-const cantidad = ref(1)
-const carrito = ref([])
-const ventaRealizada = ref(false)
-const ultimaVentaTotal = ref(0)
+const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
-const totalCarrito = computed(() => {
-  return carrito.value.reduce((total, item) => {
-    return total + (item.cantidad * item.precio_unitario)
+// ============================================================
+// STATE
+// ============================================================
+const carrito = ref([])
+const metodosPago = ref([])
+const metodoSeleccionado = ref(null)
+
+// ============================================================
+// COMPUTED
+// ============================================================
+const subtotal = computed(() => {
+  return carrito.value.reduce((sum, item) => {
+    return sum + (item.cantidad * item.precio_unitario)
   }, 0)
 })
 
-// Buscar producto por código o nombre
-const buscarProducto = async () => {
-  if (!codigoBuscado.value.trim()) {
-    alert('Ingresa un código o nombre de producto')
-    return
-  }
+const descuento = computed(() => 0) // TODO: Implementar descuentos
 
-  buscando.value = true
-  productoEncontrado.value = null
+const total = computed(() => subtotal.value - descuento.value)
 
-  try {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-    const response = await axios.get(`${baseUrl}/api/productos/buscar`, {
-      params: { q: codigoBuscado.value },
-      headers: {
-        'Authorization': `Bearer ${authStore.token}`
-      }
-    })
+// ============================================================
+// MÉTODOS
+// ============================================================
+const agregarAlCarrito = (producto) => {
+  const existente = carrito.value.find(item => item.id_producto === producto.id_producto)
 
-    if (response.data) {
-      productoEncontrado.value = response.data
-      cantidad.value = 1
-    } else {
-      productoEncontrado.value = null
-    }
-  } catch (error) {
-    console.error('Error buscando producto:', error)
-    productoEncontrado.value = null
-  } finally {
-    buscando.value = false
-  }
-}
-
-// Agregar producto al carrito
-const agregarAlCarrito = () => {
-  if (!productoEncontrado.value) return
-
-  // Verificar stock
-  if (cantidad.value > productoEncontrado.value.stock_actual) {
-    alert(`Stock insuficiente. Disponible: ${productoEncontrado.value.stock_actual}`)
-    return
-  }
-
-  // Verificar si ya está en el carrito
-  const existente = carrito.value.find(item => item.id_producto === productoEncontrado.value.id_producto)
-  
   if (existente) {
-    const nuevaCantidad = existente.cantidad + cantidad.value
-    if (nuevaCantidad > productoEncontrado.value.stock_actual) {
-      alert(`Stock insuficiente. Disponible: ${productoEncontrado.value.stock_actual}`)
-      return
-    }
-    existente.cantidad = nuevaCantidad
+    existente.cantidad += 1
   } else {
     carrito.value.push({
-      id_producto: productoEncontrado.value.id_producto,
-      nombre_producto: productoEncontrado.value.nombre_producto,
-      precio_unitario: productoEncontrado.value.precio_unitario,
-      cantidad: cantidad.value,
-      stock_actual: productoEncontrado.value.stock_actual
+      id_producto: producto.id_producto,
+      nombre_producto: producto.nombre_producto,
+      precio_unitario: producto.precio_unitario,
+      cantidad: 1,
+      stock: producto.stock_actual
     })
   }
-
-  // Limpiar búsqueda
-  codigoBuscado.value = ''
-  productoEncontrado.value = null
-  cantidad.value = 1
 }
 
-// Eliminar del carrito
+const actualizarCantidad = (index, cantidad) => {
+  if (cantidad <= 0) {
+    carrito.value.splice(index, 1)
+  } else {
+    carrito.value[index].cantidad = cantidad
+  }
+}
+
 const eliminarDelCarrito = (index) => {
   carrito.value.splice(index, 1)
 }
 
-// Finalizar venta
-const finalizarVenta = async () => {
-  if (carrito.value.length === 0) {
-    alert('El carrito está vacío')
-    return
-  }
+const seleccionarMetodoPago = (metodo) => {
+  metodoSeleccionado.value = metodo
+}
 
+const finalizarVenta = async (datosPago) => {
   try {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-    const total = totalCarrito.value
+    const venta = {
+      items: carrito.value,
+      total: total.value,
+      metodo_pago: metodoSeleccionado.value,
+      datos_pago: datosPago
+    }
 
-    // Simular venta (solo para prueba)
-    console.log('Venta registrada:', {
-      total: total,
-      productos: carrito.value,
-      trabajador: authStore.trabajador?.nombre
+    const response = await axios.post(`${baseUrl}/api/ventas`, venta, {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
     })
 
-    ultimaVentaTotal.value = total
-    ventaRealizada.value = true
+    alert('Venta realizada con éxito')
     carrito.value = []
-
+    metodoSeleccionado.value = null
   } catch (error) {
     console.error('Error finalizando venta:', error)
-    alert('Error al finalizar la venta')
+    alert('Error al procesar la venta')
   }
 }
-</script>
 
+const cerrarCaja = () => {
+  if (carrito.value.length > 0) {
+    if (!confirm('Hay productos en el carrito. ¿Seguro que quieres cerrar la caja?')) return
+  }
+  // TODO: Lógica de cierre de caja
+  alert('Caja cerrada')
+}
+
+// ============================================================
+// CARGAR MÉTODOS DE PAGO
+// ============================================================
+const cargarMetodosPago = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/api/metodos-pago`, {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    })
+    metodosPago.value = response.data
+  } catch (error) {
+    console.error('Error cargando métodos de pago:', error)
+  }
+}
+
+onMounted(() => {
+  cargarMetodosPago()
+})
+</script>
