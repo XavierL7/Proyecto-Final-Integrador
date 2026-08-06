@@ -43,25 +43,26 @@
 
     <!-- MENÚ -->
     <nav class="p-4 space-y-1 overflow-y-auto h-[calc(100vh-80px)]">
-      <!-- Dashboard -->
+      
+      <!-- ============================================================ -->
+      <!-- DASHBOARD -->
+      <!-- ============================================================ -->
       <router-link
-        to="/dashboard"
+        to="/"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[
-          isOpen ? 'justify-start' : 'justify-center'
-        ]"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
-          color: $route.path === '/dashboard' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/dashboard' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
+          color: $route.path === '/' ? '#4a8db7' : '#8ab4d6',
+          backgroundColor: $route.path === '/' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
         }"
         @mouseenter="(e) => {
-          if ($route.path !== '/dashboard') {
+          if ($route.path !== '/') {
             e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
             e.currentTarget.style.color = '#6aaec9'
           }
         }"
         @mouseleave="(e) => {
-          if ($route.path !== '/dashboard') {
+          if ($route.path !== '/') {
             e.currentTarget.style.backgroundColor = 'transparent'
             e.currentTarget.style.color = '#8ab4d6'
           }
@@ -71,14 +72,14 @@
         <span v-else class="text-sm font-medium">D</span>
       </router-link>
 
-      <!-- Ventas -->
+      <!-- ============================================================ -->
+      <!-- VENTAS -->
+      <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('dashboard_ventas')"
         to="/ventas"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[
-          isOpen ? 'justify-start' : 'justify-center'
-        ]"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
           color: $route.path === '/ventas' ? '#4a8db7' : '#8ab4d6',
           backgroundColor: $route.path === '/ventas' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
@@ -100,14 +101,72 @@
         <span v-else class="text-sm font-medium">V</span>
       </router-link>
 
-      <!-- Cajas -->
+      <!-- ============================================================ -->
+      <!-- STOCK (CORREGIDO) -->
+      <!-- ============================================================ -->
+      <router-link
+        v-if="authStore.tienePermiso('gestionar_productos')"
+        to="/stock"
+        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
+        :style="{
+          color: $route.path === '/stock' ? '#4a8db7' : '#8ab4d6',
+          backgroundColor: $route.path === '/stock' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
+        }"
+        @mouseenter="(e) => {
+          if ($route.path !== '/stock') {
+            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
+            e.currentTarget.style.color = '#6aaec9'
+          }
+        }"
+        @mouseleave="(e) => {
+          if ($route.path !== '/stock') {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = '#8ab4d6'
+          }
+        }"
+      >
+        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Stock</span>
+        <span v-else class="text-sm font-medium">S</span>
+      </router-link>
+
+      <!-- ============================================================ -->
+      <!-- ETIQUETAS (CORREGIDO) -->
+      <!-- ============================================================ -->
+      <router-link
+        v-if="authStore.tienePermiso('gestionar_etiquetas')"
+        to="/etiquetas"
+        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
+        :style="{
+          color: $route.path === '/etiquetas' ? '#4a8db7' : '#8ab4d6',
+          backgroundColor: $route.path === '/etiquetas' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
+        }"
+        @mouseenter="(e) => {
+          if ($route.path !== '/etiquetas') {
+            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
+            e.currentTarget.style.color = '#6aaec9'
+          }
+        }"
+        @mouseleave="(e) => {
+          if ($route.path !== '/etiquetas') {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = '#8ab4d6'
+          }
+        }"
+      >
+        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Etiquetas</span>
+        <span v-else class="text-sm font-medium">E</span>
+      </router-link>
+
+      <!-- ============================================================ -->
+      <!-- CAJAS -->
+      <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('cerrar_caja')"
         to="/cajas"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[
-          isOpen ? 'justify-start' : 'justify-center'
-        ]"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
           color: $route.path === '/cajas' ? '#4a8db7' : '#8ab4d6',
           backgroundColor: $route.path === '/cajas' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
@@ -129,14 +188,14 @@
         <span v-else class="text-sm font-medium">C</span>
       </router-link>
 
-      <!-- Trabajadores -->
+      <!-- ============================================================ -->
+      <!-- TRABAJADORES -->
+      <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('gestionar_trabajadores')"
         to="/trabajadores"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[
-          isOpen ? 'justify-start' : 'justify-center'
-        ]"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
           color: $route.path === '/trabajadores' ? '#4a8db7' : '#8ab4d6',
           backgroundColor: $route.path === '/trabajadores' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
@@ -157,29 +216,15 @@
         <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Trabajadores</span>
         <span v-else class="text-sm font-medium">T</span>
       </router-link>
-<!-- gestionar etiquetas-->
 
-      <router-link
-        v-if="authStore.tienePermiso('gestionar_etiquetas')"
-        to="/etiquetas"
-        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[
-            $route.path === '/etiquetas' ? 'bg-blue-50 text-blue-600' : 'text-gray-700',
-            isOpen ? 'justify-start' : 'justify-center'
-        ]"
-        >
-        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Etiquetas</span>
-        <span v-else class="text-sm font-medium">E</span>
-            
-      </router-link>
-<!-- Estadísticas -->
+      <!-- ============================================================ -->
+      <!-- ESTADÍSTICAS -->
+      <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('ver_reportes')"
         to="/estadisticas"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[
-          isOpen ? 'justify-start' : 'justify-center'
-        ]"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
           color: $route.path === '/estadisticas' ? '#4a8db7' : '#8ab4d6',
           backgroundColor: $route.path === '/estadisticas' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
@@ -201,14 +246,14 @@
         <span v-else class="text-sm font-medium">E</span>
       </router-link>
 
-      <!-- Administración -->
+      <!-- ============================================================ -->
+      <!-- ADMINISTRACIÓN -->
+      <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('crear_roles')"
         to="/admin"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[
-          isOpen ? 'justify-start' : 'justify-center'
-        ]"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
           color: $route.path === '/admin' ? '#4a8db7' : '#8ab4d6',
           backgroundColor: $route.path === '/admin' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
@@ -229,22 +274,6 @@
         <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Administración</span>
         <span v-else class="text-sm font-medium">A</span>
       </router-link>
-
-
-      <!-- frontend/src/components/Sidebar.vue -->
-
-        <router-link
-        v-if="authStore.tienePermiso('gestionar_productos')"
-        to="/stock"
-        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[
-            $route.path === '/stock' ? 'bg-blue-50 text-blue-600' : 'text-gray-700',
-            isOpen ? 'justify-start' : 'justify-center'
-        ]"
-        >
-        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Stock</span>
-        <span v-else class="text-sm font-medium">S</span>
-        </router-link>
 
       <!-- Separador -->
       <div class="border-t my-4" style="border-color: #0a2a40;"></div>
