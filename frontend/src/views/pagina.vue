@@ -29,11 +29,11 @@
           </h1>
 
           <div class="flex flex-wrap gap-4 items-center">
-            <a href="#biometria" class="bg-white text-[#0f172a] font-bold px-7 py-3.5 rounded-xl hover:bg-gray-100 transition shadow-sm text-center min-w-[160px]">
+            <a href="#footer" class="bg-white text-[#0f172a] font-bold px-7 py-3.5 rounded-xl hover:bg-gray-100 transition shadow-sm text-center min-w-[160px]">
               Sobre nosotros
             </a>
             
-            <a href="#modulos" class="bg-gradient-to-r from-[#14b8a6] to-[#06b6d4] text-white font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 min-w-[160px]">
+            <a href="/login" class="bg-gradient-to-r from-[#14b8a6] to-[#06b6d4] text-white font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 min-w-[160px]">
               Ver más 
               <svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
@@ -178,7 +178,7 @@
                 {{ module.title }}
               </h2>
               <p 
-                class="text-xs leading-relaxed text-left" 
+                class="text-sm leading-relaxed text-left" 
                 :class="module.isCyan ? 'text-black/80 font-medium' : 'text-gray-300'"
               >
                 {{ module.description }}
@@ -260,7 +260,7 @@
                 <div class="flex items-center gap-3">
                   <span class="text-2xl font-extrabold tracking-tight text-gray-900" v-html="tech.logoHtml"></span>
                 </div>
-                <p class="text-xs text-gray-800 font-medium leading-relaxed">
+                <p class="text-sm text-gray-800 font-medium leading-relaxed">
                   {{ tech.description }}
                 </p>
               </div>
@@ -271,16 +271,16 @@
       </section>
 
       <!-- FOOTER -->
-      <footer class="bg-[#050c1a] text-white pt-16 pb-8 border-t border-gray-800">
+      <footer id= "footer" class="bg-[#050c1a] text-white pt-16 pb-8 border-t border-gray-800">
         <div class="max-w-7xl mx-auto px-6 lg:px-12 space-y-12">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
             <div class="lg:col-span-5 space-y-6">
               <div class="flex items-center">
-                <img src="../assets/logo.png" alt="Logo KAIRO" class="h-20 w-auto object-contain" />
+                <img src="../assets/logo.png.png" alt="Logo KAIRO" class="h-20 w-auto object-contain" />
               </div>
               <p class="text-xs text-gray-300 leading-relaxed font-normal pr-4">
-                KAIRO es el proyecto final de un equipo de desarrollo de último año de la Escuela Técnica N° 24 "Simón de Iriondo". Lo construimos para egresarnos, pero también para entender de primera mano qué significa trabajar en un entorno real...
+                KAIRO es el proyecto final de un equipo de desarrollo de último año de la Escuela Técnica N° 24 "Simón de Iriondo". Lo construimos para egresarnos, pero también para entender de primera mano qué significa trabajar en un entorno real: tomar decisiones de diseño, integrar hardware con software, organizar un equipo y entregar algo que funcione. No es solo un trabajo práctico, es nuestra primera experiencia construyendo un producto completo de principio a fin.
               </p>
             </div>
 
@@ -314,6 +314,7 @@ import { h } from 'vue'
 import Header from '../components/Header.vue'
 
 // Iconos inline
+// Íconos generales / características
 const LockIcon = () => h('svg', { fill: 'none', stroke: 'currentColor', 'stroke-width': '2.5', viewBox: '0 0 24 24' }, [
   h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' })
 ])
@@ -363,6 +364,36 @@ const AnalyticsIcon = () => h('svg', { fill: 'none', stroke: 'currentColor', 'st
 
 const SecurityIcon = () => h('svg', { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', viewBox: '0 0 24 24' }, [
   h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' })
+])
+
+// Íconos de las tecnologías
+const SupabaseIcon = () => h('svg', { class: 'w-8 h-8 text-[#3ecf8e]', fill: 'currentColor', viewBox: '0 0 24 24' }, [
+  h('path', { d: 'M11.523 0L1.92 12.022h8.736L9.6 24l12.48-13.882h-8.736L14.4 0h-2.877z' })
+])
+
+const VueIcon = () => h('svg', { class: 'w-8 h-8', viewBox: '0 0 24 24' }, [
+  h('path', { fill: '#41b883', d: 'M2 3h3.5L12 15 20.5 3H24L12 21 0 3h2z' }),
+  h('path', { fill: '#35495e', d: 'M6.5 3h3.5L12 7.5 14 3h3.5L12 12 6.5 3z' })
+])
+
+const NodeIcon = () => h('svg', { class: 'w-8 h-8 text-[#539e43]', fill: 'currentColor', viewBox: '0 0 24 24' }, [
+  h('path', { d: 'M12 0L1.75 5.92v12.16L12 24l10.25-5.92V5.92L12 0zm0 2.8l7.8 4.5v9l-7.8 4.5-7.8-4.5v-9l7.8-4.5z' })
+])
+
+const ArduinoIcon = () => h('svg', { class: 'w-10 h-10 text-[#00979d]', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', viewBox: '0 0 24 24' }, [
+  h('circle', { cx: '12', cy: '12', r: '9' }),
+  h('path', { d: 'M8 12h2.5m1.5 0h2.5M16 10v4' })
+])
+
+const ExpressIcon = () => h('div', { class: 'flex items-center gap-2' }, [
+  h('span', { class: 'text-2xl font-light text-gray-700 tracking-tight' }, 'Express'),
+  h('span', { class: 'bg-black text-white text-xs font-bold px-2 py-1 rounded' }, 'JS')
+])
+
+const TailwindIcon = () => h('svg', { class: 'w-8 h-8 text-[#38bdf8]', fill: 'currentColor', viewBox: '0 0 24 24' }, [
+  h('path', { d: 'M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.336 6.182 14.975 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C7.666 17.818 9.027 19.2 12.001 19.2c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.336 13.382 8.975 12 6.001 12z' }),
+  h('span', { class: 'text-2xl font-light text-gray-700 tracking-tight' }, 'Express'),
+  h('span', { class: 'bg-black text-white text-xs font-bold px-2 py-1 rounded' }, 'JS')
 ])
 
 // Datos estáticos
@@ -432,16 +463,17 @@ const modules = [
 ]
 
 const techStack = [
-  { name: 'Supabase', description: 'Motor relacional robusto y seguro', category: 'Base de datos', logoHtml: '<span class="text-[#3ecf8e]">⚡</span> supabase' },
-  { name: 'Vue.js', description: 'Interfaz de usuario y Aplicación Web', category: 'Frontend', logoHtml: '<span class="text-[#41b883]">💚</span> Vue.js' },
-  { name: 'Node.js', description: 'Entorno de ejecución para javascript', category: 'Frontend & Backend', logoHtml: 'node<span class="text-xs bg-[#539e43] text-white px-1 rounded ml-1">JS</span>' },
-  { name: 'Arduino', description: 'Programar el microcontrolador para interactuar entre el lector y el sistema', category: 'Hardware', logoHtml: '<span class="text-[#00979d]">♾️ ARDUINO</span>' },
-  { name: 'Express.js', description: 'Puente central en todas las partes del sistema', category: 'Backend', logoHtml: 'Express <span class="bg-black text-white text-xs px-2 py-1 rounded">JS</span>' }
+  { name: 'Supabase', description: 'Motor relacional robusto y seguro', category: 'Base de datos', logoHtml: '<div class="flex items-center gap-3"><svg class="w-8 h-8 text-[#3ecf8e]" fill="currentColor" viewBox="0 0 24 24"><path d="M11.523 0L1.92 12.022h8.736L9.6 24l12.48-13.882h-8.736L14.4 0h-2.877z"/></svg> <span class="text-2xl font-extrabold tracking-tight text-gray-900">supabase</span></div>' },
+  { name: 'Vue.js', description: 'Interfaz de usuario y Aplicación Web', category: 'Frontend', logoHtml: '<div class="flex items-center gap-3"><svg class="w-8 h-8" viewBox="0 0 24 24"><path d="M2 3h3.5L12 15 20.5 3H24L12 21 0 3h2z" fill="#41b883"/><path d="M6.5 3h3.5L12 7.5 14 3h3.5L12 12 6.5 3z" fill="#35495e"/></svg> <span class="text-2xl font-extrabold tracking-tight text-gray-900">Vue.js</span></div>' },
+  { name: 'Node.js', description: 'Entorno de ejecución para javascript', category: 'Frontend & Backend', logoHtml: '<div class="flex items-center gap-3"><svg class="w-8 h-8 text-[#539e43]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0L1.75 5.92v12.16L12 24l10.25-5.92V5.92L12 0zm0 2.8l7.8 4.5v9l-7.8 4.5-7.8-4.5v-9l7.8-4.5z"/></svg> <span class="text-2xl font-extrabold tracking-tight text-gray-900">node<span class="text-xs font-normal bg-[#539e43] text-white px-1 rounded ml-1">JS</span></span></div>' },
+  { name: 'Arduino', description: 'Programar el microcontrolador para interactuar entre el lector y el sistema', category: 'Hardware', logoHtml: '<div class="flex items-center gap-2 text-[#00979d]"><svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h2.5m1.5 0h2.5M16 10v4"/></svg> <span class="text-xl font-extrabold tracking-widest text-[#00979d]">ARDUINO</span></div>' },
+  { name: 'Express.js', description: 'Puente central en todas las partes del sistema', category: 'Backend', logoHtml: '<div class="flex items-center gap-2"><span class="text-2xl font-light text-gray-700 tracking-tight">Express</span> <span class="bg-black text-white text-xs font-bold px-2 py-1 rounded">JS</span></div>' },
+  { name: 'Tailwind CSS', description: 'Framework CSS para diseño rápido, flexible y responsivo', category: 'Estilos & UI', logoHtml: '<div class="flex items-center gap-3"><svg class="w-8 h-8 text-[#38bdf8]" fill="currentColor" viewBox="0 0 24 24"><path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.336 6.182 14.975 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C7.666 17.818 9.027 19.2 12.001 19.2c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.336 13.382 8.975 12 6.001 12z"/></svg> <span class="text-2xl font-extrabold tracking-tight text-gray-900">Tailwind</span></div>' }
 ]
 
 const footerLinks = [
   { title: 'Producto', items: ['Biometría y acceso', 'Personalización'] },
   { title: 'Servicios', items: ['Gestión de stock', 'Punto de ventas', 'Gestión de caja', 'Asistencia personal', 'Reportes y analítica', 'Seguridad y roles'] },
-  { title: 'Recursos', items: ['Supabase', 'Vue.js', 'Node.js', 'Arduino IDE', 'Express.js'] }
+  { title: 'Recursos', items: ['Supabase', 'Vue.js', 'Node.js', 'Arduino IDE', 'Express.js', 'Tailwind.css'] }
 ]
 </script>

@@ -33,8 +33,7 @@
 
       <!-- ACCIONES DE USUARIO -->
       <div class="flex items-center gap-6 text-[#0f172a] font-bold text-sm shrink-0">
-        <a href="#" class="hover:opacity-80">Registrarse</a>
-        <a href="#" class="hover:opacity-80">Iniciar Sesión</a>
+        <a href="/login" class="hover:opacity-80">Iniciar Sesión</a>
       </div>
 
     </div>
