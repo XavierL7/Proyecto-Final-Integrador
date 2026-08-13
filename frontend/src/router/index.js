@@ -33,6 +33,37 @@ const routes = [
     component: () => import('../views/DashboardView.vue'),
     meta: { requiereAuth: true } // Solo entran logueados
   },
+
+  {
+    path: '/pagina',
+    name: 'landingpage',
+    component: () => import('../views/pagina.vue'),
+    meta: { requiereAuth: false } 
+  },
+
+  {
+    path: '/producto',
+    name: 'producto',
+    component: () => import('../views/landingpage/producto.vue'),
+    meta: { requiereAuth: false } 
+  },
+
+  {
+    path: '/servicios',
+    name: 'servicios',
+    component: () => import('../views/landingpage/servicios.vue'),
+    meta: { requiereAuth: false } 
+  },
+
+  {
+    path: '/recursos',
+    name: 'recursos',
+    component: () => import('../views/landingpage/recursos.vue'),
+    meta: { requiereAuth: false } 
+  },
+
+
+
   {
     path: '/ventas',
     name: 'Ventas',
@@ -101,7 +132,7 @@ router.beforeEach(async (to, from, next) => {
 
   // CASO 1: La ruta requiere autenticación y el usuario no está logueado
   if (to.meta.requiereAuth && !authStore.estaAutenticado) {
-    return next({ name: 'Login' })
+    return next({ name: 'landingpage' })
   }
 
   // CASO 2: El usuario ya está logueado e intenta ir al Login (lo mandamos al inicio)

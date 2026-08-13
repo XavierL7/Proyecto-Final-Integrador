@@ -12,12 +12,12 @@
       ]"
     >
       <!-- 
-        ACA VA EL CONTENIDO DE LA PÁGINA (Login, Register, Dashboard, etc.)
+        Se quita el p-6 si NO está autenticado para que la landing
+        pueda ocupar el 100% del ancho y alto sin márgenes internos.
       -->
       <main 
         :class="[
-          'p-6',
-          !authStore.estaAutenticado ? 'auth-page' : ''
+          authStore.estaAutenticado ? 'p-6' : 'p-0 auth-page'
         ]"
       >
         <router-view />
@@ -35,5 +35,4 @@ const authStore = useAuthStore()
 
 <style>
 @import "./assets/main.css";
-
 </style>
