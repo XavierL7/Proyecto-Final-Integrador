@@ -42,6 +42,20 @@ const routes = [
   },
 
   {
+    path: '/contacto',
+    name: 'contacto',
+    component: () => import('../views/contacto.vue'),
+    meta: { requiereAuth: false } 
+  },
+
+  {
+    path: '/sobrenosotros',
+    name: 'sobrenosotros',
+    component: () => import('../views/sobrenosotros.vue'),
+    meta: { requiereAuth: false } 
+  },
+
+  {
     path: '/producto',
     name: 'producto',
     component: () => import('../views/landingpage/producto.vue'),

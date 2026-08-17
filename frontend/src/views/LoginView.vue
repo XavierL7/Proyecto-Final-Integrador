@@ -1,51 +1,124 @@
-<!--Login -->
 <template>
-  <div class="login-container">
-    <h2>Proyecto Kairo - Login</h2>
-    <form @submit.prevent="entrarTradicional">
+  <div class="min-h-screen w-full flex items-center justify-center bg-[#f1f5f9] p-4 font-montserrat">
+    
+    <!-- flex-row-reverse fuerza a que el primer div quede a la izquierda si ajustamos el flujo -->
+    <div class="w-full max-w-4xl bg-gray-200  rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row ">
       
-      <!-- campo del login que pide que pongas un nombre requerido -->
-      <div class="form-group">
-        <input 
-          type="text" 
-          v-model="credentials.nombre" 
-          placeholder="Nombre" 
-          required 
-        />
+      <!-- LADO IZQUIERDO: FORMULARIO -->
+      <div class="w-full md:w-5/12 p-8 md:p-10 flex flex-col justify-center bg-[#131b2e]"
+      >
+        
+        <!-- Logo Kairo -->
+        <div class="flex flex-col items-center mb-6">
+          <div class="w-16 h-16 mb-1 flex items-center justify-center">
+            <img 
+              src="../assets/logo.png" 
+              alt="Logo Kairo" 
+              class="w-full h-full object-contain"
+            />
+          </div>
+          <span class="text-xs font-black tracking-widest text-white uppercase">KAIRO</span>
+        </div>
+
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white text-center mb-6 tracking-tight">
+          Inicio de Sesión
+        </h2>
+
+        <form @submit.prevent="entrarTradicional" class="space-y-3.5">
+          
+          <!-- Nombre -->
+          <div class="relative flex items-center">
+            <span class="absolute left-3.5 text-gray-600">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+              </svg>
+            </span>
+            <input 
+              type="text" 
+              v-model="credentials.nombre" 
+              placeholder="Nombre" 
+              required 
+              class="w-full bg-gray-300 text-gray-800 placeholder-gray-500 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+            />
+          </div>
+
+          <!-- Apellido -->
+          <div class="relative flex items-center">
+            <span class="absolute left-3.5 text-gray-600">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+              </svg>
+            </span>
+            <input 
+              type="text" 
+              v-model="credentials.apellido" 
+              placeholder="Apellido" 
+              required 
+              class="w-full bg-gray-300 text-gray-800 placeholder-gray-500 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+            />
+          </div>
+
+          <!-- DNI -->
+          <div class="relative flex items-center">
+            <span class="absolute left-3.5 text-gray-600">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4a1 1 0 011 1v1a1 1 0 01-2 0V5a1 1 0 011-1zm12 0a1 1 0 011 1v1a1 1 0 11-2 0V5a1 1 0 011-1zM3 9a2 2 0 012-2h10a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" clip-rule="evenodd"/>
+              </svg>
+            </span>
+            <input 
+              type="number" 
+              v-model="credentials.dni" 
+              placeholder="DNI" 
+              required 
+              class="w-full bg-gray-300 text-gray-800 placeholder-gray-500 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+            />
+          </div>
+
+          <!-- Contraseña -->
+          <div class="relative flex items-center">
+            <span class="absolute left-3.5 text-gray-600">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+              </svg>
+            </span>
+            <input 
+              type="password" 
+              v-model="credentials.password" 
+              placeholder="Contraseña" 
+              required 
+              class="w-full bg-gray-300 text-gray-800 placeholder-gray-500 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+            />
+          </div>
+
+          <div class="text-right pt-1">
+            <a href="#" class="text-xs font-semibold text-indigo-800 hover:underline">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <!-- Botón de Envío -->
+          <button 
+            type="submit" 
+            class="w-full text-white font-bold py-2.5 rounded-full transition-colors shadow-md text-sm"
+            style="background: linear-gradient(135deg, #14b8a6, #34e5eb);"
+          >
+            Iniciar Sesión
+          </button>
+        </form>
       </div>
 
-      <!--campo del login que pide que pongas un apellido requerido -->
-      <div class="form-group">
-        <input 
-          type="text" 
-          v-model="credentials.apellido" 
-          placeholder="Apellido" 
-          required 
-        />
+      <!-- LADO DERECHO: ILUSTRACIÓN -->
+      <div class="hidden md:flex md:w-7/12 bg-[] relative items-center justify-center p-8 overflow-hidden">
+        <div class="w-full h-full flex items-center justify-center">
+          <img 
+            src="https://illustrations.popsy.co/teal/work-from-home.svg" 
+            alt="Ilustración equipo" 
+            class="w-full max-w-md object-contain filter drop-shadow-xl" 
+          />
+        </div>
       </div>
 
-      <!-- campo del login que pide que pongas un dni requerido -->
-      <div class="form-group">
-        <input 
-          type="number" 
-          v-model="credentials.dni" 
-          placeholder="DNI" 
-          required 
-        />
-      </div>
-
-     <!-- campo del login que pide que pongas una contrasea requerido -->
-      <div class="form-group">
-        <input 
-          type="password" 
-          v-model="credentials.password" 
-          placeholder="Contraseña" 
-          required 
-        />
-      </div>
-
-      <button type="submit">Iniciar Sesión</button>
-    </form>
+    </div>
   </div>
 </template>
 
