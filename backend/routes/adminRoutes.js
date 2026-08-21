@@ -9,6 +9,8 @@ import {
   createTrabajador,
   updateTrabajador,
   deleteTrabajador,
+  solicitarHuella,
+  cancelarHuella,
   getFuncionalidades,
   createFuncionalidad,
   deleteFuncionalidad
@@ -30,9 +32,14 @@ router.delete('/roles/:id', deleteRol)
 
 // Trabajadores
 router.get('/trabajadores', getTrabajadores)
-router.post('/trabajadores', createTrabajador)
+router.post('/trabajadores', createTrabajador) // acepta { ..., registrarHuella: true }
 router.put('/trabajadores/:id', updateTrabajador)
 router.delete('/trabajadores/:id', deleteTrabajador)
+
+// Huella (AS608): reservar el próximo ID de la secuencia (arranca en 5) y
+// dejarlo pendiente de captura física, o cancelar una reserva
+router.put('/trabajadores/:id/huella', solicitarHuella)
+router.put('/trabajadores/:id/huella/cancelar', cancelarHuella)
 
 // Funcionalidades
 router.get('/funcionalidades', getFuncionalidades)

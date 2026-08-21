@@ -103,6 +103,7 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Apellido</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DNI</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Huella</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
             </tr>
           </thead>
@@ -113,6 +114,41 @@
               <td class="px-6 py-4 text-sm text-gray-900">{{ trabajador.dni }}</td>
               <td class="px-6 py-4 text-sm text-gray-900">
                 {{ trabajador.rol?.nombre_rol || 'Sin rol' }}
+              </td>
+              <td class="px-6 py-4 text-sm">
+                <span
+                  v-if="!trabajador.hash_huella"
+                  class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded"
+                >
+                  Sin huella
+                </span>
+                <span
+                  v-else-if="trabajador.huella_pendiente"
+                  class="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded"
+                >
+                  Pendiente (#{{ trabajador.hash_huella }})
+                </span>
+                <span
+                  v-else
+                  class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded"
+                >
+                  Registrada (#{{ trabajador.hash_huella }})
+                </span>
+
+                <button
+                  v-if="!trabajador.hash_huella"
+                  @click="solicitarHuella(trabajador)"
+                  class="block text-blue-500 hover:text-blue-700 text-xs mt-1"
+                >
+                  Registrar huella
+                </button>
+                <button
+                  v-else-if="trabajador.huella_pendiente"
+                  @click="cancelarHuella(trabajador)"
+                  class="block text-red-500 hover:text-red-700 text-xs mt-1"
+                >
+                  Cancelar
+                </button>
               </td>
               <td class="px-6 py-4 text-sm">
                 <button
@@ -264,6 +300,27 @@
               minlength="6"
             />
           </div>
+          <div class="mb-3" v-if="!trabajadorEditando">
+            <label class="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                v-model="trabajadorForm.registrarHuella"
+                class="w-4 h-4 text-blue-500"
+              />
+              Registrar también su huella dactilar
+            </label>
+          </div>
+
+          <div
+            v-if="huellaRecienAsignada"
+            class="mb-3 p-3 bg-amber-50 border border-amber-300 rounded-lg text-sm text-amber-800"
+          >
+            <strong>Huella #{{ huellaRecienAsignada }} reservada.</strong>
+            Llevá al empleado hasta el lector: en unos segundos el dispositivo
+            le va a pedir el dedo dos veces solo. Cuando termine, la huella
+            queda confirmada automáticamente (podés cerrar esta ventana).
+          </div>
+
           <div class="flex justify-end gap-3">
             <button
               type="button"
@@ -317,8 +374,12 @@ const trabajadorForm = ref({
   apellido: '',
   dni: '',
   id_rol: '',
-  password: ''
+  password: '',
+  registrarHuella: false
 })
+// Cuando el backend asigna un ID de huella al crear un trabajador, lo
+// mostramos acá para avisarle al admin que lleve al empleado al lector.
+const huellaRecienAsignada = ref(null)
 
 // ============================================================
 // FUNCIONES - CARGAR DATOS
@@ -418,13 +479,15 @@ const eliminarRol = async (id) => {
 // ============================================================
 const abrirModalTrabajador = (trabajador = null) => {
   trabajadorEditando.value = trabajador
+  huellaRecienAsignada.value = null
   if (trabajador) {
     trabajadorForm.value = {
       nombre: trabajador.nombre,
       apellido: trabajador.apellido,
       dni: trabajador.dni,
       id_rol: trabajador.id_rol,
-      password: ''
+      password: '',
+      registrarHuella: false
     }
   } else {
     trabajadorForm.value = {
@@ -432,7 +495,8 @@ const abrirModalTrabajador = (trabajador = null) => {
       apellido: '',
       dni: '',
       id_rol: '',
-      password: ''
+      password: '',
+      registrarHuella: false
     }
   }
   modalTrabajador.value = true
@@ -454,17 +518,57 @@ const guardarTrabajador = async () => {
 
     if (!trabajadorEditando.value) {
       data.password = trabajadorForm.value.password
+      data.registrarHuella = trabajadorForm.value.registrarHuella
     }
 
-    await axios[method](url, data, {
+    const response = await axios[method](url, data, {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     })
 
-    modalTrabajador.value = false
     cargarTodo()
+
+    if (!trabajadorEditando.value && response.data?.huellaAsignada) {
+      // No cerramos el modal todavía: le mostramos al admin el ID
+      // asignado para que lleve al empleado al lector.
+      huellaRecienAsignada.value = response.data.huellaAsignada
+    } else {
+      modalTrabajador.value = false
+    }
   } catch (error) {
     console.error('Error:', error)
     alert(error.response?.data?.error || 'Error al guardar')
+  }
+}
+
+// ============================================================
+// FUNCIONES - HUELLA
+// ============================================================
+const solicitarHuella = async (trabajador) => {
+  try {
+    const response = await axios.put(
+      `${baseUrl}/api/admin/trabajadores/${trabajador.id_trabajador}/huella`,
+      {},
+      { headers: { 'Authorization': `Bearer ${authStore.token}` } }
+    )
+    alert(response.data.message || 'Huella reservada')
+    cargarTodo()
+  } catch (error) {
+    alert(error.response?.data?.error || 'Error al solicitar la huella')
+  }
+}
+
+const cancelarHuella = async (trabajador) => {
+  if (!confirm('¿Cancelar el registro de huella pendiente?')) return
+  try {
+    const response = await axios.put(
+      `${baseUrl}/api/admin/trabajadores/${trabajador.id_trabajador}/huella/cancelar`,
+      {},
+      { headers: { 'Authorization': `Bearer ${authStore.token}` } }
+    )
+    alert(response.data.message || 'Registro de huella cancelado')
+    cargarTodo()
+  } catch (error) {
+    alert(error.response?.data?.error || 'Error al cancelar la huella')
   }
 }
 

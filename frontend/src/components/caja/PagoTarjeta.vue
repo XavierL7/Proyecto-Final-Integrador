@@ -75,6 +75,9 @@ const props = defineProps({
 
 const emit = defineEmits(['confirmar', 'cancelar'])
 
+// Los 4 campos quedan para completar en pantalla (simulación), pero solo
+// el número de tarjeta viaja al backend como "identificador". Fecha,
+// código de seguridad y titular se quedan acá y no se envían.
 const form = ref({
   numero: '',
   fecha: '',
@@ -83,6 +86,9 @@ const form = ref({
 })
 
 const confirmar = () => {
-  emit('confirmar', { ...form.value, tipo: props.tipo })
+  emit('confirmar', {
+    tipo: props.tipo,
+    identificador: form.value.numero.replace(/\s/g, '') // solo el número completo, sin espacios
+  })
 }
 </script>

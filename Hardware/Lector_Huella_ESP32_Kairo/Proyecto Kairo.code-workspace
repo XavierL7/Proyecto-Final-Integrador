@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "Lector_Huella_ESP32_Kairo",
+			"path": "."
+		}
+	],
+	"settings": {}
+}

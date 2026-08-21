@@ -64,6 +64,8 @@ const props = defineProps({
 
 const emit = defineEmits(['confirmar', 'cancelar'])
 
+// CUIL y titular quedan para completar en pantalla (simulación), pero
+// solo el alias/CBU viaja al backend como "identificador".
 const form = ref({
   cbu: '',
   cuil: '',
@@ -71,6 +73,9 @@ const form = ref({
 })
 
 const confirmar = () => {
-  emit('confirmar', { ...form.value, tipo: props.tipo })
+  emit('confirmar', {
+    tipo: props.tipo,
+    identificador: form.value.cbu
+  })
 }
 </script>

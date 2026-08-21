@@ -42,6 +42,7 @@ model Trabajador {
   dni               Int
   contraseña_hash  String              @db.VarChar(255)
   hash_huella       String?             @unique @db.VarChar(255)
+  huella_pendiente  Boolean             @default(false)
   id_rol            Int
   fecha_registro    DateTime            @default(now()) @db.Date
   arqueos_caja      Arqueo_Caja[]

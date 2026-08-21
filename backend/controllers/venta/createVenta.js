@@ -1,5 +1,19 @@
-// backend/controllers/venta/createVenta.js (~80 líneas)
+// backend/controllers/venta/createVenta.js
 import prisma from '../../db.js'
+
+// Límite defensivo: el identificador solo debería ser "1234" (últimos 4
+// dígitos de tarjeta) o un alias de Mercado Pago/CBU. Nunca debería
+// necesitar más de 34 caracteres (el máximo de un CBU son 22 dígitos).
+// Esto es una segunda barrera por si el front cambia; la barrera real
+// (no mandar el número completo ni CVV/vencimiento/nombre) está en
+// PagoTarjeta.vue y PagoTransferencia.vue.
+const MAX_LARGO_IDENTIFICADOR = 34
+
+function sanearIdentificador(identificador) {
+  if (!identificador) return null
+  const limpio = String(identificador).trim().slice(0, MAX_LARGO_IDENTIFICADOR)
+  return limpio.length > 0 ? limpio : null
+}
 
 export const createVenta = async (req, res) => {
   try {
@@ -25,6 +39,8 @@ export const createVenta = async (req, res) => {
     if (!metodoPago) {
       return res.status(400).json({ error: 'Método de pago no válido' })
     }
+
+    const identificador = sanearIdentificador(datos_pago?.identificador)
 
     const nuevaVenta = await prisma.$transaction(async (tx) => {
       const venta = await tx.venta.create({
@@ -59,7 +75,10 @@ export const createVenta = async (req, res) => {
           id_venta: venta.id_venta,
           id_metodo_pago: metodoPago.id_metodo_pago,
           monto: total,
-          cambio_devuelto: datos_pago?.cambio || null
+          cambio_devuelto: datos_pago?.cambio || null,
+          // Últimos 4 dígitos de tarjeta o alias de transferencia/Mercado
+          // Pago. Nunca CVV, vencimiento ni nombre del titular.
+          identificador
         }
       })
 

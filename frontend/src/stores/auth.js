@@ -25,40 +25,50 @@ export const useAuthStore = defineStore('auth', () => {
       return funcionalidades.value.includes(permisoRequerido)
     }
   // 3 ACTIONS (Funciones que modifican el estado o realizan operaciones asincronas)    
-  
+
+  // usamos la variable de entorno o localhost 3000 para la url base
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+
+  // Guarda la sesión en Pinia + localStorage + header de axios.
+  // La usan tanto el login con contraseña como el login con huella:
+  // ambos terminan con la misma forma de respuesta del backend
+  // ({ token, trabajador, funcionalidades }).
+  function guardarSesion(data) {
+    token.value = data.token
+    trabajador.value = data.trabajador
+    funcionalidades.value = data.funcionalidades
+
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('trabajador', JSON.stringify(data.trabajador))
+    localStorage.setItem('funcionalidades', JSON.stringify(data.funcionalidades))
+
+    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
+  }
+
+  function limpiarSesion() {
+    token.value = null
+    trabajador.value = null
+    funcionalidades.value = []
+    localStorage.removeItem('token')
+    localStorage.removeItem('trabajador')
+    localStorage.removeItem('funcionalidades')
+    delete axios.defaults.headers.common['Authorization']
+  }
+
   // iniciar sesión con contraseña 
   async function loginConContrasena(credentials) {
     try {
-      // usamos la variable de entorno o localhost 3000 para la urlbase
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000' 
-      
-      //credentials contiene: { nombre: '...', apellido: '...', password: '...' }
+      //credentials contiene: { nombre: '...', apellido: '...', dni: '...', password: '...' }
       const response = await axios.post(`${baseUrl}/api/auth/login`, credentials)
-      
-      // Guardamos la información en el estado de Pinia
-      token.value = response.data.token //token.value = el token del que hizo el login
-      trabajador.value = response.data.trabajador //trabjador.value = el nombre, apellido, dni y contrasela del que hizo ellogin
-      funcionalidades.value = response.data.funcionalidades // funcionalidades.value son las funciones que puede hacer ese usuario
 
-      // persistencia de la sesión
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('trabajador', JSON.stringify(response.data.trabajador)) 
-      localStorage.setItem('funcionalidades', JSON.stringify(response.data.funcionalidades))
-      
-      // configura Axios para que automáticamente incluya el token en todas las peticiones HTTP que se hagan al backend.
-      //sino tendria que poner 'Authorization': `Bearer ${token}` en cada peticion
-      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
-      
+      guardarSesion(response.data)
+
       return { success: true } //retorna succes para que se use en la verificaion del login
     } catch (error) {
       console.error('Error en el login:', error)
       
       // si falla, nos aseguramos de limpiar cualquier rastro viejo por seguridad
-      token.value = null
-      trabajador.value = null
-      funcionalidades.value = []
-      localStorage.removeItem('token')
-      delete axios.defaults.headers.common['Authorization']
+      limpiarSesion()
 
       return { 
         success: false, 
@@ -67,15 +77,30 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Cerrar sesión y vaciar la tienda
-    function logout() {
-    trabajador.value = null
-    token.value = null
-    funcionalidades.value = []
-    localStorage.removeItem('token')
-    localStorage.removeItem('trabajador')
-    localStorage.removeItem('funcionalidades')
+  // Consulta una sola vez si el lector de huellas (ESP32) identificó a
+  // alguien recién. Devuelve true si encontró un login y ya quedó
+  // guardada la sesión; false si todavía no hay nada (204 = "esperá").
+  // La usa LoginView.vue en un loop mientras el usuario tiene el dedo
+  // apoyado en el sensor.
+  async function consultarLoginPorHuella() {
+    try {
+      const response = await axios.get(`${baseUrl}/api/auth/huella/resultado`)
+
+      if (response.status === 200 && response.data?.token) {
+        guardarSesion(response.data)
+        return true
+      }
+      return false // 204: todavía no identificó a nadie
+    } catch (error) {
+      console.error('Error consultando login por huella:', error)
+      return false
     }
+  }
+
+  // Cerrar sesión y vaciar la tienda
+  function logout() {
+    limpiarSesion()
+  }
 
 
   // Retornamos todo para que pueda ser usado en los componentes de Vue
@@ -87,6 +112,7 @@ export const useAuthStore = defineStore('auth', () => {
     rolActual,
     tienePermiso,
     loginConContrasena,
+    consultarLoginPorHuella,
     logout
   }
 })
