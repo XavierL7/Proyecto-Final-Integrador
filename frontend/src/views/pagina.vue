@@ -29,7 +29,7 @@
           </h1>
 
           <div class="flex flex-wrap gap-4 items-center">
-            <a href="#footer" class="bg-white text-[#0f172a] font-bold px-7 py-3.5 rounded-xl hover:bg-gray-100 transition shadow-sm text-center min-w-[160px]">
+            <a href="/sobrenosotros" class="bg-white text-[#0f172a] font-bold px-7 py-3.5 rounded-xl hover:bg-gray-100 transition shadow-sm text-center min-w-[160px]">
               Sobre nosotros
             </a>
             

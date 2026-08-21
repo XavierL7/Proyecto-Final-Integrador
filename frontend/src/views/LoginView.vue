@@ -1,8 +1,17 @@
 <template>
-  <div class="min-h-screen w-full flex items-center justify-center bg-[#f1f5f9] p-4 font-montserrat">
+  <div class="relative min-h-screen w-full flex items-center justify-center bg-[#f1f5f9] p-4 font-montserrat">
+    
+    <header class="absolute top-6 right-6">
+      <a href="pagina.vue" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-black transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+        </svg>
+        Volver al Inicio
+      </a>
+    </header>
     
     <!-- flex-row-reverse fuerza a que el primer div quede a la izquierda si ajustamos el flujo -->
-    <div class="w-full max-w-4xl bg-gray-200  rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row ">
+    <div class="w-full max-w-6xl bg-gray-200 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
       
       <!-- LADO IZQUIERDO: FORMULARIO -->
       <div class="w-full md:w-5/12 p-8 md:p-10 flex flex-col justify-center bg-[#131b2e]"

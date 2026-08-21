@@ -1,26 +1,11 @@
 <template>
   <div class="min-h-screen bg-[#f1f5f9] text-slate-200 p-4 md:p-8 font-sans antialiased select-none">
     <div class="max-w-6xl mx-auto space-y-6">
+      <Header />
       
-      <!-- HEADER -->
-      <header class="flex items-center justify-between py-2">
-        <a href="#">
-            <img 
-            src="../assets/logo-removebg-preview.png" 
-            alt="Logo" 
-            class="h-12 w-auto object-contain"
-            />
-        </a>
-        <a href="pagina.vue" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-black transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
-          </svg>
-          Volver al Inicio
-        </a>
-      </header>
 
       <!-- CONTENIDO PRINCIPAL (2 COLUMNAS) -->
-      <main class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-20">
         
         <!-- COLUMNA IZQUIERDA -->
         <section class="lg:col-span-5 flex flex-col justify-between space-y-6">
@@ -316,6 +301,7 @@
 
 <script setup>
 import { reactive } from 'vue'
+import Header from '../components/Header.vue'
 
 const form = reactive({
   nombre: '',
