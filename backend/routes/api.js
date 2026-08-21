@@ -7,6 +7,7 @@ import etiquetaRoutes from './etiquetaRoutes.js'
 import productoRoutes from './productoRoutes.js'
 import metodoPagoRoutes from './metodoPagoRoutes.js'
 import ventaRoutes from './ventaRoutes.js'
+import clientesRoutes from './clientesRoutes.js'
 
 const router = express.Router();
 
@@ -20,6 +21,10 @@ router.use('/productos', productoRoutes)
 router.use('/metodos-pago', metodoPagoRoutes)
 //ventas
 router.use('/ventas', ventaRoutes)
+
+
+// Definir el prefijo '/api/clientes'
+router.use('/clientes', clientesRoutes)
 
 // Rutas de autenticación (usan el controlador)
 router.post('/auth/register', registrarTrabajador);

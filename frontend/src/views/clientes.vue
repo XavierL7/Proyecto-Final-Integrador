@@ -14,19 +14,13 @@
         
         <!-- Formulario de Registro -->
         <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200/80 h-fit">
-          <h2 class="text-xl font-bold text-[#131b2e] mb-4">Nuevo Cliente</h2>
+          <h2 class="text-xl font-bold text-[#131b2e] mb-4">
+            {{ editando ? 'Editar Cliente' : 'Nuevo Cliente' }}
+          </h2>
           
           <form @submit.prevent="guardarCliente" class="space-y-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre</label>
-              <input 
-                v-model="nuevoCliente.id_cliente" 
-                type="text" 
-                required 
-                placeholder="Ej. 123"
-                class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
+            <!-- El ID se omitió porque es autoincremental -->
+            
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre</label>
               <input 
@@ -79,14 +73,25 @@
               />
             </div>
 
-            <button 
-              type="submit" 
-              :disabled="cargando"
-              class="w-full text-white font-bold py-2.5 rounded-lg transition-all shadow-md text-sm disabled:opacity-50"
-              style="background: linear-gradient(135deg, #14b8a6, #34e5eb);"
-            >
-              {{ cargando ? 'Guardando...' : 'Guardar Cliente' }}
-            </button>
+            <div class="flex gap-2">
+              <button 
+                type="submit" 
+                :disabled="cargando"
+                class="w-full text-white font-bold py-2.5 rounded-lg transition-all shadow-md text-sm disabled:opacity-50"
+                style="background: linear-gradient(135deg, #14b8a6, #34e5eb);"
+              >
+                {{ cargando ? 'Guardando...' : (editando ? 'Actualizar Cliente' : 'Guardar Cliente') }}
+              </button>
+
+              <button 
+                v-if="editando"
+                type="button" 
+                @click="resetearFormulario"
+                class="px-3 py-2.5 bg-slate-200 text-slate-700 font-semibold rounded-lg text-sm hover:bg-slate-300 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
           </form>
         </div>
 
@@ -102,18 +107,33 @@
                   <th class="p-3">Nombre Completo</th>
                   <th class="p-3">Teléfono</th>
                   <th class="p-3">Última Compra</th>
+                  <th class="p-3 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 text-sm">
                 <tr v-if="clientes.length === 0">
-                  <td colspan="4" class="p-4 text-center text-slate-400">No hay clientes registrados aún.</td>
+                  <td colspan="5" class="p-4 text-center text-slate-400">No hay clientes registrados aún.</td>
                 </tr>
-                <tr v-for="cliente in clientes" :key="cliente.id" class="hover:bg-slate-50/80 transition-colors">
+                <tr v-for="cliente in clientes" :key="cliente.id_cliente" class="hover:bg-slate-50/80 transition-colors">
                   <td class="p-3 font-medium text-slate-700">{{ cliente.dni }}</td>
                   <td class="p-3 text-slate-900 font-semibold">{{ cliente.nombre }} {{ cliente.apellido }}</td>
                   <td class="p-3 text-slate-600">{{ cliente.telefono || '-' }}</td>
                   <td class="p-3 text-slate-600">
-                    {{ cliente.fecha_ultima_compra ? new Date(cliente.fecha_ultima_compra).toLocaleDateString('es-AR') : '-' }}
+                    {{ cliente.fecha_ultima_compra ? new Date(cliente.fecha_ultima_compra).toLocaleDateString('es-AR', { timeZone: 'UTC' }) : '-' }}
+                  </td>
+                  <td class="p-3 text-right space-x-2">
+                    <button 
+                      @click="seleccionarParaEditar(cliente)" 
+                      class="text-teal-600 font-semibold hover:underline text-xs"
+                    >
+                      Editar
+                    </button>
+                    <button 
+                      @click="eliminarCliente(cliente.id_cliente)" 
+                      class="text-rose-500 font-semibold hover:underline text-xs"
+                    >
+                      Eliminar
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -127,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 
@@ -139,10 +159,8 @@ const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 // ============================================================
 const clientes = ref([])
 const cargando = ref(false)
-const modalVisible = ref(false)
 const editando = ref(false)
 
-// Estado del formulario
 const nuevoCliente = ref({
   id_cliente: null,
   nombre: '',
@@ -168,59 +186,57 @@ const obtenerClientes = async () => {
   }
 }
 
-// Abrir modal para Crear o Editar
-const abrirModal = (cliente = null) => {
-  if (cliente) {
-    editando.value = true
-    form.value = {
-      id_cliente: cliente.id_cliente,
-      nombre: cliente.nombre || '',
-      apellido: cliente.apellido || '',
-      dni: cliente.dni || '',
-      telefono: cliente.telefono || '',
-      fecha_ultima_compra: cliente.fecha_ultima_compra 
-        ? cliente.fecha_ultima_compra.split('T')[0] 
-        : ''
-    }
-  } else {
-    editando.value = false
-    form.value = {
-      id_cliente: null,
-      nombre: '',
-      apellido: '',
-      dni: '',
-      telefono: '',
-      fecha_ultima_compra: ''
-    }
+// Cargar datos en el formulario para editar
+const seleccionarParaEditar = (cliente) => {
+  editando.value = true
+  nuevoCliente.value = {
+    id_cliente: cliente.id_cliente,
+    nombre: cliente.nombre || '',
+    apellido: cliente.apellido || '',
+    dni: cliente.dni || '',
+    telefono: cliente.telefono || '',
+    fecha_ultima_compra: cliente.fecha_ultima_compra 
+      ? new Date(cliente.fecha_ultima_compra).toISOString().split('T')[0] 
+      : ''
   }
-  modalVisible.value = true
 }
 
-// Guardar (POST) o Actualizar (PUT) un cliente mediante Axios
+// Resetear el formulario al estado inicial
+const resetearFormulario = () => {
+  editando.value = false
+  nuevoCliente.value = {
+    id_cliente: null,
+    nombre: '',
+    apellido: '',
+    dni: '',
+    telefono: '',
+    fecha_ultima_compra: ''
+  }
+}
+
+// Guardar (POST) o Actualizar (PUT)
 const guardarCliente = async () => {
   cargando.value = true
   
   try {
     const url = editando.value
-      ? `${baseUrl}/api/clientes/${form.value.id_cliente}`
+      ? `${baseUrl}/api/clientes/${nuevoCliente.value.id_cliente}`
       : `${baseUrl}/api/clientes`
     const method = editando.value ? 'put' : 'post'
 
     const payload = {
-      nombre: form.value.nombre.trim(),
-      apellido: form.value.apellido.trim(),
-      dni: parseInt(form.value.dni),
-      telefono: form.value.telefono ? form.value.telefono.trim() : null,
-      fecha_ultima_compra: form.value.fecha_ultima_compra || null
+      nombre: nuevoCliente.value.nombre.trim(),
+      apellido: nuevoCliente.value.apellido.trim(),
+      dni: parseInt(nuevoCliente.value.dni),
+      telefono: nuevoCliente.value.telefono ? nuevoCliente.value.telefono.trim() : null,
+      fecha_ultima_compra: nuevoCliente.value.fecha_ultima_compra || null
     }
 
     await axios[method](url, payload, {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     })
 
-    // Resetear formulario y recargar lista
-    modalVisible.value = false
-    form.value = { id_cliente: null, nombre: '', apellido: '', dni: '', telefono: '', fecha_ultima_compra: '' }
+    resetearFormulario()
     await obtenerClientes()
   } catch (error) {
     console.error('Error al guardar cliente:', error)

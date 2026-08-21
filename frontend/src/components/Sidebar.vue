@@ -251,7 +251,7 @@
       <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('gestionar_productos')"
-        to="/stock"
+        to="/clientes"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
@@ -259,13 +259,13 @@
           backgroundColor: $route.path === '/stock' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
         }"
         @mouseenter="(e) => {
-          if ($route.path !== '/stock') {
+          if ($route.path !== '/clientes') {
             e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
             e.currentTarget.style.color = '#6aaec9'
           }
         }"
         @mouseleave="(e) => {
-          if ($route.path !== '/stock') {
+          if ($route.path !== '/clientes') {
             e.currentTarget.style.backgroundColor = 'transparent'
             e.currentTarget.style.color = '#8ab4d6'
           }
