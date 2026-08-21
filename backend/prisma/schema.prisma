@@ -1,6 +1,3 @@
-// prisma/schema.prisma
-
-// Archivo ORM encargado de mappear la base de datos
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,307 +6,264 @@ datasource db {
   provider = "postgresql"
 }
 
-// 1. Roles
 model Rol {
   id_rol                Int                     @id @default(autoincrement())
   nombre_rol            String                  @db.VarChar(50)
-  trabajadores          Trabajador[]
   roles_funcionalidades Roles_Funcionalidades[]
-  
+  trabajadores          Trabajador[]
+
   @@map("Roles")
 }
 
-// 2. Funcionalidades
 model Funcionalidad {
   id_func               Int                     @id @default(autoincrement())
   nombre_func           String                  @db.VarChar(100)
-  descripcion           String?                 @db.Text
+  descripcion           String?
   roles_funcionalidades Roles_Funcionalidades[]
-  
+
   @@map("Funcionalidades")
 }
 
-// 3. Roles_Funcionalidades (Tabla intermedia)
 model Roles_Funcionalidades {
-  id_rol    Int
-  id_func   Int
-  activo    Boolean   @default(true)
-  rol       Rol       @relation(fields: [id_rol], references: [id_rol])
+  id_rol        Int
+  id_func       Int
+  activo        Boolean       @default(true)
   funcionalidad Funcionalidad @relation(fields: [id_func], references: [id_func])
-  
+  rol           Rol           @relation(fields: [id_rol], references: [id_rol])
+
   @@id([id_rol, id_func])
   @@map("Roles_Funcionalidades")
 }
 
-// 4. Trabajadores
 model Trabajador {
-  id_trabajador           Int                     @id @default(autoincrement())
-  nombre                  String                  @db.VarChar(50)
-  apellido                String                  @db.VarChar(50)
-  dni                     Int                     
-  contraseña_hash         String                  @db.VarChar(255)
-  hash_huella             String?                 @unique @db.VarChar(255)
-  id_rol                  Int
-  fecha_registro          DateTime                @default(now()) @db.Date
+  id_trabajador     Int                 @id @default(autoincrement())
+  nombre            String              @db.VarChar(50)
+  apellido          String              @db.VarChar(50)
+  dni               Int
+  contraseña_hash  String              @db.VarChar(255)
+  hash_huella       String?             @unique @db.VarChar(255)
+  id_rol            Int
+  fecha_registro    DateTime            @default(now()) @db.Date
+  arqueos_caja      Arqueo_Caja[]
+  cajas_apertura    Caja[]              @relation("apertura")
+  cajas_cierre      Caja[]              @relation("cierre")
+  log_ventas_huella Log_Ventas_Huella[]
+  movimientos_caja  Movimiento_Caja[]
+  sesiones_vendedor Sesion_Vendedor[]
+  rol               Rol                 @relation(fields: [id_rol], references: [id_rol])
+  ventas            Venta[]
 
   @@unique([nombre, apellido, dni])
-  rol                     Rol                     @relation(fields: [id_rol], references: [id_rol])
-  
-  // Relaciones
-  cajas_apertura          Caja[]                  @relation("apertura")
-  cajas_cierre            Caja[]                  @relation("cierre")
-  sesiones_vendedor       Sesion_Vendedor[]
-  movimientos_caja        Movimiento_Caja[]
-  arqueos_caja            Arqueo_Caja[]
-  ventas                  Venta[]
-  log_ventas_huella       Log_Ventas_Huella[]
-  
   @@map("Trabajadores")
 }
 
-// 5. Productos
 model Producto {
-  id_producto             Int                     @id @default(autoincrement())
-  codigo_barras           String?                 @unique @db.VarChar(50)
-  nombre_producto         String                  @db.VarChar(100)
-  precio_unitario         Decimal                 @db.Decimal(10, 2)
-  costo_unitario          Decimal                 @db.Decimal(10, 2)
-  stock_actual            Int
-  stock_minimo            Int
-  fecha_ultima_compra     DateTime?               @db.Date
-  
-  // Relaciones
-  detalle_ventas          Detalle_Venta[]
-  productos_promociones   Productos_Promociones[]
-  productos_etiquetas     Productos_Etiquetas[]
-  
+  id_producto           Int                     @id @default(autoincrement())
+  codigo_barras         String?                 @unique @db.VarChar(50)
+  nombre_producto       String                  @db.VarChar(100)
+  precio_unitario       Decimal                 @db.Decimal(10, 2)
+  costo_unitario        Decimal                 @db.Decimal(10, 2)
+  stock_actual          Int
+  stock_minimo          Int
+  fecha_ultima_compra   DateTime?               @db.Date
+  detalle_ventas        Detalle_Venta[]
+  productos_etiquetas   Productos_Etiquetas[]
+  productos_promociones Productos_Promociones[]
+
   @@map("Productos")
 }
 
-
 model MetodoPago {
-  id_metodo_pago   Int     @id @default(autoincrement())
-  nombre           String  @db.VarChar(50)
-  activo           Boolean @default(true)
-  
+  id_metodo_pago     Int                  @id @default(autoincrement())
+  nombre             String               @db.VarChar(50)
+  activo             Boolean              @default(true)
   detalle_pago_venta Detalle_Pago_Venta[]
 
   @@map("Metodos_Pago")
 }
 
-// 6. Cajas
 model Caja {
-  id_caja                 Int                     @id @default(autoincrement())
-  id_trabajador_apertura  Int
-  fecha_hora_apertura     DateTime                @default(now())
-  monto_inicial           Decimal                 @db.Decimal(10, 2)
-  id_trabajador_cierre    Int?
-  fecha_hora_cierre       DateTime?
-  monto_final_esperado    Decimal?                @db.Decimal(10, 2)
-  monto_final_real        Decimal?                @db.Decimal(10, 2)
-  estado                  CajaEstado              @default(abierta)
-  modo_autenticacion      ModoAutenticacion       @default(sesion_inicial)
-  
-  // Relaciones
-  trabajador_apertura     Trabajador              @relation("apertura", fields: [id_trabajador_apertura], references: [id_trabajador])
-  trabajador_cierre       Trabajador?             @relation("cierre", fields: [id_trabajador_cierre], references: [id_trabajador])
-  sesiones_vendedor       Sesion_Vendedor[]
-  movimientos_caja        Movimiento_Caja[]
-  arqueos_caja            Arqueo_Caja[]
-  ventas                  Venta[]
-  log_ventas_huella       Log_Ventas_Huella[]
-  
+  id_caja                Int                 @id @default(autoincrement())
+  id_trabajador_apertura Int
+  fecha_hora_apertura    DateTime            @default(now())
+  monto_inicial          Decimal             @db.Decimal(10, 2)
+  id_trabajador_cierre   Int?
+  fecha_hora_cierre      DateTime?
+  monto_final_esperado   Decimal?            @db.Decimal(10, 2)
+  monto_final_real       Decimal?            @db.Decimal(10, 2)
+  estado                 CajaEstado          @default(abierta)
+  modo_autenticacion     ModoAutenticacion   @default(sesion_inicial)
+  arqueos_caja           Arqueo_Caja[]
+  trabajador_apertura    Trabajador          @relation("apertura", fields: [id_trabajador_apertura], references: [id_trabajador])
+  trabajador_cierre      Trabajador?         @relation("cierre", fields: [id_trabajador_cierre], references: [id_trabajador])
+  log_ventas_huella      Log_Ventas_Huella[]
+  movimientos_caja       Movimiento_Caja[]
+  sesiones_vendedor      Sesion_Vendedor[]
+  ventas                 Venta[]
+
   @@map("Cajas")
 }
 
-// 7. Sesiones_Vendedor
 model Sesion_Vendedor {
-  id_sesion               Int                     @id @default(autoincrement())
-  id_caja                 Int
-  id_trabajador           Int
-  fecha_hora_inicio       DateTime                @default(now())
-  fecha_hora_fin          DateTime?
-  
-  caja                    Caja                    @relation(fields: [id_caja], references: [id_caja])
-  trabajador              Trabajador              @relation(fields: [id_trabajador], references: [id_trabajador])
-  
+  id_sesion         Int        @id @default(autoincrement())
+  id_caja           Int
+  id_trabajador     Int
+  fecha_hora_inicio DateTime   @default(now())
+  fecha_hora_fin    DateTime?
+  caja              Caja       @relation(fields: [id_caja], references: [id_caja])
+  trabajador        Trabajador @relation(fields: [id_trabajador], references: [id_trabajador])
+
   @@map("Sesiones_Vendedor")
 }
 
-// 8. Ventas
 model Venta {
-  id_venta                Int                     @id @default(autoincrement())
-  fecha_hora              DateTime                @default(now())
-  id_trabajador           Int
-  id_caja                 Int
-  total_neto              Decimal                 @db.Decimal(10, 2)
-  cambio_total            Decimal?                @db.Decimal(10, 2)
-  fecha                   DateTime                @default(now()) @db.Date
-  id_cliente              Int?
-  
-  // Relaciones
-  trabajador              Trabajador              @relation(fields: [id_trabajador], references: [id_trabajador])
-  caja                    Caja                    @relation(fields: [id_caja], references: [id_caja])
-  cliente                 Cliente?                @relation(fields: [id_cliente], references: [id_cliente])
-  detalle_pago_venta      Detalle_Pago_Venta[]
-  detalle_ventas          Detalle_Venta[]
-  movimientos_caja        Movimiento_Caja[]
-  log_ventas_huella       Log_Ventas_Huella[]
-  
+  id_venta           Int                  @id @default(autoincrement())
+  fecha_hora         DateTime             @default(now())
+  id_trabajador      Int
+  id_caja            Int
+  total_neto         Decimal              @db.Decimal(10, 2)
+  cambio_total       Decimal?             @db.Decimal(10, 2)
+  fecha              DateTime             @default(now()) @db.Date
+  id_cliente         Int?
+  detalle_pago_venta Detalle_Pago_Venta[]
+  detalle_ventas     Detalle_Venta[]
+  log_ventas_huella  Log_Ventas_Huella[]
+  movimientos_caja   Movimiento_Caja[]
+  caja               Caja                 @relation(fields: [id_caja], references: [id_caja])
+  cliente            Cliente?             @relation(fields: [id_cliente], references: [id_cliente])
+  trabajador         Trabajador           @relation(fields: [id_trabajador], references: [id_trabajador])
+
   @@map("Ventas")
 }
 
-// 9. Detalle_Pago_Venta
 model Detalle_Pago_Venta {
-  id_detalle_pago   Int      @id @default(autoincrement())
-  id_venta          Int
-  id_metodo_pago    Int      // 👈 En lugar del ENUM
-  monto             Decimal  @db.Decimal(10, 2)
-  cambio_devuelto   Decimal? @db.Decimal(10, 2)
-  
-  venta       Venta      @relation(fields: [id_venta], references: [id_venta])
-  metodo_pago MetodoPago @relation(fields: [id_metodo_pago], references: [id_metodo_pago])
-  
+  id_detalle_pago Int        @id @default(autoincrement())
+  id_venta        Int
+  id_metodo_pago  Int
+  monto           Decimal    @db.Decimal(10, 2)
+  cambio_devuelto Decimal?   @db.Decimal(10, 2)
+  identificador   String?    @db.VarChar(255)
+  metodo_pago     MetodoPago @relation(fields: [id_metodo_pago], references: [id_metodo_pago])
+  venta           Venta      @relation(fields: [id_venta], references: [id_venta])
+
   @@map("Detalle_Pago_Venta")
 }
 
-// 10. Detalle_Ventas
 model Detalle_Venta {
-  id_detalle              Int                     @id @default(autoincrement())
+  id_detalle              Int        @id @default(autoincrement())
   id_venta                Int
   id_producto             Int
   cantidad                Int
-  precio_unitario_momento Decimal                 @db.Decimal(10, 2)
+  precio_unitario_momento Decimal    @db.Decimal(10, 2)
   id_promocion            Int?
-  monto_descuento_total   Decimal?                @db.Decimal(10, 2)
-  
-  venta                   Venta                   @relation(fields: [id_venta], references: [id_venta])
-  producto                Producto               @relation(fields: [id_producto], references: [id_producto])
-  promocion               Promocion?             @relation(fields: [id_promocion], references: [id_promocion])
-  
+  monto_descuento_total   Decimal?   @db.Decimal(10, 2)
+  producto                Producto   @relation(fields: [id_producto], references: [id_producto])
+  promocion               Promocion? @relation(fields: [id_promocion], references: [id_promocion])
+  venta                   Venta      @relation(fields: [id_venta], references: [id_venta])
+
   @@map("Detalle_Ventas")
 }
 
-// 11. Movimientos_Caja
 model Movimiento_Caja {
-  id_movimiento           Int                     @id @default(autoincrement())
-  id_caja                 Int
-  fecha_hora              DateTime                @default(now())
-  tipo_movimiento         TipoMovimiento
-  id_venta                Int?
-  monto                   Decimal                 @db.Decimal(10, 2)
-  descripcion             String?                 @db.VarChar(255)
-  id_trabajador_registra  Int
-  
-  caja                    Caja                    @relation(fields: [id_caja], references: [id_caja])
-  venta                   Venta?                  @relation(fields: [id_venta], references: [id_venta])
-  trabajador              Trabajador              @relation(fields: [id_trabajador_registra], references: [id_trabajador])
-  
+  id_movimiento          Int            @id @default(autoincrement())
+  id_caja                Int
+  fecha_hora             DateTime       @default(now())
+  tipo_movimiento        TipoMovimiento
+  id_venta               Int?
+  monto                  Decimal        @db.Decimal(10, 2)
+  descripcion            String?        @db.VarChar(255)
+  id_trabajador_registra Int
+  caja                   Caja           @relation(fields: [id_caja], references: [id_caja])
+  trabajador             Trabajador     @relation(fields: [id_trabajador_registra], references: [id_trabajador])
+  venta                  Venta?         @relation(fields: [id_venta], references: [id_venta])
+
   @@map("Movimientos_Caja")
 }
 
-// 12. Arqueos_Caja
 model Arqueo_Caja {
-  id_arqueo               Int                     @id @default(autoincrement())
-  id_caja                 Int
-  fecha_hora              DateTime                @default(now())
-  monto_contado_fisico    Decimal                 @db.Decimal(10, 2)
-  monto_segun_sistema     Decimal                 @db.Decimal(10, 2)
-  diferencia              Decimal                 @db.Decimal(10, 2)
-  id_trabajador           Int
-  observaciones           String?                 @db.Text
-  
-  caja                    Caja                    @relation(fields: [id_caja], references: [id_caja])
-  trabajador              Trabajador              @relation(fields: [id_trabajador], references: [id_trabajador])
-  
+  id_arqueo            Int        @id @default(autoincrement())
+  id_caja              Int
+  fecha_hora           DateTime   @default(now())
+  monto_contado_fisico Decimal    @db.Decimal(10, 2)
+  monto_segun_sistema  Decimal    @db.Decimal(10, 2)
+  diferencia           Decimal    @db.Decimal(10, 2)
+  id_trabajador        Int
+  observaciones        String?
+  caja                 Caja       @relation(fields: [id_caja], references: [id_caja])
+  trabajador           Trabajador @relation(fields: [id_trabajador], references: [id_trabajador])
+
   @@map("Arqueos_Caja")
 }
 
-// 13. Log_Ventas_Huella
 model Log_Ventas_Huella {
-  id_log                  Int                     @id @default(autoincrement())
-  id_venta                Int
-  id_trabajador           Int
-  timestamp_huella        DateTime                @default(now())
-  id_caja                 Int
-  
-  venta                   Venta                   @relation(fields: [id_venta], references: [id_venta])
-  trabajador              Trabajador              @relation(fields: [id_trabajador], references: [id_trabajador])
-  caja                    Caja                    @relation(fields: [id_caja], references: [id_caja])
-  
+  id_log           Int        @id @default(autoincrement())
+  id_venta         Int
+  id_trabajador    Int
+  timestamp_huella DateTime   @default(now())
+  id_caja          Int
+  caja             Caja       @relation(fields: [id_caja], references: [id_caja])
+  trabajador       Trabajador @relation(fields: [id_trabajador], references: [id_trabajador])
+  venta            Venta      @relation(fields: [id_venta], references: [id_venta])
+
   @@map("Log_Ventas_Huella")
 }
 
-// 14. Promociones
-
 model Promocion {
-  id_promocion            Int                     @id @default(autoincrement())
-  nombre_promo            String                  @db.VarChar(100)
-  tipo_promo              TipoPromo
-  porcentaje_descuento    Decimal?                @db.Decimal(5, 2)
-  cantidad_minima         Int?
-  metodo_pago_requerido   String?                 @db.VarChar(50)  // Simple: "Efectivo", "Tarjeta"
-  fecha_inicio            DateTime
-  fecha_fin               DateTime
-  activa                  Boolean                 @default(true)
-  
-  detalle_ventas          Detalle_Venta[]
-  productos_promociones   Productos_Promociones[]
-  
+  id_promocion          Int                     @id @default(autoincrement())
+  nombre_promo          String                  @db.VarChar(100)
+  tipo_promo            TipoPromo
+  porcentaje_descuento  Decimal?                @db.Decimal(5, 2)
+  cantidad_minima       Int?
+  metodo_pago_requerido String?                 @db.VarChar(50)
+  fecha_inicio          DateTime
+  fecha_fin             DateTime
+  activa                Boolean                 @default(true)
+  detalle_ventas        Detalle_Venta[]
+  productos_promociones Productos_Promociones[]
+
   @@map("Promociones")
 }
 
-
-// 15. Productos_Promociones
 model Productos_Promociones {
-  id_producto             Int
-  id_promocion            Int
-  
-  producto                Producto               @relation(fields: [id_producto], references: [id_producto])
-  promocion               Promocion              @relation(fields: [id_promocion], references: [id_promocion])
-  
+  id_producto  Int
+  id_promocion Int
+  producto     Producto  @relation(fields: [id_producto], references: [id_producto])
+  promocion    Promocion @relation(fields: [id_promocion], references: [id_promocion])
+
   @@id([id_producto, id_promocion])
   @@map("Productos_Promociones")
 }
 
-// 16. Etiquetas
 model Etiqueta {
-  id_etiqueta             Int                     @id @default(autoincrement())
-  nombre_etiqueta         String                  @db.VarChar(50)
-  descripcion             String?                 @db.VarChar(255)
-  
-  productos_etiquetas     Productos_Etiquetas[]
-  
+  id_etiqueta         Int                   @id @default(autoincrement())
+  nombre_etiqueta     String                @db.VarChar(50)
+  descripcion         String?               @db.VarChar(255)
+  productos_etiquetas Productos_Etiquetas[]
+
   @@map("Etiquetas")
 }
 
-// 17. Productos_Etiquetas
 model Productos_Etiquetas {
-  id_producto             Int
-  id_etiqueta             Int
-  
-  producto                Producto               @relation(fields: [id_producto], references: [id_producto])
-  etiqueta                Etiqueta               @relation(fields: [id_etiqueta], references: [id_etiqueta])
-  
+  id_producto Int
+  id_etiqueta Int
+  etiqueta    Etiqueta @relation(fields: [id_etiqueta], references: [id_etiqueta])
+  producto    Producto @relation(fields: [id_producto], references: [id_producto])
+
   @@id([id_producto, id_etiqueta])
   @@map("Productos_Etiquetas")
 }
 
-// 18. Clientes
 model Cliente {
-  id_cliente              Int                     @id @default(autoincrement())
-  nombre                  String                  @db.VarChar(100)
-  apellido                String?                 @db.VarChar(50)
-  dni                     String                  @unique @db.VarChar(20)
-  telefono                String                  @db.VarChar(20)
-  fecha_ultima_compra     DateTime?
-  
-  ventas                  Venta[]
-  
+  id_cliente          Int       @id @default(autoincrement())
+  nombre              String    @db.VarChar(100)
+  apellido            String?   @db.VarChar(50)
+  dni                 String    @unique @db.VarChar(20)
+  telefono            String    @db.VarChar(20)
+  fecha_ultima_compra DateTime?
+  ventas              Venta[]
+
   @@map("Clientes")
 }
-
-// ==================== ENUMS ====================
 
 enum CajaEstado {
   abierta
@@ -321,9 +275,6 @@ enum ModoAutenticacion {
   sesion_inicial
   por_venta
 }
-
-
-
 
 enum TipoMovimiento {
   ingreso_venta
