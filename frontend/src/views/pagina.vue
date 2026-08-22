@@ -29,7 +29,7 @@
           </h1>
 
           <div class="flex flex-wrap gap-4 items-center">
-            <a href="#footer" class="bg-white text-[#0f172a] font-bold px-7 py-3.5 rounded-xl hover:bg-gray-100 transition shadow-sm text-center min-w-[160px]">
+            <a href="/sobrenosotros" class="bg-white text-[#0f172a] font-bold px-7 py-3.5 rounded-xl hover:bg-gray-100 transition shadow-sm text-center min-w-[160px]">
               Sobre nosotros
             </a>
             
@@ -63,7 +63,7 @@
               contraseñas, sin <br>
               demoras.
             </h2>
-            <p class="text-gray-400 text-sm leading-relaxed max-w-md">
+            <p class="text-gray-400 text-lg leading-relaxed max-w-md">
               Cada usuario ingresa con su huella. KAIRO identifica al instante quién está operando, registra el inicio de turno automáticamente y habilita solo las funciones que corresponden a su nivel de acceso.
             </p>
           </div>
@@ -97,7 +97,7 @@
               </div>
               <h3 class="text-lg font-bold text-[#06b6d4]">{{ feature.title }}</h3>
             </div>
-            <p class="text-gray-300 text-sm mt-4 leading-relaxed">{{ feature.description }}</p>
+            <p class="text-gray-300 text-base mt-4 leading-relaxed">{{ feature.description }}</p>
           </div>
         </div>
 
@@ -110,7 +110,7 @@
             <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">
               Adaptado a <span class="text-[#06b6d4]">tu tipo de comercio</span>
             </h2>
-            <p class="text-gray-400 text-sm leading-relaxed">
+            <p class="text-gray-400 text-lg leading-relaxed">
               No hay dos negocios iguales. KAIRO se configura para encajar en tu operativa, tu vocabulario y tus necesidades específicas.
             </p>
           </div>
@@ -124,9 +124,9 @@
               <div class="space-y-4">
                 <component :is="business.icon" class="w-8 h-8 text-[#06b6d4]" />
                 <h3 class="text-lg font-bold text-[#06b6d4]">{{ business.title }}</h3>
-                <p class="text-gray-300 text-sm leading-relaxed">{{ business.description }}</p>
+                <p class="text-gray-300 text-base leading-relaxed">{{ business.description }}</p>
               </div>
-              <p class="text-[#06b6d4] text-xs font-medium mt-6">{{ business.tag }}</p>
+              <p class="text-[#06b6d4] text-sm font-medium mt-6">{{ business.tag }}</p>
             </div>
           </div>
         </div>
@@ -146,7 +146,7 @@
             Todo lo que tu negocio <br class="hidden sm:inline">
             necesita, <span class="text-[#00a8bd]">en uno.</span>
           </h1>
-          <p class="text-gray-600 text-sm md:text-base leading-relaxed px-4">
+          <p class="text-gray-600 text-lg leading-relaxed px-4">
             Módulos integrados que trabajan juntos. No más planillas sueltas, no más sistemas que no se comuniquen.
           </p>
         </div>
@@ -178,7 +178,7 @@
                 {{ module.title }}
               </h2>
               <p 
-                class="text-sm leading-relaxed text-left" 
+                class="text-base leading-relaxed text-left" 
                 :class="module.isCyan ? 'text-black/80 font-medium' : 'text-gray-300'"
               >
                 {{ module.description }}
@@ -186,7 +186,7 @@
             </div>
 
               <div 
-                class="mt-8 space-y-3 text-xs"
+                class="mt-8 space-y-3 text-sm"
                 :class="module.isCyan ? 'text-black font-semibold' : 'text-gray-300'"
               >
                 <div v-for="(feature, idx) in module.features" :key="idx" class="flex items-start gap-2">
@@ -222,7 +222,7 @@
               Construido con tecnología <br>
               pensada <span class="text-[#00bcd4]">para durar.</span>
             </h1>
-            <p class="text-gray-400 text-sm md:text-base leading-relaxed max-w-2xl font-normal">
+            <p class="text-gray-400 text-lg leading-relaxed max-w-2xl font-normal">
               Stack moderno, probado y abierto. KAIRO se apoya en herramientas de primer nivel para garantizar rendimiento, seguridad y escalabilidad.
             </p>
           </div>
@@ -245,7 +245,7 @@
               ¿Con qué está <br>
               hecho <span class="text-[#00bcd4]">KAIRO</span>?
             </h2>
-            <p class="text-gray-700 text-sm md:text-base leading-relaxed font-normal">
+            <p class="text-gray-700 text-base leading-relaxed font-normal">
               Elegimos cada herramienta con criterio. El frontend es rápido y responsivo, el backend es seguro y escalable, y la biometría funciona en hardware accesible. Tecnología al alcance de cualquier comercio.
             </p>
           </div>
@@ -260,11 +260,11 @@
                 <div class="flex items-center gap-3">
                   <span class="text-2xl font-extrabold tracking-tight text-gray-900" v-html="tech.logoHtml"></span>
                 </div>
-                <p class="text-sm text-gray-800 font-medium leading-relaxed">
+                <p class="text-base text-gray-800 font-medium leading-relaxed">
                   {{ tech.description }}
                 </p>
               </div>
-              <span class="text-xs font-semibold text-[#4f46e5] tracking-wide mt-4">// {{ tech.category }}</span>
+              <span class="text-xs font-semibold text-[#3b93e5] tracking-wide mt-4">// {{ tech.category }}</span>
             </div>
           </div>
         </div>
@@ -277,9 +277,9 @@
             
             <div class="lg:col-span-5 space-y-6">
               <div class="flex items-center">
-                <img src="../assets/logo.png.png" alt="Logo KAIRO" class="h-20 w-auto object-contain" />
+                <img src="../assets/logo.png.png" alt="Logo KAIRO" class="h-12 w-auto object-contain" />
               </div>
-              <p class="text-xs text-gray-300 leading-relaxed font-normal pr-4">
+              <p class="text-sm text-gray-300 leading-relaxed font-normal pr-4">
                 KAIRO es el proyecto final de un equipo de desarrollo de último año de la Escuela Técnica N° 24 "Simón de Iriondo". Lo construimos para egresarnos, pero también para entender de primera mano qué significa trabajar en un entorno real: tomar decisiones de diseño, integrar hardware con software, organizar un equipo y entregar algo que funcione. No es solo un trabajo práctico, es nuestra primera experiencia construyendo un producto completo de principio a fin.
               </p>
             </div>
@@ -289,7 +289,7 @@
                 <div class="bg-[#14b8a6] text-white font-bold text-center py-2 px-4 rounded-full text-sm shadow">
                   {{ group.title }}
                 </div>
-                <ul class="space-y-3 text-xs text-gray-300 font-medium">
+                <ul class="space-y-3 text-sm text-gray-300 font-medium">
                   <li v-for="link in group.items" :key="link">
                     <a href="#" class="hover:text-[#00bcd4] transition-colors">{{ link }}</a>
                   </li>

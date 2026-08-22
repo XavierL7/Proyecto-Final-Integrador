@@ -17,7 +17,7 @@
       </div>
 
       <!-- NAVEGACIÓN PRINCIPAL -->
-      <nav class="hidden md:flex items-center gap-8 text-[#0f172a] font-bold text-sm">
+      <nav class="hidden md:flex items-center gap-8 text-[#0f172a] font-bold text-base">
         <a 
           v-for="item in navLinks" 
           :key="item.text" 
@@ -33,7 +33,8 @@
 
       <!-- ACCIONES DE USUARIO -->
       <div class="flex items-center gap-6 text-[#0f172a] font-bold text-sm shrink-0">
-        <a href="/login" class="hover:opacity-80">Iniciar Sesión</a>
+        <a href="/contacto" class="hover:opacity-80">Servicio al cliente</a>
+        <a href="/login" class="hover:opacity-80">Ingresar</a>
       </div>
 
     </div>

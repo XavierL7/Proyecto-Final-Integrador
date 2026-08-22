@@ -8,7 +8,11 @@ import etiquetaRoutes from './etiquetaRoutes.js'
 import productoRoutes from './productoRoutes.js'
 import metodoPagoRoutes from './metodoPagoRoutes.js'
 import ventaRoutes from './ventaRoutes.js'
+
 import dispositivoRoutes from './dispositivoRoutes.js'
+
+import clientesRoutes from './clientesRoutes.js'
+
 
 const router = express.Router();
 
@@ -25,8 +29,10 @@ router.use('/ventas', ventaRoutes)
 // rutas del lector de huella (ESP32 + AS608), autenticadas con API key propia
 router.use('/dispositivo', dispositivoRoutes)
 
-// Rutas de autenticación
-// Login solo con contraseña (nombre + apellido + dni + password)
+
+router.use('/clientes', clientesRoutes)
+
+// Rutas de autenticación (usan el controlador)
 router.post('/auth/register', registrarTrabajador);
 router.post('/auth/login', loginTrabajador);
 // Login solo con huella: el front hace polling acá mientras el usuario
