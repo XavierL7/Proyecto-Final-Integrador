@@ -8,6 +8,9 @@ export const getVentas = async (req, res) => {
         trabajador: {
           select: { nombre: true, apellido: true }
         },
+        cliente: {
+          select: { id_cliente: true, nombre: true, apellido: true, dni: true }
+        },
         detalle_ventas: {
           include: {
             producto: {

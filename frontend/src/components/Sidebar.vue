@@ -222,41 +222,12 @@
       <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('ver_reportes')"
-        to="/estadisticas"
-        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[isOpen ? 'justify-start' : 'justify-center']"
-        :style="{
-          color: $route.path === '/estadisticas' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/estadisticas' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
-        }"
-        @mouseenter="(e) => {
-          if ($route.path !== '/estadisticas') {
-            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
-            e.currentTarget.style.color = '#6aaec9'
-          }
-        }"
-        @mouseleave="(e) => {
-          if ($route.path !== '/estadisticas') {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#8ab4d6'
-          }
-        }"
-      >
-        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Estadísticas</span>
-        <span v-else class="text-sm font-medium">E</span>
-      </router-link>
-
-      <!-- ============================================================ -->
-      <!-- clientes -->
-      <!-- ============================================================ -->
-      <router-link
-        v-if="authStore.tienePermiso('gestionar_productos')"
         to="/clientes"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
-          color: $route.path === '/stock' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/stock' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
+          color: $route.path === '/clientes' ? '#4a8db7' : '#8ab4d6',
+          backgroundColor: $route.path === '/clientes' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
         }"
         @mouseenter="(e) => {
           if ($route.path !== '/clientes') {
@@ -272,7 +243,36 @@
         }"
       >
         <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Clientes</span>
-        <span v-else class="text-sm font-medium">S</span>
+        <span v-else class="text-sm font-medium">E</span>
+      </router-link>
+
+      <!-- ============================================================ -->
+      <!-- HISTORIAL DE VENTAS -->
+      <!-- ============================================================ -->
+      <router-link
+        v-if="authStore.tienePermiso('ver_reportes')"
+        to="/historial"
+        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
+        :style="{
+          color: $route.path === '/historial' ? '#4a8db7' : '#8ab4d6',
+          backgroundColor: $route.path === '/historial' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
+        }"
+        @mouseenter="(e) => {
+          if ($route.path !== '/historial') {
+            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
+            e.currentTarget.style.color = '#6aaec9'
+          }
+        }"
+        @mouseleave="(e) => {
+          if ($route.path !== '/historial') {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = '#8ab4d6'
+          }
+        }"
+      >
+        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Historial de Ventas</span>
+        <span v-else class="text-sm font-medium">H</span>
       </router-link>
 
       <!-- ============================================================ -->
@@ -280,21 +280,21 @@
       <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('crear_roles')"
-        to="/admin"
+        to="/administracion"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
-          color: $route.path === '/admin' ? '#4a8db7' : '#8ab4d6',
+          color: $route.path === '/administracion' ? '#4a8db7' : '#8ab4d6',
           backgroundColor: $route.path === '/admin' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
         }"
         @mouseenter="(e) => {
-          if ($route.path !== '/admin') {
+          if ($route.path !== '/administracion') {
             e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
             e.currentTarget.style.color = '#6aaec9'
           }
         }"
         @mouseleave="(e) => {
-          if ($route.path !== '/admin') {
+          if ($route.path !== '/administracion') {
             e.currentTarget.style.backgroundColor = 'transparent'
             e.currentTarget.style.color = '#8ab4d6'
           }

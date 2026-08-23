@@ -18,7 +18,7 @@ function sanearIdentificador(identificador) {
 export const createVenta = async (req, res) => {
   try {
     const userId = req.userId
-    const { items, total, metodo_pago, datos_pago } = req.body
+    const { items, total, metodo_pago, datos_pago, id_cliente } = req.body
 
     if (!items || items.length === 0) {
       return res.status(400).json({ error: 'La venta debe tener al menos un producto' })
@@ -40,6 +40,19 @@ export const createVenta = async (req, res) => {
       return res.status(400).json({ error: 'Método de pago no válido' })
     }
 
+    // id_cliente es opcional: null/ausente = "Cliente General".
+    // Si viene, validamos que exista para no guardar una FK inválida.
+    let idClienteValidado = null
+    if (id_cliente !== null && id_cliente !== undefined && id_cliente !== '') {
+      const clienteExiste = await prisma.cliente.findUnique({
+        where: { id_cliente: parseInt(id_cliente) }
+      })
+      if (!clienteExiste) {
+        return res.status(400).json({ error: 'El cliente seleccionado no existe.' })
+      }
+      idClienteValidado = clienteExiste.id_cliente
+    }
+
     const identificador = sanearIdentificador(datos_pago?.identificador)
 
     const nuevaVenta = await prisma.$transaction(async (tx) => {
@@ -50,6 +63,8 @@ export const createVenta = async (req, res) => {
           total_neto: total,
           id_trabajador: userId,
           id_caja: 1,
+          id_cliente: idClienteValidado, // null = Cliente General
+          cambio_total: datos_pago?.cambio || null,
         }
       })
 
@@ -81,6 +96,16 @@ export const createVenta = async (req, res) => {
           identificador
         }
       })
+
+      // Si la venta es de un cliente identificado (no "Cliente General"),
+      // actualizamos su fecha de última compra -> así el listado de
+      // clientes (que ordena por esta fecha) refleja la actividad real.
+      if (idClienteValidado) {
+        await tx.cliente.update({
+          where: { id_cliente: idClienteValidado },
+          data: { fecha_ultima_compra: new Date() }
+        })
+      }
 
       return venta
     })

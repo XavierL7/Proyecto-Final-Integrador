@@ -27,6 +27,12 @@
 
       <!-- Columna derecha: Resumen y pago -->
       <div class="lg:col-span-1">
+        <!-- Cliente -->
+        <SelectorCliente
+          :clientes="clientes"
+          v-model="clienteSeleccionado"
+        />
+
         <!-- Resumen -->
         <ResumenVenta
           :subtotal="subtotal"
@@ -82,6 +88,7 @@ import PagoEfectivo from '../components/caja/PagoEfectivo.vue'
 import PagoTransferencia from '../components/caja/PagoTransferencia.vue'
 import PagoCheque from '../components/caja/PagoCheque.vue'
 import PagoTarjeta from '../components/caja/PagoTarjeta.vue'
+import SelectorCliente from '../components/caja/SelectorCliente.vue'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -92,6 +99,9 @@ const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const carrito = ref([])
 const metodosPago = ref([])
 const metodoSeleccionado = ref(null)
+const clientes = ref([])
+// null = "Cliente General". Si no, es el id_cliente elegido en el selector.
+const clienteSeleccionado = ref(null)
 
 // ============================================================
 // COMPUTED
@@ -147,7 +157,9 @@ const finalizarVenta = async (datosPago) => {
       items: carrito.value,
       total: total.value,
       metodo_pago: metodoSeleccionado.value,
-      datos_pago: datosPago
+      datos_pago: datosPago,
+      // null si es "Cliente General"
+      id_cliente: clienteSeleccionado.value
     }
 
     const response = await axios.post(`${baseUrl}/api/ventas`, venta, {
@@ -157,6 +169,7 @@ const finalizarVenta = async (datosPago) => {
     alert('Venta realizada con éxito')
     carrito.value = []
     metodoSeleccionado.value = null
+    clienteSeleccionado.value = null
   } catch (error) {
     console.error('Error finalizando venta:', error)
     alert('Error al procesar la venta')
@@ -185,7 +198,22 @@ const cargarMetodosPago = async () => {
   }
 }
 
+// ============================================================
+// CARGAR CLIENTES
+// ============================================================
+const cargarClientes = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/api/clientes`, {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    })
+    clientes.value = response.data
+  } catch (error) {
+    console.error('Error cargando clientes:', error)
+  }
+}
+
 onMounted(() => {
   cargarMetodosPago()
+  cargarClientes()
 })
 </script>
