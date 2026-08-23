@@ -2,7 +2,7 @@
 .env.local
 .env.*.local
 
-.rar
+*.rar
 
 # Dependencias de Node.js
 node_modules/
