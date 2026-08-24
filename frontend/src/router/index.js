@@ -13,6 +13,19 @@ const routes = [
 
 
   {
+    path: '/contacto',
+    name: 'Contacto',
+    component: () => import('../views/contacto.vue'), 
+    meta: { requiereAuth: false }
+  },
+    {
+    path: '/sobrenosotros',
+    name: 'SobreNosotros',
+    component: () => import('../views/sobrenosotros.vue'), 
+    meta: { requiereAuth: false }
+  },
+
+  {
     path: '/clientes',
     name: 'clientes',
     component: () => import('../views/clientes.vue'), 
