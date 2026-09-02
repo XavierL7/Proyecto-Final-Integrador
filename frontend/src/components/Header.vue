@@ -7,7 +7,7 @@
       <!-- LADO IZQUIERDO: Botón Retroceder + Logo compacto -->
       <div class="flex items-center gap-3 shrink-0">
 
-        <a href="#" class="inline-flex items-center">
+        <a href="/pagina" class="inline-flex items-center">
           <img 
             src="../assets/logo-removebg-preview.png" 
             alt="Kairo Logo" 
