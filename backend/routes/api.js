@@ -13,6 +13,8 @@ import dispositivoRoutes from './dispositivoRoutes.js'
 
 import clientesRoutes from './clientesRoutes.js'
 
+import cajaRoutes from './cajaRoutes.js'
+
 
 const router = express.Router();
 
@@ -31,6 +33,9 @@ router.use('/dispositivo', dispositivoRoutes)
 
 
 router.use('/clientes', clientesRoutes)
+
+// cajas: abrir, cerrar, ver historial y ver la caja activa
+router.use('/cajas', cajaRoutes)
 
 // Rutas de autenticación (usan el controlador)
 router.post('/auth/register', registrarTrabajador);

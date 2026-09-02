@@ -20,7 +20,7 @@ const char* WIFI_PASSWORD = "alumnos24";
 
 // Ej: "http://192.168.1.100:3000" si el backend corre en tu LAN,
 // o el dominio público si está desplegado.
-const char* BACKEND_URL    = "http://172.16.68.223:3000";
+const char* BACKEND_URL    = "http://172.16.68.80:3000";
 const char* DEVICE_API_KEY = "3jK8dFgH9lM2nBvC5xZqWpErTyUiOpAsDfGhJkLzXcVbNmQwErTyUiOpAsDfGhJkLYTljZWZlNTYtZmRkNi00NTBjLWFlNGYtZWJkYmQ4NDZiZTYyNTcyYWIzMjYtY2Y4NS00YWQ0LThhNDEtOTIwZjgxNGJkZTgx"; // debe coincidir con DEVICE_API_KEY del .env del backend
 
 // --- Configuración del Módulo LED RGB ---

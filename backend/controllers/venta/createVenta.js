@@ -40,6 +40,23 @@ export const createVenta = async (req, res) => {
       return res.status(400).json({ error: 'Método de pago no válido' })
     }
 
+    // La venta se registra en LA CAJA DE ESTE TRABAJADOR (no en "la" caja
+    // abierta del sistema: puede haber varias PCs vendiendo en paralelo,
+    // cada una con su propio cajero y su propia caja abierta).
+    // Nos fijamos en su Sesion_Vendedor activa para saber cuál es.
+    const sesionActiva = await prisma.sesion_Vendedor.findFirst({
+      where: { id_trabajador: userId, fecha_hora_fin: null },
+      include: { caja: true }
+    })
+
+    if (!sesionActiva) {
+      return res.status(400).json({
+        error: 'No tenés ninguna caja abierta. Abrí una caja antes de registrar ventas.'
+      })
+    }
+
+    const cajaActiva = sesionActiva.caja
+
     // id_cliente es opcional: null/ausente = "Cliente General".
     // Si viene, validamos que exista para no guardar una FK inválida.
     let idClienteValidado = null
@@ -62,7 +79,7 @@ export const createVenta = async (req, res) => {
           fecha: new Date(),
           total_neto: total,
           id_trabajador: userId,
-          id_caja: 1,
+          id_caja: cajaActiva.id_caja,
           id_cliente: idClienteValidado, // null = Cliente General
           cambio_total: datos_pago?.cambio || null,
         }
