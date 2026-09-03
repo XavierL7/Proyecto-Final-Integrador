@@ -42,6 +42,16 @@ const routes = [
   },
 
   {
+    path: '/descuentos',
+    name: 'Descuentos',
+    component: () => import('../views/DescuentosView.vue'),
+    meta: {
+      requiereAuth: true,
+      permiso: 'gestionar_productos'
+    }
+  },
+
+  {
     path: '/register',
     name: 'Register',
     component: () => import('../views/RegisterView.vue'), 

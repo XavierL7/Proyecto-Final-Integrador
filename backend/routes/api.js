@@ -8,10 +8,13 @@ import etiquetaRoutes from './etiquetaRoutes.js'
 import productoRoutes from './productoRoutes.js'
 import metodoPagoRoutes from './metodoPagoRoutes.js'
 import ventaRoutes from './ventaRoutes.js'
+import cajaRoutes from './cajaRoutes.js'
 
 import dispositivoRoutes from './dispositivoRoutes.js'
 
 import clientesRoutes from './clientesRoutes.js'
+
+import promocionRoutes from './promocionRoutes.js'
 
 
 const router = express.Router();
@@ -28,9 +31,12 @@ router.use('/metodos-pago', metodoPagoRoutes)
 router.use('/ventas', ventaRoutes)
 // rutas del lector de huella (ESP32 + AS608), autenticadas con API key propia
 router.use('/dispositivo', dispositivoRoutes)
-
+router.use('/cajas', cajaRoutes)
 
 router.use('/clientes', clientesRoutes)
+
+// descuentos / promociones
+router.use('/promociones', promocionRoutes)
 
 // Rutas de autenticación (usan el controlador)
 router.post('/auth/register', registrarTrabajador);
