@@ -1,8 +1,8 @@
 <!-- frontend/src/components/caja/CarritoCompras.vue -->
 <template>
-  <div class="bg-white rounded-lg shadow">
+  <div class="rounded-lg shadow">
     <div class="p-4 border-b border-gray-200">
-      <h2 class="font-bold text-gray-700">🛒 Carrito</h2>
+      <h2 class="font-bold">🛒 Carrito</h2>
     </div>
 
     <div v-if="items.length === 0" class="p-8 text-center text-gray-400">
@@ -16,21 +16,21 @@
         class="flex items-center gap-3 px-4 py-3"
       >
         <div class="flex-1">
-          <p class="font-medium text-gray-800">{{ item.nombre_producto }}</p>
-          <p class="text-sm text-gray-500">${{ item.precio_unitario }} c/u</p>
+          <p class="font-medium">{{ item.nombre_producto }}</p>
+          <p class="text-sm">${{ item.precio_unitario }} c/u</p>
         </div>
 
         <div class="flex items-center gap-2">
           <button
             @click="actualizarCantidad(index, item.cantidad - 1)"
-            class="w-7 h-7 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition"
+            class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-300 transition"
           >
             -
           </button>
           <span class="w-8 text-center font-medium">{{ item.cantidad }}</span>
           <button
             @click="actualizarCantidad(index, item.cantidad + 1)"
-            class="w-7 h-7 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition"
+            class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-300 transition"
             :disabled="item.cantidad >= item.stock"
           >
             +

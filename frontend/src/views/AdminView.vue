@@ -1,7 +1,7 @@
 <!-- frontend/src/views/AdminView.vue -->
 <template>
   <div class="p-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Administración</h1>
+    <h1 class="text-2xl font-bold mb-6">Administración</h1>
 
     <!-- Tabs -->
     <div class="flex gap-2 border-b border-gray-200 mb-6">
@@ -30,7 +30,7 @@
     <!-- ======================================================== -->
     <div v-if="tabActivo === 'roles'">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold text-gray-700">Roles del sistema</h2>
+        <h2 class="text-lg font-semibold">Roles del sistema</h2>
         <button
           @click="abrirModalRol()"
           class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
@@ -43,11 +43,11 @@
         <div
           v-for="rol in roles"
           :key="rol.id_rol"
-          class="bg-white p-4 rounded-lg shadow border border-gray-200"
+          class="p-4 rounded-lg shadow border border-gray-200"
         >
           <div class="flex justify-between items-start">
             <div>
-              <h3 class="font-semibold text-gray-800">{{ rol.nombre_rol }}</h3>
+              <h3 class="font-semibold">{{ rol.nombre_rol }}</h3>
               <p class="text-sm text-gray-500">
                 {{ rol.roles_funcionalidades?.length || 0 }} permisos
               </p>
@@ -86,7 +86,7 @@
     <!-- ======================================================== -->
     <div v-if="tabActivo === 'trabajadores'">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold text-gray-700">Trabajadores</h2>
+        <h2 class="text-lg font-semibold">Trabajadores</h2>
         <button
           @click="abrirModalTrabajador()"
           class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
@@ -95,24 +95,24 @@
         </button>
       </div>
 
-      <div class="overflow-x-auto bg-white rounded-lg shadow">
+      <div class="overflow-x-auto rounded-lg shadow">
         <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+          <thead class="bg-gray">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Apellido</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">DNI</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Huella</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Nombre</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Apellido</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase">DNI</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Rol</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Huella</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Acciones</th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="divide-y divide-gray-200">
             <tr v-for="trabajador in trabajadores" :key="trabajador.id_trabajador">
-              <td class="px-6 py-4 text-sm text-gray-900">{{ trabajador.nombre }}</td>
-              <td class="px-6 py-4 text-sm text-gray-900">{{ trabajador.apellido }}</td>
-              <td class="px-6 py-4 text-sm text-gray-900">{{ trabajador.dni }}</td>
-              <td class="px-6 py-4 text-sm text-gray-900">
+              <td class="px-6 py-4 text-sm">{{ trabajador.nombre }}</td>
+              <td class="px-6 py-4 text-sm">{{ trabajador.apellido }}</td>
+              <td class="px-6 py-4 text-sm">{{ trabajador.dni }}</td>
+              <td class="px-6 py-4 text-sm">
                 {{ trabajador.rol?.nombre_rol || 'Sin rol' }}
               </td>
               <td class="px-6 py-4 text-sm">

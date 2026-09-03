@@ -2,7 +2,7 @@
 <template>
   <div class="p-6 max-w-7xl mx-auto">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Historial de Ventas</h1>
+      <h1 class="text-2xl font-bold">Historial de Ventas</h1>
       <button
         @click="cargarVentas"
         class="text-sm text-blue-500 hover:text-blue-700"
@@ -11,11 +11,11 @@
       </button>
     </div>
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="rounded-lg shadow overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase">
+            <tr class=" border-b border-gray-200 text-xs font-semibold uppercase">
               <th class="px-4 py-3">Fecha y hora</th>
               <th class="px-4 py-3">Trabajador</th>
               <th class="px-4 py-3">Caja</th>
@@ -28,38 +28,38 @@
           </thead>
           <tbody class="divide-y divide-gray-100 text-sm">
             <tr v-if="cargando">
-              <td colspan="8" class="px-4 py-6 text-center text-gray-400">Cargando ventas...</td>
+              <td colspan="8" class="px-4 py-6 text-center">Cargando ventas...</td>
             </tr>
             <tr v-else-if="ventas.length === 0">
-              <td colspan="8" class="px-4 py-6 text-center text-gray-400">No hay ventas registradas todavía.</td>
+              <td colspan="8" class="px-4 py-6 text-center">No hay ventas registradas todavía.</td>
             </tr>
-            <tr v-for="venta in ventas" :key="venta.id_venta" class="hover:bg-gray-50">
-              <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
+            <tr v-for="venta in ventas" :key="venta.id_venta" class="hover:bg-gray-300">
+              <td class="px-4 py-3 whitespace-nowrap">
                 {{ formatearFechaHora(venta.fecha_hora) }}
               </td>
-              <td class="px-4 py-3 text-gray-900 font-medium whitespace-nowrap">
+              <td class="px-4 py-3 font-medium whitespace-nowrap">
                 {{ venta.trabajador?.nombre }} {{ venta.trabajador?.apellido }}
               </td>
-              <td class="px-4 py-3 text-gray-700">
+              <td class="px-4 py-3">
                 #{{ venta.id_caja }}
               </td>
-              <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
+              <td class="px-4 py-3 whitespace-nowrap">
                 {{ nombreCliente(venta) }}
               </td>
-              <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
+              <td class="px-4 py-3 whitespace-nowrap">
                 {{ metodoPago(venta) }}
               </td>
-              <td class="px-4 py-3 text-right text-gray-900 font-semibold whitespace-nowrap">
+              <td class="px-4 py-3 text-right font-semibold whitespace-nowrap">
                 ${{ Number(venta.total_neto).toFixed(2) }}
               </td>
-              <td class="px-4 py-3 text-right text-gray-700 whitespace-nowrap">
+              <td class="px-4 py-3 text-right whitespace-nowrap">
                 ${{ montoPagado(venta).toFixed(2) }}
               </td>
               <td class="px-4 py-3 text-right whitespace-nowrap">
                 <span v-if="cambio(venta) > 0" class="text-green-600 font-medium">
                   ${{ cambio(venta).toFixed(2) }}
                 </span>
-                <span v-else class="text-gray-400">-</span>
+                <span v-else class="">-</span>
               </td>
             </tr>
           </tbody>

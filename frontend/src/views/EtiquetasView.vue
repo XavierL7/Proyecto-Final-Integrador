@@ -1,7 +1,7 @@
 <!-- frontend/src/views/EtiquetasView.vue -->
 <template>
   <div class="p-6 max-w-4xl mx-auto">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Etiquetas</h1>
+    <h1 class="text-2xl font-bold mb-6">Etiquetas</h1>
 
     <!-- Barra de búsqueda y botón -->
     <div class="flex  flex-wrap gap-3 mb-6">

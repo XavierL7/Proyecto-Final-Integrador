@@ -1,7 +1,7 @@
 <!-- frontend/src/components/ventas/MetodosPago.vue -->
 <template>
-  <div class="bg-white rounded-lg shadow p-4 mt-4">
-    <h3 class="font-bold text-gray-700 mb-3">💳 Métodos de pago</h3>
+  <div class=" rounded-lg shadow p-4 mt-4">
+    <h3 class="font-bold mb-3">💳 Métodos de pago</h3>
 
     <div class="grid grid-cols-2 gap-2">
       <button
@@ -12,7 +12,7 @@
         :class="[
           seleccionado === metodo.nombre
             ? 'border-blue-500 bg-blue-50 text-blue-600'
-            : 'border-gray-200 hover:border-blue-300 text-gray-700'
+            : 'border-gray-200 hover:border-blue-300'
         ]"
       >
         {{ metodo.nombre }}

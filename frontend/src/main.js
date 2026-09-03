@@ -1,10 +1,11 @@
 // src/main.js
 import { createApp } from 'vue'
-import { createPinia } from 'pinia' //Importamos Pinia
-import App from './App.vue' //importa app.vue
+import { createPinia } from 'pinia' // Importamos Pinia
+import App from './App.vue' // Importa app.vue
 import router from './router' // Importamos tu router index.js
 import './assets/main.css'
 import axios from 'axios'
+
 
 axios.interceptors.request.use(
   (config) => {
@@ -39,14 +40,19 @@ axios.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-const app = createApp(App)// Crea Vue con App.vue como raíz│
 
-// 2. ¡CRUCIAL! Instanciar y registrar Pinia PRIMERO
+import { useThemeStore } from './stores/theme'
+const app = createApp(App) // Crea Vue con App.vue como raíz
+
+// 1. Instanciar y registrar Pinia
 const pinia = createPinia()
 app.use(pinia)
 
-// 3. Registrar el Router SEGUNDO 
-// Ahora cuando el router use "useAuthStore()" en sus guards, Pinia ya va a estar activo.
+// 2. Inicializar el tema oscuro/claro (debe ser después de app.use(pinia))
+const themeStore = useThemeStore()
+themeStore.inicializarTema()
+
+// 3. Registrar el Router
 app.use(router)
 
-app.mount('#app')  // pega App.vue en el <div> id = app del index
+app.mount('#app') // Pega App.vue en el <div id="app"> del index

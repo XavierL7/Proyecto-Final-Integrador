@@ -1,11 +1,11 @@
 <!-- frontend/src/components/caja/PagoCheque.vue -->
 <template>
-  <div class="bg-white rounded-lg shadow p-4 mt-4">
-    <h4 class="font-bold text-gray-700 mb-3">Cheque</h4>
+  <div class="rounded-lg shadow p-4 mt-4">
+    <h4 class="font-bold mb-3">Cheque</h4>
 
     <div class="space-y-3">
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Número de cheque</label>
+        <label class="block text-sm mb-1">Número de cheque</label>
         <input
           v-model="form.numero"
           type="text"
@@ -15,7 +15,7 @@
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Banco emisor</label>
+        <label class="block text-sm mb-1">Banco emisor</label>
         <input
           v-model="form.banco"
           type="text"
@@ -25,7 +25,7 @@
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Fecha de emisión</label>
+        <label class="block text-sm mb-1">Fecha de emisión</label>
         <input
           v-model="form.fecha"
           type="date"
@@ -34,7 +34,7 @@
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Titular</label>
+        <label class="block text-sm mb-1">Titular</label>
         <input
           v-model="form.titular"
           type="text"
@@ -46,7 +46,7 @@
       <div class="flex gap-3">
         <button
           @click="$emit('cancelar')"
-          class="flex-1 px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg"
+          class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-red-600 transition"
         >
           Cancelar
         </button>

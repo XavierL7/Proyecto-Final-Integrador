@@ -68,7 +68,6 @@ h1 {
 }
 
 .user-info {
-  background: #f8f9fa;
   padding: 15px 20px;
   border-radius: 8px;
   margin-bottom: 30px;

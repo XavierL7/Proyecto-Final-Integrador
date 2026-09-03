@@ -60,30 +60,7 @@ const routes = [
     component: () => import('../views/pagina.vue'),
     meta: { requiereAuth: false } 
   },
-
-  {
-    path: '/producto',
-    name: 'producto',
-    component: () => import('../views/landingpage/producto.vue'),
-    meta: { requiereAuth: false } 
-  },
-
-  {
-    path: '/servicios',
-    name: 'servicios',
-    component: () => import('../views/landingpage/servicios.vue'),
-    meta: { requiereAuth: false } 
-  },
-
-  {
-    path: '/recursos',
-    name: 'recursos',
-    component: () => import('../views/landingpage/recursos.vue'),
-    meta: { requiereAuth: false } 
-  },
-
-
-
+  
   {
     path: '/ventas',
     name: 'Ventas',

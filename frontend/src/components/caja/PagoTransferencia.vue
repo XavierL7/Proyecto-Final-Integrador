@@ -1,13 +1,13 @@
 <!-- frontend/src/components/caja/PagoTransferencia.vue -->
 <template>
-  <div class="bg-white rounded-lg shadow p-4 mt-4">
-    <h4 class="font-bold text-gray-700 mb-3">
+  <div class="rounded-lg shadow p-4 mt-4">
+    <h4 class="font-bold mb-3">
       📱 {{ tipo }}
     </h4>
 
     <div class="space-y-3">
       <div>
-        <label class="block text-sm text-gray-600 mb-1">CBU o alias</label>
+        <label class="block text-sm mb-1">CBU o alias</label>
         <input
           v-model="form.cbu"
           type="text"
@@ -17,7 +17,7 @@
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">CUIL/CUIT</label>
+        <label class="block text-sm mb-1">CUIL/CUIT</label>
         <input
           v-model="form.cuil"
           type="text"
@@ -27,7 +27,7 @@
       </div>
 
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Nombre del titular</label>
+        <label class="block text-sm mb-1">Nombre del titular</label>
         <input
           v-model="form.titular"
           type="text"
@@ -39,7 +39,7 @@
       <div class="flex gap-3">
         <button
           @click="$emit('cancelar')"
-          class="flex-1 px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg"
+          class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-red-600 transition"
         >
           Cancelar
         </button>

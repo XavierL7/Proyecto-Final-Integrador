@@ -1,6 +1,6 @@
 <!-- frontend/src/App.vue -->
 <template>
-  <div id="app" class="flex min-h-screen bg-gray-50">
+  <div id="app" class="flex min-h-screen">
     <!-- Sidebar - SOLO si está autenticado -->
     <Sidebar v-if="authStore.estaAutenticado" />
 

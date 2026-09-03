@@ -2,7 +2,7 @@
 <template>
   <div class="p-6 max-w-6xl mx-auto">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Caja Registradora</h1>
+      <h1 class="text-2xl font-bold">Caja Registradora</h1>
       <button
         @click="cerrarCaja"
         class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"

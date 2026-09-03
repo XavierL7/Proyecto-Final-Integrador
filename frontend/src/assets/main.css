@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+/* Aplicar el fondo base directamente al body */
+body {
+  background-color: #f8fafc;
+  color: #021120;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* Cuando <html> tiene la clase .dark, cambia el body */
+html.dark body {
+  background-color: #021120;
+  color: #ffff;
+}

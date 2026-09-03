@@ -1,10 +1,10 @@
 <!-- frontend/src/components/caja/ResumenVenta.vue -->
 <template>
-  <div class="bg-white rounded-lg shadow p-4">
-    <h3 class="font-bold text-gray-700 mb-3">📋 Resumen</h3>
+  <div class="rounded-lg shadow p-4">
+    <h3 class="font-bold mb-3">📋 Resumen</h3>
 
     <div class="space-y-2">
-      <div class="flex justify-between text-gray-600">
+      <div class="flex justify-between">
         <span>Subtotal</span>
         <span>${{ subtotal.toFixed(2) }}</span>
       </div>

@@ -2,7 +2,7 @@
 <template>
   <div class="p-6 max-w-6xl mx-auto">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Stock</h1>
+      <h1 class="text-2xl font-bold">Stock</h1>
       <button
         @click="abrirModal()"
         class="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition shadow-sm hover:shadow"
@@ -22,22 +22,22 @@
     </div>
 
     <!-- Tabla de productos -->
-    <div class="overflow-x-auto bg-white rounded-lg shadow">
+    <div class="overflow-x-auto rounded-lg shadow">
       <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+        <thead class="">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Etiquetas</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Código</th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Producto</th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Etiquetas</th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Precio</th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Stock</th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Acciones</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="divide-y divide-gray-200">
           <tr v-for="producto in productosFiltrados" :key="producto.id_producto">
-            <td class="px-4 py-3 text-sm text-gray-900">{{ producto.codigo_barras || '-' }}</td>
-            <td class="px-4 py-3 text-sm text-gray-900">{{ producto.nombre_producto }}</td>
+            <td class="px-4 py-3 text-sm">{{ producto.codigo_barras || '-' }}</td>
+            <td class="px-4 py-3 text-sm">{{ producto.nombre_producto }}</td>
             <td class="px-4 py-3 text-sm">
               <!-- 👇 NUEVO SISTEMA DE ETIQUETAS -->
               <div class="flex items-center gap-1">
@@ -65,9 +65,9 @@
                 </button>
               </div>
             </td>
-            <td class="px-4 py-3 text-sm text-gray-900">${{ producto.precio_unitario }}</td>
+            <td class="px-4 py-3 text-sm">${{ producto.precio_unitario }}</td>
             <td class="px-4 py-3 text-sm">
-              <span :class="producto.stock_actual < producto.stock_minimo ? 'text-red-500 font-bold' : 'text-gray-900'">
+              <span :class="producto.stock_actual < producto.stock_minimo ? 'text-red-500 font-bold' : 'text-sm'">
                 {{ producto.stock_actual }}
               </span>
               <span v-if="producto.stock_actual < producto.stock_minimo" class="text-red-500 text-xs ml-1"></span>

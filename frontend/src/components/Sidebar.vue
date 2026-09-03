@@ -44,9 +44,7 @@
     <!-- MENÚ -->
     <nav class="p-4 space-y-1 overflow-y-auto h-[calc(100vh-80px)]">
       
-      <!-- ============================================================ -->
       <!-- DASHBOARD -->
-      <!-- ============================================================ -->
       <router-link
         to="/"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
@@ -72,9 +70,7 @@
         <span v-else class="text-sm font-medium">D</span>
       </router-link>
 
-      <!-- ============================================================ -->
       <!-- VENTAS -->
-      <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('dashboard_ventas')"
         to="/ventas"
@@ -101,9 +97,7 @@
         <span v-else class="text-sm font-medium">V</span>
       </router-link>
 
-      <!-- ============================================================ -->
-      <!-- STOCK (CORREGIDO) -->
-      <!-- ============================================================ -->
+      <!-- STOCK -->
       <router-link
         v-if="authStore.tienePermiso('gestionar_productos')"
         to="/stock"
@@ -130,9 +124,7 @@
         <span v-else class="text-sm font-medium">S</span>
       </router-link>
 
-      <!-- ============================================================ -->
-      <!-- ETIQUETAS (CORREGIDO) -->
-      <!-- ============================================================ -->
+      <!-- ETIQUETAS -->
       <router-link
         v-if="authStore.tienePermiso('gestionar_etiquetas')"
         to="/etiquetas"
@@ -159,9 +151,7 @@
         <span v-else class="text-sm font-medium">E</span>
       </router-link>
 
-      <!-- ============================================================ -->
       <!-- CAJAS -->
-      <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('cerrar_caja')"
         to="/cajas"
@@ -188,9 +178,7 @@
         <span v-else class="text-sm font-medium">C</span>
       </router-link>
 
-      <!-- ============================================================ -->
       <!-- TRABAJADORES -->
-      <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('gestionar_trabajadores')"
         to="/trabajadores"
@@ -217,9 +205,7 @@
         <span v-else class="text-sm font-medium">T</span>
       </router-link>
 
-      <!-- ============================================================ -->
-      <!-- ESTADÍSTICAS -->
-      <!-- ============================================================ -->
+      <!-- CLIENTES -->
       <router-link
         v-if="authStore.tienePermiso('ver_reportes')"
         to="/clientes"
@@ -243,12 +229,10 @@
         }"
       >
         <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Clientes</span>
-        <span v-else class="text-sm font-medium">E</span>
+        <span v-else class="text-sm font-medium">Cl</span>
       </router-link>
 
-      <!-- ============================================================ -->
       <!-- HISTORIAL DE VENTAS -->
-      <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('ver_reportes')"
         to="/historial"
@@ -275,9 +259,7 @@
         <span v-else class="text-sm font-medium">H</span>
       </router-link>
 
-      <!-- ============================================================ -->
       <!-- ADMINISTRACIÓN -->
-      <!-- ============================================================ -->
       <router-link
         v-if="authStore.tienePermiso('crear_roles')"
         to="/administracion"
@@ -285,7 +267,7 @@
         :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
           color: $route.path === '/administracion' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/admin' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
+          backgroundColor: $route.path === '/administracion' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
         }"
         @mouseenter="(e) => {
           if ($route.path !== '/administracion') {
@@ -306,6 +288,37 @@
 
       <!-- Separador -->
       <div class="border-t my-4" style="border-color: #0a2a40;"></div>
+
+      <!-- ============================================================ -->
+      <!-- BOTÓN MODO CLARO / OSCURO (NUEVO) -->
+      <!-- ============================================================ -->
+      <button
+        @click="themeStore.toggleTema"
+        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 w-full"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
+        style="color: #8ab4d6;"
+        @mouseenter="(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
+          e.currentTarget.style.color = '#6aaec9'
+        }"
+        @mouseleave="(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent'
+          e.currentTarget.style.color = '#8ab4d6'
+        }"
+      >
+        <!-- Icono Sol (Modo Claro) -->
+        <svg v-if="!themeStore.esOscuro" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <!-- Icono Luna (Modo Oscuro) -->
+        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+
+        <span v-if="isOpen" class="ml-3 text-sm font-medium whitespace-nowrap">
+          {{ themeStore.esOscuro ? 'Modo Oscuro' : 'Modo Claro' }}
+        </span>
+      </button>
 
       <!-- Cerrar sesión -->
       <button
@@ -333,10 +346,12 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useThemeStore } from '../stores/theme' // <-- Importamos el store del tema
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const themeStore = useThemeStore() // <-- Instanciamos el store del tema
 
 const isOpen = ref(true)
 

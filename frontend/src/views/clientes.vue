@@ -1,11 +1,11 @@
 <template>
-  <div class="min-h-screen bg-[#f1f5f9] font-montserrat">
+  <div class="min-h-screen font-montserrat">
 
     <main class="max-w-7xl mx-auto px-4 pt-24 pb-12">
       <!-- Título de la sección -->
       <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 class="text-3xl font-extrabold text-[#131b2e]">Gestión de Clientes</h1>
+          <h1 class="text-3xl font-extrabold">Gestión de Clientes</h1>
           <p class="text-sm text-slate-500">Registrá y gestioná la información de tus clientes</p>
         </div>
       </div>
@@ -13,8 +13,8 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <!-- Formulario de Registro -->
-        <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200/80 h-fit">
-          <h2 class="text-xl font-bold text-[#131b2e] mb-4">
+        <div class="p-6 rounded-2xl shadow-md border border-slate-200/80 h-fit">
+          <h2 class="text-xl font-bold mb-4">
             {{ editando ? 'Editar Cliente' : 'Nuevo Cliente' }}
           </h2>
           
@@ -22,7 +22,7 @@
             <!-- El ID se omitió porque es autoincremental -->
             
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre</label>
+              <label class="block text-xs font-semibold mb-1">Nombre</label>
               <input 
                 v-model="nuevoCliente.nombre" 
                 type="text" 
@@ -33,7 +33,7 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Apellido</label>
+              <label class="block text-xs font-semibold mb-1">Apellido</label>
               <input 
                 v-model="nuevoCliente.apellido" 
                 type="text" 
@@ -44,7 +44,7 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">DNI</label>
+              <label class="block text-xs font-semibold mb-1">DNI</label>
               <input 
                 v-model="nuevoCliente.dni" 
                 type="number" 
@@ -55,7 +55,7 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono</label>
+              <label class="block text-xs font-semibold mb-1">Teléfono</label>
               <input 
                 v-model="nuevoCliente.telefono" 
                 type="text" 
@@ -65,7 +65,7 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha de última compra</label>
+              <label class="block text-xs font-semibold mb-1">Fecha de última compra</label>
               <input 
                 v-model="nuevoCliente.fecha_ultima_compra" 
                 type="date" 
@@ -96,13 +96,13 @@
         </div>
 
         <!-- Tabla / Lista de Clientes -->
-        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-md border border-slate-200/80 overflow-hidden">
-          <h2 class="text-xl font-bold text-[#131b2e] mb-4">Listado de Clientes</h2>
+        <div class="lg:col-span-2 p-6 rounded-2xl shadow-md border border-slate-200/80 overflow-hidden">
+          <h2 class="text-xl font-bold mb-4">Listado de Clientes</h2>
 
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
-                <tr class="border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase bg-slate-50">
+                <tr class="border-b border-slate-200 text-xs font-semibold uppercase">
                   <th class="p-3">DNI</th>
                   <th class="p-3">Nombre Completo</th>
                   <th class="p-3">Teléfono</th>
@@ -112,13 +112,13 @@
               </thead>
               <tbody class="divide-y divide-slate-100 text-sm">
                 <tr v-if="clientes.length === 0">
-                  <td colspan="5" class="p-4 text-center text-slate-400">No hay clientes registrados aún.</td>
+                  <td colspan="5" class="p-4 text-center">No hay clientes registrados aún.</td>
                 </tr>
                 <tr v-for="cliente in clientes" :key="cliente.id_cliente" class="hover:bg-slate-50/80 transition-colors">
-                  <td class="p-3 font-medium text-slate-700">{{ cliente.dni }}</td>
-                  <td class="p-3 text-slate-900 font-semibold">{{ cliente.nombre }} {{ cliente.apellido }}</td>
-                  <td class="p-3 text-slate-600">{{ cliente.telefono || '-' }}</td>
-                  <td class="p-3 text-slate-600">
+                  <td class="p-3 font-medium">{{ cliente.dni }}</td>
+                  <td class="p-3 font-semibold">{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                  <td class="p-3">{{ cliente.telefono || '-' }}</td>
+                  <td class="p-3">
                     {{ cliente.fecha_ultima_compra ? new Date(cliente.fecha_ultima_compra).toLocaleDateString('es-AR', { timeZone: 'UTC' }) : '-' }}
                   </td>
                   <td class="p-3 text-right space-x-2">

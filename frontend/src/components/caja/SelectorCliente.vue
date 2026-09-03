@@ -1,12 +1,12 @@
 <!-- frontend/src/components/caja/SelectorCliente.vue -->
 <template>
-  <div class="bg-white rounded-lg shadow p-4 mb-4">
-    <label class="block text-sm font-semibold text-gray-700 mb-2">Cliente</label>
+  <div class="rounded-lg shadow p-4 mb-4">
+    <label class="block text-sm font-semibold mb-2">Cliente</label>
 
     <select
       :value="modelValue ?? ''"
       @change="onChange"
-      class="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
     >
       <option value="">Cliente General</option>
       <option
@@ -18,7 +18,7 @@
       </option>
     </select>
 
-    <p v-if="clienteActual" class="text-xs text-gray-400 mt-1">
+    <p v-if="clienteActual" class="text-xs mt-1">
       {{ clienteActual.telefono ? `Tel: ${clienteActual.telefono}` : 'Sin teléfono cargado' }}
     </p>
   </div>

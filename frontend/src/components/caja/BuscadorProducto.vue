@@ -18,16 +18,16 @@
     </div>
 
     <!-- Resultados -->
-    <div v-if="resultados.length > 0" class="mt-2 bg-white rounded-lg shadow border border-gray-200 max-h-60 overflow-y-auto">
+    <div v-if="resultados.length > 0" class="mt-2 rounded-lg shadow border border-gray-300 max-h-60 overflow-y-auto">
       <div
         v-for="producto in resultados"
         :key="producto.id_producto"
-        class="flex justify-between items-center px-4 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0"
+        class="flex justify-between items-center px-4 py-2 hover:bg-gray-200 cursor-pointer border-b border-gray-100 last:border-0"
         @click="agregar(producto)"
       >
         <div>
           <span class="font-medium">{{ producto.nombre_producto }}</span>
-          <span class="text-sm text-gray-500 ml-2">(Stock: {{ producto.stock_actual }})</span>
+          <span class="text-sm">(Stock: {{ producto.stock_actual }})</span>
         </div>
         <span class="font-bold text-blue-600">${{ producto.precio_unitario }}</span>
       </div>
