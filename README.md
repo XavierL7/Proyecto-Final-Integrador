@@ -5,11 +5,11 @@ TODO
 
 Dashboard	
 
-No respeta la cantidad del stock (ventas)
+Sobrescribe el extox existente (Stock)
 
 que al crear a caja te envie a ventas 
 
-Stock Negativoe
+Stock Negativo
 
 -Descuentos pagina-
 
