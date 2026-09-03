@@ -217,34 +217,6 @@
         <span v-else class="text-sm font-medium">C</span>
       </router-link>
 
-      <!-- ============================================================ -->
-      <!-- TRABAJADORES -->
-      <!-- ============================================================ -->
-      <router-link
-        v-if="authStore.tienePermiso('gestionar_trabajadores')"
-        to="/trabajadores"
-        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[isOpen ? 'justify-start' : 'justify-center']"
-        :style="{
-          color: $route.path === '/trabajadores' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/trabajadores' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
-        }"
-        @mouseenter="(e) => {
-          if ($route.path !== '/trabajadores') {
-            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
-            e.currentTarget.style.color = '#6aaec9'
-          }
-        }"
-        @mouseleave="(e) => {
-          if ($route.path !== '/trabajadores') {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#8ab4d6'
-          }
-        }"
-      >
-        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Trabajadores</span>
-        <span v-else class="text-sm font-medium">T</span>
-      </router-link>
 
       <!-- ============================================================ -->
       <!-- ESTADÍSTICAS -->
