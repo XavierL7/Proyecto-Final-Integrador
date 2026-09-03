@@ -20,8 +20,11 @@
         <!-- Carrito -->
         <CarritoCompras
           :items="carrito"
+          :promociones-aplicables="promocionesAplicables"
+          :calcular-descuento="calcularDescuentoItem"
           @actualizar-cantidad="actualizarCantidad"
           @eliminar="eliminarDelCarrito"
+          @aplicar-descuento="aplicarDescuento"
         />
       </div>
 
@@ -102,6 +105,8 @@ const metodoSeleccionado = ref(null)
 const clientes = ref([])
 // null = "Cliente General". Si no, es el id_cliente elegido en el selector.
 const clienteSeleccionado = ref(null)
+// Promociones activas y vigentes ahora mismo (se ofrecen en el carrito)
+const promocionesVigentes = ref([])
 
 // ============================================================
 // COMPUTED
@@ -112,7 +117,9 @@ const subtotal = computed(() => {
   }, 0)
 })
 
-const descuento = computed(() => 0) // TODO: Implementar descuentos
+const descuento = computed(() => {
+  return carrito.value.reduce((sum, item) => sum + calcularDescuentoItem(item), 0)
+})
 
 const total = computed(() => subtotal.value - descuento.value)
 
@@ -130,7 +137,8 @@ const agregarAlCarrito = (producto) => {
       nombre_producto: producto.nombre_producto,
       precio_unitario: producto.precio_unitario,
       cantidad: 1,
-      stock: producto.stock_actual
+      stock: producto.stock_actual,
+      id_promocion: null // sin descuento hasta que el cajero elija uno
     })
   }
 }
@@ -138,8 +146,19 @@ const agregarAlCarrito = (producto) => {
 const actualizarCantidad = (index, cantidad) => {
   if (cantidad <= 0) {
     carrito.value.splice(index, 1)
-  } else {
-    carrito.value[index].cantidad = cantidad
+    return
+  }
+  carrito.value[index].cantidad = cantidad
+
+  // Si la promo elegida era "por volumen" y ahora la cantidad no alcanza,
+  // se la sacamos: si no, quedaría un descuento inválido en pantalla que
+  // el backend igual va a rechazar al confirmar la venta.
+  const item = carrito.value[index]
+  if (item.id_promocion) {
+    const sigueSiendoValida = promocionesAplicables(item).some(p => p.id_promocion === item.id_promocion)
+    if (!sigueSiendoValida) {
+      item.id_promocion = null
+    }
   }
 }
 
@@ -149,6 +168,49 @@ const eliminarDelCarrito = (index) => {
 
 const seleccionarMetodoPago = (metodo) => {
   metodoSeleccionado.value = metodo
+}
+
+// ============================================================
+// DESCUENTOS / PROMOCIONES
+// ============================================================
+
+// Qué promociones vigentes podrían aplicarse a este item del carrito.
+// La validación definitiva (incluida la de "por_metodo_pago", que acá
+// solo se etiqueta) la hace siempre el backend al confirmar la venta.
+const promocionesAplicables = (item) => {
+  return promocionesVigentes.value.filter(promo => {
+    const productosPermitidos = promo.productos_promociones.map(pp => pp.id_producto)
+    const aplicaAlProducto = productosPermitidos.length === 0 || productosPermitidos.includes(item.id_producto)
+    if (!aplicaAlProducto) return false
+
+    if (promo.tipo_promo === 'por_volumen' && item.cantidad < promo.cantidad_minima) {
+      return false
+    }
+
+    return true
+  })
+}
+
+const calcularDescuentoItem = (item) => {
+  if (!item.id_promocion) return 0
+  const promo = promocionesVigentes.value.find(p => p.id_promocion === item.id_promocion)
+  if (!promo) return 0
+  return Number((item.cantidad * item.precio_unitario * (Number(promo.porcentaje_descuento) / 100)).toFixed(2))
+}
+
+const aplicarDescuento = (index, idPromocion) => {
+  carrito.value[index].id_promocion = idPromocion
+}
+
+const cargarPromociones = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/api/promociones/vigentes`, {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    })
+    promocionesVigentes.value = response.data
+  } catch (error) {
+    console.error('Error cargando promociones:', error)
+  }
 }
 
 const finalizarVenta = async (datosPago) => {
@@ -215,5 +277,6 @@ const cargarClientes = async () => {
 onMounted(() => {
   cargarMetodosPago()
   cargarClientes()
+  cargarPromociones()
 })
 </script>
