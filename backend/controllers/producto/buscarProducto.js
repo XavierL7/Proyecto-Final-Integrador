@@ -9,7 +9,7 @@ export const buscarProducto = async (req, res) => {
       return res.status(400).json({ error: 'Falta el término de búsqueda' })
     }
 
-    const producto = await prisma.producto.findFirst({
+    const producto = await prisma.producto.findMany({
       where: {
         OR: [
           { codigo_barras: q.trim() },

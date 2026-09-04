@@ -15,7 +15,7 @@ Sobrescribe el extox existente (Stock)
 
 ---cerrar caja desde ventas---
 
-que el buscador de ventas entregue todo los resultados
+---que el buscador de ventas entregue todo los resultados---
 
 stock buscar por etiqueta
 
