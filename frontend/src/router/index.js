@@ -1,6 +1,7 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import axios from 'axios'
 
 // router/index.js sirve para definir las rutas de la aplicación
 const routes = [
@@ -70,14 +71,18 @@ const routes = [
     component: () => import('../views/pagina.vue'),
     meta: { requiereAuth: false } 
   },
-  
+
+
+
+
   {
     path: '/ventas',
     name: 'Ventas',
     component: () => import('../views/VentasView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'registrar_venta' // Requiere esta funcionalidad específica
+      permiso: 'registrar_venta', // Requiere esta funcionalidad específica
+      requiereCajaAbierta: true // No se puede vender sin haber abierto una caja antes
     }
   },
 
@@ -164,6 +169,28 @@ router.beforeEach(async (to, from, next) => {
     if (!tienePermisoNecesario) {
       console.warn(`Acceso denegado a ${to.path}. Falta el permiso: ${to.meta.permiso}`)
       return next({ name: 'Dashboard' }) // Lo rebota al panel principal
+    }
+  }
+
+  // CASO 4: La ruta (ej. /ventas) requiere que este trabajador tenga una
+  // caja abierta. Si no tiene, no lo dejamos vender: lo mandamos a /cajas
+  // para que abra una o vea la que ya tiene abierta.
+  if (to.meta.requiereCajaAbierta) {
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+    try {
+      const response = await axios.get(`${baseUrl}/api/cajas/activa`, {
+        headers: { 'Authorization': `Bearer ${authStore.token}` }
+      })
+
+      if (!response.data) {
+        // null = no tiene ninguna caja abierta
+        return next({ name: 'Cajas', query: { motivo: 'necesita-caja' } })
+      }
+    } catch (error) {
+      console.error('No se pudo verificar la caja activa:', error)
+      // Si falla la verificación (ej. backend caído), preferimos no dejar
+      // vender a ciegas: lo mandamos igual a /cajas.
+      return next({ name: 'Cajas', query: { motivo: 'error-verificacion' } })
     }
   }
 

@@ -7,13 +7,11 @@ Dashboard
 
 Sobrescribe el extox existente (Stock)
 
-que al crear a caja te envie a ventas 
+---que al crear a caja te envie a ventas---
 
-Stock Negativo
+---Descuentos pagina---
 
--Descuentos pagina-
-
--que se agreguen descuentos en las ventas-
+---que se agreguen descuentos en las ventas---
 
 cerrar caja desde ventas
 
