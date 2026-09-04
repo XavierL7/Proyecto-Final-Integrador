@@ -251,6 +251,7 @@ const abrirCaja = async () => {
   try {
     await axios.post(`${baseUrl}/api/cajas`, { monto_inicial: montoInicial.value }, headers())
     montoInicial.value = ''
+    router.push('/ventas')
     await cargarCajaActiva()
     await cargarHistorial()
   } catch (error) {
