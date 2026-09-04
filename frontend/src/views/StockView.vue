@@ -5,7 +5,7 @@
       <h1 class="text-2xl font-bold">Stock</h1>
       <button
         @click="abrirModal()"
-        class="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition shadow-sm hover:shadow"
+        class="bg-blue-500 px-5 py-2 rounded-lg hover:bg-blue-600 transition shadow-sm hover:shadow"
       >
         + Nuevo Producto
       </button>
@@ -23,7 +23,7 @@
 
     <!-- Tabla de productos -->
     <div class="overflow-x-auto rounded-lg shadow">
-      <table class="min-w-full divide-y divide-gray-200">
+      <table class="border-white min-w-full divide-y divide-gray-200">
         <thead class="">
           <tr>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase">Código</th>
@@ -147,12 +147,12 @@
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
       @click.self="modalVisible = false"
     >
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+      <div class="rounded-2xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-gray-800">
+          <h2 class="text-xl font-bold">
             {{ editando ? 'Editar Producto' : 'Nuevo Producto' }}
           </h2>
-          <button @click="modalVisible = false" class="text-gray-400 hover:text-gray-600">
+          <button @click="modalVisible = false" class=" text-gray-400 hover:text-gray-600">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -162,7 +162,7 @@
         <form @submit.prevent="guardarProducto">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Código de barras</label>
+              <label class="block text-sm font-medium mb-1">Código de barras</label>
               <input
                 v-model="form.codigo_barras"
                 type="text"
@@ -171,7 +171,7 @@
               />
             </div>
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Nombre *</label>
+              <label class="block text-sm font-medium mb-1">Nombre *</label>
               <input
                 v-model="form.nombre_producto"
                 type="text"
@@ -183,7 +183,7 @@
 
           <div class="grid grid-cols-2 gap-4 mt-3">
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Precio venta *</label>
+              <label class="block text-sm font-medium mb-1">Precio venta *</label>
               <input
                 v-model="form.precio_unitario"
                 type="number"
@@ -194,7 +194,7 @@
               />
             </div>
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Costo</label>
+              <label class="block text-sm font-medium mb-1">Costo</label>
               <input
                 v-model="form.costo_unitario"
                 type="number"
@@ -208,7 +208,7 @@
 
           <div class="grid grid-cols-2 gap-4 mt-3">
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Stock actual *</label>
+              <label class="block text-sm font-medium mb-1">Stock actual *</label>
               <input
                 v-model="form.stock_actual"
                 type="number"
@@ -218,7 +218,7 @@
               />
             </div>
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Stock mínimo</label>
+              <label class="block text-sm font-medium mb-1">Stock mínimo</label>
               <input
                 v-model="form.stock_minimo"
                 type="number"
@@ -230,7 +230,7 @@
           </div>
 
           <div class="mt-3">
-            <label class="block text-gray-700 text-sm font-medium mb-1">Etiquetas</label>
+            <label class="block text-sm font-medium mb-1">Etiquetas</label>
             <div class="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg max-h-32 overflow-y-auto">
               <label
                 v-for="etiqueta in etiquetas"
