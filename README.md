@@ -13,7 +13,7 @@ Sobrescribe el extox existente (Stock)
 
 ---que se agreguen descuentos en las ventas---
 
-cerrar caja desde ventas
+---cerrar caja desde ventas---
 
 que el buscador de ventas entregue todo los resultados
 

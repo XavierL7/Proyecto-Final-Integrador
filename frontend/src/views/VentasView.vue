@@ -3,12 +3,12 @@
   <div class="p-6 max-w-6xl mx-auto">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">Caja Registradora</h1>
-      <button
-        @click="cerrarCaja"
+      <a
         class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+        href="/cajas"
       >
         Cerrar Caja
-      </button>
+      </a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -238,13 +238,6 @@ const finalizarVenta = async (datosPago) => {
   }
 }
 
-const cerrarCaja = () => {
-  if (carrito.value.length > 0) {
-    if (!confirm('Hay productos en el carrito. ¿Seguro que quieres cerrar la caja?')) return
-  }
-  // TODO: Lógica de cierre de caja
-  alert('Caja cerrada')
-}
 
 // ============================================================
 // CARGAR MÉTODOS DE PAGO
