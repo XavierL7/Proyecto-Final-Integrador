@@ -5,7 +5,7 @@
       <h1 class="text-2xl font-bold">Stock</h1>
       <button
         @click="abrirModal()"
-        class="bg-blue-500 px-5 py-2 rounded-lg hover:bg-blue-600 transition shadow-sm hover:shadow"
+        class="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition shadow-sm hover:shadow"
       >
         + Nuevo Producto
       </button>
@@ -23,7 +23,7 @@
 
     <!-- Tabla de productos -->
     <div class="overflow-x-auto rounded-lg shadow">
-      <table class="border-white min-w-full divide-y divide-gray-200">
+      <table class="min-w-full divide-y divide-gray-200">
         <thead class="">
           <tr>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase">Código</th>
@@ -79,6 +79,29 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Controles de paginación -->
+    <div class="flex justify-between items-center mt-4">
+      <span class="text-sm text-gray-500">
+        Página {{ paginaActual }} de {{ totalPaginas }} ({{ totalProductos }} productos)
+      </span>
+      <div class="flex gap-2">
+        <button
+          @click="irAPaginaAnterior"
+          :disabled="paginaActual === 1"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          ← Anterior
+        </button>
+        <button
+          @click="irAPaginaSiguiente"
+          :disabled="paginaActual === totalPaginas"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          Siguiente →
+        </button>
+      </div>
     </div>
 
     <!-- ======================================================== -->
@@ -147,12 +170,12 @@
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
       @click.self="modalVisible = false"
     >
-      <div class="rounded-2xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">
+          <h2 class="text-xl font-bold text-gray-800">
             {{ editando ? 'Editar Producto' : 'Nuevo Producto' }}
           </h2>
-          <button @click="modalVisible = false" class=" text-gray-400 hover:text-gray-600">
+          <button @click="modalVisible = false" class="text-gray-400 hover:text-gray-600">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -162,7 +185,7 @@
         <form @submit.prevent="guardarProducto">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-1">Código de barras</label>
+              <label class="block text-gray-700 text-sm font-medium mb-1">Código de barras</label>
               <input
                 v-model="form.codigo_barras"
                 type="text"
@@ -171,7 +194,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">Nombre *</label>
+              <label class="block text-gray-700 text-sm font-medium mb-1">Nombre *</label>
               <input
                 v-model="form.nombre_producto"
                 type="text"
@@ -183,7 +206,7 @@
 
           <div class="grid grid-cols-2 gap-4 mt-3">
             <div>
-              <label class="block text-sm font-medium mb-1">Precio venta *</label>
+              <label class="block text-gray-700 text-sm font-medium mb-1">Precio venta *</label>
               <input
                 v-model="form.precio_unitario"
                 type="number"
@@ -194,7 +217,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">Costo</label>
+              <label class="block text-gray-700 text-sm font-medium mb-1">Costo</label>
               <input
                 v-model="form.costo_unitario"
                 type="number"
@@ -208,7 +231,7 @@
 
           <div class="grid grid-cols-2 gap-4 mt-3">
             <div>
-              <label class="block text-sm font-medium mb-1">Stock actual *</label>
+              <label class="block text-gray-700 text-sm font-medium mb-1">Stock actual *</label>
               <input
                 v-model="form.stock_actual"
                 type="number"
@@ -218,7 +241,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">Stock mínimo</label>
+              <label class="block text-gray-700 text-sm font-medium mb-1">Stock mínimo</label>
               <input
                 v-model="form.stock_minimo"
                 type="number"
@@ -230,7 +253,7 @@
           </div>
 
           <div class="mt-3">
-            <label class="block text-sm font-medium mb-1">Etiquetas</label>
+            <label class="block text-gray-700 text-sm font-medium mb-1">Etiquetas</label>
             <div class="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg max-h-32 overflow-y-auto">
               <label
                 v-for="etiqueta in etiquetas"
@@ -292,7 +315,17 @@ const productos = ref([])
 const etiquetas = ref([])
 const busqueda = ref('')
 
+// ============================================================
+// PAGINACIÓN
+// ============================================================
+const paginaActual = ref(1)
+const totalPaginas = ref(1)
+const totalProductos = ref(0)
+const porPagina = 10
+
 const productosFiltrados = computed(() => {
+  // El filtro de búsqueda solo actúa sobre los productos ya cargados
+  // (la página actual). Es una búsqueda "rápida" dentro de la página.
   if (!busqueda.value) return productos.value
   const q = busqueda.value.toLowerCase()
   return productos.value.filter(p =>
@@ -300,6 +333,20 @@ const productosFiltrados = computed(() => {
     p.codigo_barras?.includes(q)
   )
 })
+
+const irAPaginaAnterior = () => {
+  if (paginaActual.value > 1) {
+    paginaActual.value--
+    cargarProductos()
+  }
+}
+
+const irAPaginaSiguiente = () => {
+  if (paginaActual.value < totalPaginas.value) {
+    paginaActual.value++
+    cargarProductos()
+  }
+}
 
 // ============================================================
 // MODAL: PRODUCTO
@@ -329,9 +376,15 @@ const productoEtiquetas = ref(null)
 const cargarProductos = async () => {
   try {
     const response = await axios.get(`${baseUrl}/api/productos`, {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
+      headers: { 'Authorization': `Bearer ${authStore.token}` },
+      params: {
+        page: paginaActual.value,
+        limit: porPagina
+      }
     })
-    productos.value = response.data
+    productos.value = response.data.productos
+    totalPaginas.value = response.data.totalPages
+    totalProductos.value = response.data.total
   } catch (error) {
     console.error('Error cargando productos:', error)
   }
@@ -417,6 +470,10 @@ const eliminarProducto = async (id) => {
     await axios.delete(`${baseUrl}/api/productos/${id}`, {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     })
+    // Si era el único producto de esta página y no es la primera, retrocedemos
+    if (productos.value.length === 1 && paginaActual.value > 1) {
+      paginaActual.value--
+    }
     cargarProductos()
   } catch (error) {
     alert(error.response?.data?.error || 'Error al eliminar')

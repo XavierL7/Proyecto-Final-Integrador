@@ -7,6 +7,10 @@ Dashboard
 
 Sobrescribe el extox existente (Stock)
 
+No se puede vender mas de un producto a la vez si el Stock es Negativo
+
+Agregar boton "Agregar" en el Stock para cargar mecaderia 
+
 ---que al crear a caja te envie a ventas---
 
 ---Descuentos pagina---
@@ -21,7 +25,7 @@ stock buscar por etiqueta
 
 hacer menú desplegable para editar->etiquetas
 
-que solo aparezcan 10 cosas en el stock y  lechas para pasarde pagina y que no muestre todo
+---que solo aparezcan 10 cosas en el stock y  lechas para pasarde pagina y que no muestre todo---
 
 reworkear panel de administración
 
