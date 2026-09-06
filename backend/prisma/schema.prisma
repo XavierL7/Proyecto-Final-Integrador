@@ -42,9 +42,9 @@ model Trabajador {
   dni               Int
   contraseña_hash  String              @db.VarChar(255)
   hash_huella       String?             @unique @db.VarChar(255)
+  huella_pendiente  Boolean             @default(false)
   id_rol            Int
   fecha_registro    DateTime            @default(now()) @db.Date
-  huella_pendiente  Boolean             @default(false)
   arqueos_caja      Arqueo_Caja[]
   cajas_apertura    Caja[]              @relation("apertura")
   cajas_cierre      Caja[]              @relation("cierre")
@@ -215,6 +215,7 @@ model Promocion {
   tipo_promo            TipoPromo
   porcentaje_descuento  Decimal?                @db.Decimal(5, 2)
   cantidad_minima       Int?
+  cantidad_paga         Int?
   metodo_pago_requerido String?                 @db.VarChar(50)
   fecha_inicio          DateTime
   fecha_fin             DateTime
@@ -290,4 +291,5 @@ enum TipoPromo {
   descuento_directo
   por_volumen
   por_metodo_pago
+  combo_nxm
 }

@@ -1,12 +1,26 @@
 // backend/controllers/promocion/updatePromocion.js
 import prisma from '../../db.js'
 
-const TIPOS_VALIDOS = ['descuento_directo', 'por_volumen', 'por_metodo_pago']
+const TIPOS_VALIDOS = ['descuento_directo', 'por_volumen', 'por_metodo_pago', 'combo_nxm']
 
-function validarSegunTipo({ tipo_promo, porcentaje_descuento, cantidad_minima, metodo_pago_requerido }) {
+function validarSegunTipo({ tipo_promo, porcentaje_descuento, cantidad_minima, cantidad_paga, metodo_pago_requerido }) {
   if (!TIPOS_VALIDOS.includes(tipo_promo)) {
     return `Tipo de promoción inválido. Debe ser uno de: ${TIPOS_VALIDOS.join(', ')}`
   }
+
+  if (tipo_promo === 'combo_nxm') {
+    if (!cantidad_minima || Number(cantidad_minima) < 2) {
+      return 'En un combo NxM, la cantidad que se lleva (N) tiene que ser al menos 2.'
+    }
+    if (cantidad_paga === undefined || cantidad_paga === null || cantidad_paga === '') {
+      return 'En un combo NxM, tenés que indicar cuántas unidades se pagan (M).'
+    }
+    if (Number(cantidad_paga) < 1 || Number(cantidad_paga) >= Number(cantidad_minima)) {
+      return 'En un combo NxM, la cantidad que se paga (M) tiene que ser menor a la cantidad que se lleva (N) y al menos 1.'
+    }
+    return null
+  }
+
   if (porcentaje_descuento === undefined || porcentaje_descuento === null || Number(porcentaje_descuento) <= 0 || Number(porcentaje_descuento) > 100) {
     return 'El porcentaje de descuento debe ser un número entre 1 y 100.'
   }
@@ -32,6 +46,7 @@ export const updatePromocion = async (req, res) => {
       tipo_promo,
       porcentaje_descuento,
       cantidad_minima,
+      cantidad_paga,
       metodo_pago_requerido,
       fecha_inicio,
       fecha_fin,
@@ -48,7 +63,7 @@ export const updatePromocion = async (req, res) => {
       return res.status(400).json({ error: 'nombre_promo, tipo_promo, fecha_inicio y fecha_fin son obligatorios.' })
     }
 
-    const errorTipo = validarSegunTipo({ tipo_promo, porcentaje_descuento, cantidad_minima, metodo_pago_requerido })
+    const errorTipo = validarSegunTipo({ tipo_promo, porcentaje_descuento, cantidad_minima, cantidad_paga, metodo_pago_requerido })
     if (errorTipo) {
       return res.status(400).json({ error: errorTipo })
     }
@@ -57,14 +72,18 @@ export const updatePromocion = async (req, res) => {
       return res.status(400).json({ error: 'La fecha de fin tiene que ser posterior a la fecha de inicio.' })
     }
 
+    const esCombo = tipo_promo === 'combo_nxm'
+    const usaCantidadMinima = tipo_promo === 'por_volumen' || esCombo
+
     const promoActualizada = await prisma.$transaction(async (tx) => {
       const promo = await tx.promocion.update({
         where: { id_promocion: parseInt(id) },
         data: {
           nombre_promo,
           tipo_promo,
-          porcentaje_descuento: Number(porcentaje_descuento),
-          cantidad_minima: tipo_promo === 'por_volumen' ? Number(cantidad_minima) : null,
+          porcentaje_descuento: esCombo ? null : Number(porcentaje_descuento),
+          cantidad_minima: usaCantidadMinima ? Number(cantidad_minima) : null,
+          cantidad_paga: esCombo ? Number(cantidad_paga) : null,
           metodo_pago_requerido: tipo_promo === 'por_metodo_pago' ? metodo_pago_requerido : null,
           fecha_inicio: new Date(fecha_inicio),
           fecha_fin: new Date(fecha_fin),

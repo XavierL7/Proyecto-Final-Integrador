@@ -28,11 +28,10 @@
         <!-- Carrito -->
         <CarritoCompras
           :items="carrito"
-          :promociones-aplicables="promocionesAplicables"
           :calcular-descuento="calcularDescuentoItem"
+          :promo-aplicada="promoAplicadaItem"
           @actualizar-cantidad="actualizarCantidad"
           @eliminar="eliminarDelCarrito"
-          @aplicar-descuento="aplicarDescuento"
         />
       </div>
 
@@ -169,8 +168,7 @@ const agregarAlCarrito = (producto) => {
       nombre_producto: producto.nombre_producto,
       precio_unitario: producto.precio_unitario,
       cantidad: 1,
-      stock: producto.stock_actual,
-      id_promocion: null // sin descuento hasta que el cajero elija uno
+      stock: producto.stock_actual
     })
   }
 }
@@ -181,14 +179,9 @@ const actualizarCantidad = (index, cantidad) => {
     return
   }
   carrito.value[index].cantidad = cantidad
-
-  const item = carrito.value[index]
-  if (item.id_promocion) {
-    const sigueSiendoValida = promocionesAplicables(item).some(p => p.id_promocion === item.id_promocion)
-    if (!sigueSiendoValida) {
-      item.id_promocion = null
-    }
-  }
+  // El descuento se recalcula solo (es reactivo): si al bajar/subir la
+  // cantidad deja de alcanzar un combo o una promo por volumen, se
+  // recalcula automáticamente a 0 sin que haya que hacer nada acá.
 }
 
 const eliminarDelCarrito = (index) => {
@@ -200,32 +193,55 @@ const seleccionarMetodoPago = (metodo) => {
 }
 
 // ============================================================
-// DESCUENTOS / PROMOCIONES
+// DESCUENTOS / PROMOCIONES (automático: se elige solo el mejor)
 // ============================================================
-const promocionesAplicables = (item) => {
-  return promocionesVigentes.value.filter(promo => {
-    const productosPermitidos = promo.productos_promociones.map(pp => pp.id_producto)
-    const aplicaAlProducto = productosPermitidos.length === 0 || productosPermitidos.includes(item.id_producto)
-    if (!aplicaAlProducto) return false
 
-    if (promo.tipo_promo === 'por_volumen' && item.cantidad < promo.cantidad_minima) {
-      return false
-    }
+// Cuánto descuento le daría ESTA promo puntual a este item, si aplica.
+// Espeja exactamente la lógica del backend (construirVenta.js) para que
+// lo que se ve en el carrito coincida con lo que después se cobra.
+const montoSiAplica = (item, promo) => {
+  const productosPermitidos = promo.productos_promociones.map(pp => pp.id_producto)
+  const aplicaAlProducto = productosPermitidos.length === 0 || productosPermitidos.includes(item.id_producto)
+  if (!aplicaAlProducto) return 0
 
-    return true
-  })
-}
+  if (promo.tipo_promo === 'por_metodo_pago') {
+    if (!metodoSeleccionado.value || promo.metodo_pago_requerido !== metodoSeleccionado.value) return 0
+    return Number((item.cantidad * item.precio_unitario * (Number(promo.porcentaje_descuento) / 100)).toFixed(2))
+  }
 
-const calcularDescuentoItem = (item) => {
-  if (!item.id_promocion) return 0
-  const promo = promocionesVigentes.value.find(p => p.id_promocion === item.id_promocion)
-  if (!promo) return 0
+  if (promo.tipo_promo === 'por_volumen') {
+    if (item.cantidad < promo.cantidad_minima) return 0
+    return Number((item.cantidad * item.precio_unitario * (Number(promo.porcentaje_descuento) / 100)).toFixed(2))
+  }
+
+  if (promo.tipo_promo === 'combo_nxm') {
+    const n = promo.cantidad_minima // cuántas se llevan (ej. 2 en un 2x1)
+    const m = promo.cantidad_paga   // cuántas se pagan (ej. 1 en un 2x1)
+    if (!n || m === null || m === undefined) return 0
+    const gruposCompletos = Math.floor(item.cantidad / n)
+    if (gruposCompletos === 0) return 0
+    // Solo los grupos completos entran en el combo; lo que sobra
+    // (item.cantidad % n) queda a precio normal.
+    return Number((item.precio_unitario * gruposCompletos * (n - m)).toFixed(2))
+  }
+
+  // descuento_directo
   return Number((item.cantidad * item.precio_unitario * (Number(promo.porcentaje_descuento) / 100)).toFixed(2))
 }
 
-const aplicarDescuento = (index, idPromocion) => {
-  carrito.value[index].id_promocion = idPromocion
+// De todas las promociones vigentes, la que le conviene más al cliente
+// para este item (mayor descuento). Si ninguna aplica, no hay promo.
+const mejorPromoParaItem = (item) => {
+  let mejor = { promo: null, monto: 0 }
+  for (const promo of promocionesVigentes.value) {
+    const monto = montoSiAplica(item, promo)
+    if (monto > mejor.monto) mejor = { promo, monto }
+  }
+  return mejor
 }
+
+const calcularDescuentoItem = (item) => mejorPromoParaItem(item).monto
+const promoAplicadaItem = (item) => mejorPromoParaItem(item).promo
 
 const cargarPromociones = async () => {
   try {

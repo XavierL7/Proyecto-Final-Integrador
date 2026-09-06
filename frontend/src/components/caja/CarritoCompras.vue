@@ -1,8 +1,8 @@
 <!-- frontend/src/components/caja/CarritoCompras.vue -->
 <template>
-  <div class="rounded-lg shadow">
+  <div class="bg-white rounded-lg shadow">
     <div class="p-4 border-b border-gray-200">
-      <h2 class="font-bold">🛒 Carrito</h2>
+      <h2 class="font-bold text-gray-700">🛒 Carrito</h2>
     </div>
 
     <div v-if="items.length === 0" class="p-8 text-center text-gray-400">
@@ -13,9 +13,8 @@
       <div
         v-for="(item, index) in items"
         :key="index"
-        class="flex flex-col gap-2 px-4 py-3"
+        class="flex flex-col gap-1 px-4 py-3"
       >
-
         <div class="flex items-center gap-3">
           <div class="flex-1">
             <p class="font-medium text-gray-800">{{ item.nombre_producto }}</p>
@@ -40,17 +39,15 @@
           </div>
 
           <div class="text-right min-w-[80px]">
-            <p v-if="descuentoDe(item) > 0" class="text-xs text-gray-400 line-through">
+            <p v-if="calcularDescuento(item) > 0" class="text-xs text-gray-400 line-through">
               ${{ (item.cantidad * item.precio_unitario).toFixed(2) }}
             </p>
             <p class="font-bold text-blue-600">
-              ${{ ((item.cantidad * item.precio_unitario) - descuentoDe(item)).toFixed(2) }}
+              ${{ ((item.cantidad * item.precio_unitario) - calcularDescuento(item)).toFixed(2) }}
             </p>
           </div>
 
-
           <button
-
             @click="eliminar(index)"
             class="text-red-500 hover:text-red-700 transition"
           >
@@ -58,24 +55,11 @@
           </button>
         </div>
 
-        <!-- Selector de descuento, solo si hay alguna promoción aplicable a este item -->
-        <div v-if="promocionesDe(item).length > 0" class="pl-1">
-          <select
-            :value="item.id_promocion || ''"
-            @change="(e) => aplicarDescuento(index, e.target.value ? Number(e.target.value) : null)"
-            class="text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
-          >
-            <option value="">Sin descuento</option>
-            <option
-              v-for="promo in promocionesDe(item)"
-              :key="promo.id_promocion"
-              :value="promo.id_promocion"
-            >
-              {{ promo.nombre_promo }} (-{{ promo.porcentaje_descuento }}%)
-              {{ promo.tipo_promo === 'por_metodo_pago' ? `· requiere ${promo.metodo_pago_requerido}` : '' }}
-            </option>
-          </select>
-        </div>
+        <!-- El descuento se aplica solo; esto es solo informativo -->
+        <p v-if="promoAplicada(item)" class="text-xs text-green-600 pl-1">
+          🎉 {{ promoAplicada(item).nombre_promo }} aplicado
+          (-${{ calcularDescuento(item).toFixed(2) }})
+        </p>
       </div>
     </div>
   </div>
@@ -87,22 +71,22 @@ const props = defineProps({
     type: Array,
     required: true
   },
-  // Función que recibe un item del carrito y devuelve el array de
-  // promociones vigentes que podría aplicarle (la calcula VentasView.vue,
-  // que es quien tiene la lista completa de promociones vigentes).
-  promocionesAplicables: {
-    type: Function,
-    default: () => []
-  },
-  // Función que recibe un item y devuelve el monto de descuento actual
-  // (0 si no tiene ninguna promoción elegida).
+  // Función que recibe un item y devuelve el monto de descuento que le
+  // corresponde (0 si ninguna promoción vigente le aplica). La calcula
+  // VentasView.vue automáticamente, sin que el cajero elija nada.
   calcularDescuento: {
     type: Function,
     default: () => 0
+  },
+  // Función que recibe un item y devuelve la promoción que se le aplicó
+  // (o null), solo para mostrar el cartelito informativo.
+  promoAplicada: {
+    type: Function,
+    default: () => null
   }
 })
 
-const emit = defineEmits(['actualizar-cantidad', 'eliminar', 'aplicar-descuento'])
+const emit = defineEmits(['actualizar-cantidad', 'eliminar'])
 
 const actualizarCantidad = (index, cantidad) => {
   emit('actualizar-cantidad', index, cantidad)
@@ -111,11 +95,4 @@ const actualizarCantidad = (index, cantidad) => {
 const eliminar = (index) => {
   emit('eliminar', index)
 }
-
-const aplicarDescuento = (index, idPromocion) => {
-  emit('aplicar-descuento', index, idPromocion)
-}
-
-const promocionesDe = (item) => props.promocionesAplicables(item)
-const descuentoDe = (item) => props.calcularDescuento(item)
 </script>

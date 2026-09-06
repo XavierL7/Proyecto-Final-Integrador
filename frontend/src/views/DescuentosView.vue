@@ -36,7 +36,7 @@
             <tr v-for="promo in promociones" :key="promo.id_promocion" class="hover:bg-gray-50">
               <td class="px-4 py-3 font-medium text-gray-900">{{ promo.nombre_promo }}</td>
               <td class="px-4 py-3 text-gray-700">{{ etiquetaTipo(promo.tipo_promo) }}</td>
-              <td class="px-4 py-3 text-right text-gray-900 font-semibold">{{ promo.porcentaje_descuento }}%</td>
+              <td class="px-4 py-3 text-right text-gray-900 font-semibold">{{ etiquetaDescuento(promo) }}</td>
               <td class="px-4 py-3 text-gray-500 text-xs">{{ condicion(promo) }}</td>
               <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
                 {{ formatearFecha(promo.fecha_inicio) }} → {{ formatearFecha(promo.fecha_fin) }}
@@ -108,10 +108,11 @@
             <option value="descuento_directo">Descuento directo (% sobre el precio)</option>
             <option value="por_volumen">Por volumen (comprando N unidades o más)</option>
             <option value="por_metodo_pago">Por método de pago</option>
+            <option value="combo_nxm">Combo NxM (ej. 2x1, 3x2)</option>
           </select>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-3" v-if="form.tipo_promo !== 'combo_nxm'">
           <label class="block text-gray-700 text-sm font-medium mb-1">Porcentaje de descuento</label>
           <input
             v-model="form.porcentaje_descuento"
@@ -122,6 +123,30 @@
             placeholder="Ej: 15"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
+        </div>
+
+        <div class="mb-3" v-if="form.tipo_promo === 'combo_nxm'">
+          <label class="block text-gray-700 text-sm font-medium mb-1">Combo</label>
+          <div class="flex items-center gap-2">
+            <input
+              v-model="form.cantidad_minima"
+              type="number"
+              min="2"
+              placeholder="N (lleva)"
+              class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+            <span class="text-gray-500 font-medium">x</span>
+            <input
+              v-model="form.cantidad_paga"
+              type="number"
+              min="1"
+              placeholder="M (paga)"
+              class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+          <p class="text-xs text-gray-400 mt-1">
+            Ej: 2x1 → lleva 2 (N), paga 1 (M). Solo se descuentan grupos completos de N: si compran 3 con un 2x1, se aplica a 2 y la tercera queda a precio normal.
+          </p>
         </div>
 
         <div class="mb-3" v-if="form.tipo_promo === 'por_volumen'">
@@ -191,7 +216,7 @@
             <label
               v-for="producto in productosFiltrados"
               :key="producto.id_producto"
-              class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+              class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer "
             >
               <input
                 type="checkbox"
@@ -258,8 +283,22 @@ const cargarPromociones = async () => {
 
 const cargarProductos = async () => {
   try {
-    const response = await axios.get(`${baseUrl}/api/productos`, headers())
-    productos.value = response.data
+    // /api/productos devuelve resultados paginados:
+    // { productos: [...], total, page, totalPages }
+    // Para el picker de la promoción necesitamos TODOS los productos, así
+    // que recorremos las páginas hasta juntarlas todas.
+    let todos = []
+    let page = 1
+    let totalPages = 1
+
+    do {
+      const response = await axios.get(`${baseUrl}/api/productos?page=${page}`, headers())
+      todos = todos.concat(response.data.productos || [])
+      totalPages = response.data.totalPages || 1
+      page++
+    } while (page <= totalPages)
+
+    productos.value = todos
   } catch (error) {
     console.error('Error cargando productos:', error)
   }
@@ -277,12 +316,21 @@ const cargarMetodosPago = async () => {
 const etiquetaTipo = (tipo) => ({
   descuento_directo: 'Descuento directo',
   por_volumen: 'Por volumen',
-  por_metodo_pago: 'Por método de pago'
+  por_metodo_pago: 'Por método de pago',
+  combo_nxm: 'Combo NxM'
 }[tipo] || tipo)
+
+const etiquetaDescuento = (promo) => {
+  if (promo.tipo_promo === 'combo_nxm') {
+    return `${promo.cantidad_minima}x${promo.cantidad_paga}`
+  }
+  return `${promo.porcentaje_descuento}%`
+}
 
 const condicion = (promo) => {
   if (promo.tipo_promo === 'por_volumen') return `Mín. ${promo.cantidad_minima} unidades`
   if (promo.tipo_promo === 'por_metodo_pago') return `Pagando con ${promo.metodo_pago_requerido}`
+  if (promo.tipo_promo === 'combo_nxm') return `Cada ${promo.cantidad_minima}, paga ${promo.cantidad_paga}`
   return '-'
 }
 
@@ -308,6 +356,7 @@ const form = ref({
   tipo_promo: 'descuento_directo',
   porcentaje_descuento: '',
   cantidad_minima: '',
+  cantidad_paga: '',
   metodo_pago_requerido: '',
   fecha_inicio: '',
   fecha_fin: '',
@@ -341,8 +390,9 @@ const abrirModal = (promo = null) => {
     form.value = {
       nombre_promo: promo.nombre_promo,
       tipo_promo: promo.tipo_promo,
-      porcentaje_descuento: promo.porcentaje_descuento,
+      porcentaje_descuento: promo.porcentaje_descuento || '',
       cantidad_minima: promo.cantidad_minima || '',
+      cantidad_paga: promo.cantidad_paga || '',
       metodo_pago_requerido: promo.metodo_pago_requerido || '',
       fecha_inicio: aFechaInput(promo.fecha_inicio),
       fecha_fin: aFechaInput(promo.fecha_fin),
@@ -355,6 +405,7 @@ const abrirModal = (promo = null) => {
       tipo_promo: 'descuento_directo',
       porcentaje_descuento: '',
       cantidad_minima: '',
+      cantidad_paga: '',
       metodo_pago_requerido: '',
       fecha_inicio: '',
       fecha_fin: '',
@@ -367,8 +418,18 @@ const abrirModal = (promo = null) => {
 }
 
 const guardarPromocion = async () => {
-  if (!form.value.nombre_promo || !form.value.porcentaje_descuento || !form.value.fecha_inicio || !form.value.fecha_fin) {
-    alert('Completá nombre, porcentaje y las fechas de vigencia.')
+  if (!form.value.nombre_promo || !form.value.fecha_inicio || !form.value.fecha_fin) {
+    alert('Completá nombre y las fechas de vigencia.')
+    return
+  }
+
+  if (form.value.tipo_promo === 'combo_nxm') {
+    if (!form.value.cantidad_minima || !form.value.cantidad_paga) {
+      alert('Completá cuántas unidades se llevan (N) y cuántas se pagan (M).')
+      return
+    }
+  } else if (!form.value.porcentaje_descuento) {
+    alert('Completá el porcentaje de descuento.')
     return
   }
 
