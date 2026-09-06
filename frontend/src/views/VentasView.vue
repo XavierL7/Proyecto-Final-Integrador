@@ -3,12 +3,20 @@
   <div class="p-6 max-w-6xl mx-auto">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">Caja Registradora</h1>
-      <a
-        class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
-        href="/cajas"
-      >
-        Cerrar Caja
-      </a>
+      <div class="flex items-center gap-3">
+        <span
+          v-if="cajaActiva?.modo_autenticacion === 'por_venta'"
+          class="text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-1 rounded"
+        >
+          Caja compartida
+        </span>
+        <a
+          class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+          href="/cajas"
+        >
+          Cerrar Caja
+        </a>
+      </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -43,44 +51,64 @@
           :total="total"
         />
 
-        <!-- Métodos de pago -->
-        <MetodosPago
-          :metodos="metodosPago"
-          @seleccionar="seleccionarMetodoPago"
-        />
-
-        <!-- Formulario según método -->
-        <div v-if="metodoSeleccionado" class="mt-4">
-          <PagoEfectivo
-            v-if="metodoSeleccionado === 'Efectivo'"
-            :total="total"
-            @confirmar="finalizarVenta"
-          />
-          <PagoTarjeta
-            v-else-if="metodoSeleccionado === 'Tarjeta Débito' || metodoSeleccionado === 'Tarjeta Crédito'"
-            :tipo="metodoSeleccionado"
-            :total="total"
-            @confirmar="finalizarVenta"
-          />
-          <PagoTransferencia
-            v-else-if="metodoSeleccionado === 'Transferencia' || metodoSeleccionado === 'Mercado Pago'"
-            :tipo="metodoSeleccionado"
-            :total="total"
-            @confirmar="finalizarVenta"
-          />
-          <PagoCheque
-            v-else-if="metodoSeleccionado === 'Cheque'"
-            :total="total"
-            @confirmar="finalizarVenta"
-          />
+        <!-- ============================================================ -->
+        <!-- CAJA COMPARTIDA: esperando que alguien confirme con huella -->
+        <!-- ============================================================ -->
+        <div
+          v-if="esperandoHuella"
+          class="mt-4 bg-purple-50 border border-purple-300 rounded-lg p-4 text-center"
+        >
+          <p class="font-semibold text-purple-800 mb-1">Esperando confirmación...</p>
+          <p class="text-sm text-purple-700 mb-3">
+            Que la persona que hizo la venta ponga el dedo en el lector de huella.
+          </p>
+          <button
+            @click="cancelarEsperaHuella"
+            class="text-sm text-purple-600 hover:underline"
+          >
+            Cancelar
+          </button>
         </div>
+
+        <!-- Métodos de pago y formularios: ocultos mientras se espera huella -->
+        <template v-else>
+          <MetodosPago
+            :metodos="metodosPago"
+            @seleccionar="seleccionarMetodoPago"
+          />
+
+          <div v-if="metodoSeleccionado" class="mt-4">
+            <PagoEfectivo
+              v-if="metodoSeleccionado === 'Efectivo'"
+              :total="total"
+              @confirmar="finalizarVenta"
+            />
+            <PagoTarjeta
+              v-else-if="metodoSeleccionado === 'Tarjeta Débito' || metodoSeleccionado === 'Tarjeta Crédito'"
+              :tipo="metodoSeleccionado"
+              :total="total"
+              @confirmar="finalizarVenta"
+            />
+            <PagoTransferencia
+              v-else-if="metodoSeleccionado === 'Transferencia' || metodoSeleccionado === 'Mercado Pago'"
+              :tipo="metodoSeleccionado"
+              :total="total"
+              @confirmar="finalizarVenta"
+            />
+            <PagoCheque
+              v-else-if="metodoSeleccionado === 'Cheque'"
+              :total="total"
+              @confirmar="finalizarVenta"
+            />
+          </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 import BuscadorProducto from '../components/caja/BuscadorProducto.vue'
@@ -95,6 +123,7 @@ import SelectorCliente from '../components/caja/SelectorCliente.vue'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const headers = () => ({ headers: { 'Authorization': `Bearer ${authStore.token}` } })
 
 // ============================================================
 // STATE
@@ -107,6 +136,9 @@ const clientes = ref([])
 const clienteSeleccionado = ref(null)
 // Promociones activas y vigentes ahora mismo (se ofrecen en el carrito)
 const promocionesVigentes = ref([])
+// La caja de este trabajador: acá miramos modo_autenticacion para decidir
+// si la venta se registra directo o queda esperando huella.
+const cajaActiva = ref(null)
 
 // ============================================================
 // COMPUTED
@@ -150,9 +182,6 @@ const actualizarCantidad = (index, cantidad) => {
   }
   carrito.value[index].cantidad = cantidad
 
-  // Si la promo elegida era "por volumen" y ahora la cantidad no alcanza,
-  // se la sacamos: si no, quedaría un descuento inválido en pantalla que
-  // el backend igual va a rechazar al confirmar la venta.
   const item = carrito.value[index]
   if (item.id_promocion) {
     const sigueSiendoValida = promocionesAplicables(item).some(p => p.id_promocion === item.id_promocion)
@@ -173,10 +202,6 @@ const seleccionarMetodoPago = (metodo) => {
 // ============================================================
 // DESCUENTOS / PROMOCIONES
 // ============================================================
-
-// Qué promociones vigentes podrían aplicarse a este item del carrito.
-// La validación definitiva (incluida la de "por_metodo_pago", que acá
-// solo se etiqueta) la hace siempre el backend al confirmar la venta.
 const promocionesAplicables = (item) => {
   return promocionesVigentes.value.filter(promo => {
     const productosPermitidos = promo.productos_promociones.map(pp => pp.id_producto)
@@ -204,49 +229,129 @@ const aplicarDescuento = (index, idPromocion) => {
 
 const cargarPromociones = async () => {
   try {
-    const response = await axios.get(`${baseUrl}/api/promociones/vigentes`, {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
-    })
+    const response = await axios.get(`${baseUrl}/api/promociones/vigentes`, headers())
     promocionesVigentes.value = response.data
   } catch (error) {
     console.error('Error cargando promociones:', error)
   }
 }
 
-const finalizarVenta = async (datosPago) => {
+// ============================================================
+// CAJA ACTIVA (para saber si es individual o compartida)
+// ============================================================
+const cargarCajaActiva = async () => {
   try {
-    const venta = {
-      items: carrito.value,
-      total: total.value,
-      metodo_pago: metodoSeleccionado.value,
-      datos_pago: datosPago,
-      // null si es "Cliente General"
-      id_cliente: clienteSeleccionado.value
-    }
-
-    const response = await axios.post(`${baseUrl}/api/ventas`, venta, {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
-    })
-
-    alert('Venta realizada con éxito')
-    carrito.value = []
-    metodoSeleccionado.value = null
-    clienteSeleccionado.value = null
+    const response = await axios.get(`${baseUrl}/api/cajas/activa`, headers())
+    cajaActiva.value = response.data
   } catch (error) {
-    console.error('Error finalizando venta:', error)
-    alert('Error al procesar la venta')
+    console.error('Error cargando caja activa:', error)
   }
 }
 
+// ============================================================
+// FINALIZAR VENTA
+// ============================================================
+const limpiarCarrito = () => {
+  carrito.value = []
+  metodoSeleccionado.value = null
+  clienteSeleccionado.value = null
+}
+
+const finalizarVenta = async (datosPago) => {
+  const venta = {
+    items: carrito.value,
+    total: total.value,
+    metodo_pago: metodoSeleccionado.value,
+    datos_pago: datosPago,
+    id_cliente: clienteSeleccionado.value // null si es "Cliente General"
+  }
+
+  // Caja compartida: no se registra directo, queda esperando huella.
+  if (cajaActiva.value?.modo_autenticacion === 'por_venta') {
+    try {
+      await axios.post(`${baseUrl}/api/ventas/pendiente`, venta, headers())
+      iniciarEsperaHuella()
+    } catch (error) {
+      console.error('Error iniciando venta pendiente:', error)
+      alert(error.response?.data?.error || 'Error al iniciar la confirmación por huella')
+    }
+    return
+  }
+
+  // Caja individual: como siempre, directo.
+  try {
+    await axios.post(`${baseUrl}/api/ventas`, venta, headers())
+    alert('Venta realizada con éxito')
+    limpiarCarrito()
+  } catch (error) {
+    console.error('Error finalizando venta:', error)
+    alert(error.response?.data?.error || 'Error al procesar la venta')
+  }
+}
+
+// ============================================================
+// ESPERA DE HUELLA (caja compartida)
+// ============================================================
+const esperandoHuella = ref(false)
+let intervaloHuella = null
+let timeoutHuella = null
+
+const INTERVALO_MS = 2000
+const TIMEOUT_MS = 32000 // un poco más que el TTL de 30s del backend
+
+const detenerEsperaHuella = () => {
+  clearInterval(intervaloHuella)
+  clearTimeout(timeoutHuella)
+  intervaloHuella = null
+  timeoutHuella = null
+  esperandoHuella.value = false
+}
+
+const iniciarEsperaHuella = () => {
+  esperandoHuella.value = true
+
+  intervaloHuella = setInterval(async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/api/ventas/pendiente/resultado`, headers())
+
+      if (response.status === 200 && response.data) {
+        detenerEsperaHuella()
+        if (response.data.success) {
+          const t = response.data.trabajador
+          alert(t ? `Venta confirmada por ${t.nombre} ${t.apellido}.` : 'Venta confirmada.')
+          limpiarCarrito()
+        } else {
+          alert(response.data.error || 'No se pudo confirmar la venta.')
+          // No limpiamos el carrito: el cajero puede reintentar el pago.
+        }
+      }
+    } catch (error) {
+      // Error de red puntual: seguimos intentando hasta el timeout.
+    }
+  }, INTERVALO_MS)
+
+  timeoutHuella = setTimeout(() => {
+    detenerEsperaHuella()
+    alert('No se confirmó la venta a tiempo. Podés intentar de nuevo.')
+  }, TIMEOUT_MS)
+}
+
+const cancelarEsperaHuella = () => {
+  detenerEsperaHuella()
+  // El pedido en el backend expira solo a los 30s si nadie confirma;
+  // acá solo dejamos de esperar del lado del cajero.
+}
+
+onUnmounted(() => {
+  detenerEsperaHuella()
+})
 
 // ============================================================
 // CARGAR MÉTODOS DE PAGO
 // ============================================================
 const cargarMetodosPago = async () => {
   try {
-    const response = await axios.get(`${baseUrl}/api/metodos-pago`, {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
-    })
+    const response = await axios.get(`${baseUrl}/api/metodos-pago`, headers())
     metodosPago.value = response.data
   } catch (error) {
     console.error('Error cargando métodos de pago:', error)
@@ -258,9 +363,7 @@ const cargarMetodosPago = async () => {
 // ============================================================
 const cargarClientes = async () => {
   try {
-    const response = await axios.get(`${baseUrl}/api/clientes`, {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
-    })
+    const response = await axios.get(`${baseUrl}/api/clientes`, headers())
     clientes.value = response.data
   } catch (error) {
     console.error('Error cargando clientes:', error)
@@ -271,5 +374,6 @@ onMounted(() => {
   cargarMetodosPago()
   cargarClientes()
   cargarPromociones()
+  cargarCajaActiva()
 })
 </script>

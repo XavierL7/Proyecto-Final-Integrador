@@ -1,4 +1,4 @@
-<!-- frontend/src/views/AdminView.vue -->
+z<!-- frontend/src/views/AdminView.vue -->
 <template>
   <div class="p-6">
     <h1 class="text-2xl font-bold mb-6">Administración</h1>
@@ -22,6 +22,15 @@
           : 'text-gray-500 hover:text-gray-700'"
       >
         Trabajadores
+      </button>
+      <button
+        @click="tabActivo = 'configuracion'"
+        class="px-4 py-2 font-medium transition-colors"
+        :class="tabActivo === 'configuracion' 
+          ? 'border-b-2 border-blue-500 text-blue-600' 
+          : 'text-gray-500 hover:text-gray-700'"
+      >
+        Configuración
       </button>
     </div>
 
@@ -351,6 +360,12 @@ const authStore = useAuthStore()
 const tabActivo = ref('roles')
 
 // ============================================================
+// CONFIGURACIÓN
+// ============================================================
+const modoCaja = ref('sesion_inicial')
+const guardandoConfig = ref(false)
+
+// ============================================================
 // DATOS
 // ============================================================
 const roles = ref([])
@@ -423,9 +438,42 @@ const cargarTodo = () => {
   cargarRoles()
   cargarTrabajadores()
   cargarFuncionalidades()
+  cargarConfiguracion()
 }
 
 onMounted(cargarTodo)
+
+// ============================================================
+// FUNCIONES - CONFIGURACIÓN
+// ============================================================
+const cargarConfiguracion = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/api/configuracion`, {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    })
+    if (response.data.modo_caja_default) {
+      modoCaja.value = response.data.modo_caja_default
+    }
+  } catch (error) {
+    console.error('Error cargando configuración:', error)
+  }
+}
+
+const guardarModoCaja = async () => {
+  guardandoConfig.value = true
+  try {
+    await axios.put(
+      `${baseUrl}/api/configuracion/modo_caja_default`,
+      { valor: modoCaja.value },
+      { headers: { 'Authorization': `Bearer ${authStore.token}` } }
+    )
+    alert('Configuración guardada. Se aplica a las próximas cajas que se abran.')
+  } catch (error) {
+    alert(error.response?.data?.error || 'Error al guardar la configuración')
+  } finally {
+    guardandoConfig.value = false
+  }
+}
 
 // ============================================================
 // FUNCIONES - ROL

@@ -21,9 +21,17 @@
       <div v-else-if="cajaActiva">
         <div class="flex items-start justify-between">
           <div>
-            <span class="inline-block text-xs font-semibold bg-green-100 text-green-700 px-2 py-1 rounded mb-2">
-              Caja #{{ cajaActiva.id_caja }} abierta
-            </span>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="inline-block text-xs font-semibold bg-green-100 text-green-700 px-2 py-1 rounded">
+                Caja #{{ cajaActiva.id_caja }} abierta
+              </span>
+              <span
+                class="inline-block text-xs font-semibold px-2 py-1 rounded"
+                :class="cajaActiva.modo_autenticacion === 'por_venta' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
+              >
+                {{ cajaActiva.modo_autenticacion === 'por_venta' ? 'Compartida (huella por venta)' : 'Individual' }}
+              </span>
+            </div>
             <p class="text-sm text-gray-600">
               Abierta por
               <strong>{{ cajaActiva.trabajador_apertura?.nombre }} {{ cajaActiva.trabajador_apertura?.apellido }}</strong>
@@ -108,6 +116,20 @@
           </button>
         </p>
         <div v-else class="mb-4"></div>
+
+        <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg mb-4 max-w-md cursor-pointer hover:bg-gray-50">
+          <input type="checkbox" v-model="cajaCompartida" class="mt-1 w-4 h-4 text-teal-500" />
+          <div>
+            <p class="text-sm font-medium text-gray-800">Caja compartida</p>
+            <p class="text-xs text-gray-500">
+              Varios trabajadores pueden vender en esta misma caja. Cada venta
+              queda pendiente hasta que alguien confirma el pago poniendo el
+              dedo en el lector de huella (se registra a quien puso el dedo,
+              no necesariamente a quien la abrió).
+            </p>
+          </div>
+        </label>
+
         <div>
           <button
             @click="abrirCaja"
@@ -130,6 +152,7 @@
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase">
               <th class="px-4 py-3">#</th>
+              <th class="px-4 py-3">Modo</th>
               <th class="px-4 py-3">Apertura</th>
               <th class="px-4 py-3">Cierre</th>
               <th class="px-4 py-3">Abrió</th>
@@ -143,13 +166,21 @@
           </thead>
           <tbody class="divide-y divide-gray-100 text-sm">
             <tr v-if="cargandoHistorial">
-              <td colspan="10" class="px-4 py-6 text-center text-gray-400">Cargando...</td>
+              <td colspan="11" class="px-4 py-6 text-center text-gray-400">Cargando...</td>
             </tr>
             <tr v-else-if="cajas.length === 0">
-              <td colspan="10" class="px-4 py-6 text-center text-gray-400">Todavía no hay cajas registradas.</td>
+              <td colspan="11" class="px-4 py-6 text-center text-gray-400">Todavía no hay cajas registradas.</td>
             </tr>
             <tr v-for="caja in cajas" :key="caja.id_caja" class="hover:bg-gray-50">
               <td class="px-4 py-3 text-gray-700">#{{ caja.id_caja }}</td>
+              <td class="px-4 py-3">
+                <span
+                  class="text-xs font-semibold px-2 py-1 rounded"
+                  :class="caja.modo_autenticacion === 'por_venta' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
+                >
+                  {{ caja.modo_autenticacion === 'por_venta' ? 'Compartida' : 'Individual' }}
+                </span>
+              </td>
               <td class="px-4 py-3 text-gray-700 whitespace-nowrap">{{ formatearFecha(caja.fecha_hora_apertura) }}</td>
               <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
                 {{ caja.fecha_hora_cierre ? formatearFecha(caja.fecha_hora_cierre) : '-' }}
@@ -231,6 +262,7 @@ const cargarCajaActiva = async () => {
 // ABRIR CAJA
 // ============================================================
 const montoInicial = ref('')
+const cajaCompartida = ref(false)
 const abriendo = ref(false)
 
 // Sugerencia: lo que quedó contado (monto_final_real) en la última caja
@@ -249,11 +281,14 @@ const abrirCaja = async () => {
   }
   abriendo.value = true
   try {
-    await axios.post(`${baseUrl}/api/cajas`, { monto_inicial: montoInicial.value }, headers())
+    await axios.post(
+      `${baseUrl}/api/cajas`,
+      { monto_inicial: montoInicial.value, compartida: cajaCompartida.value },
+      headers()
+    )
     montoInicial.value = ''
+    cajaCompartida.value = false
     router.push('/ventas')
-    await cargarCajaActiva()
-    await cargarHistorial()
   } catch (error) {
     alert(error.response?.data?.error || 'Error al abrir la caja')
   } finally {
