@@ -10,6 +10,11 @@ export const getPromociones = async (req, res) => {
           include: {
             producto: { select: { id_producto: true, nombre_producto: true } }
           }
+        },
+        promociones_etiquetas: {
+          include: {
+            etiqueta: { select: { id_etiqueta: true, nombre_etiqueta: true } }
+          }
         }
       },
       orderBy: [{ activa: 'desc' }, { fecha_inicio: 'desc' }]

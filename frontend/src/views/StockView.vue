@@ -138,6 +138,29 @@
       </table>
     </div>
 
+    <!-- Controles de paginación -->
+    <div class="flex justify-between items-center mt-4">
+      <span class="text-sm text-gray-500">
+        Página {{ paginaActual }} de {{ totalPaginas }} ({{ totalProductos }} productos)
+      </span>
+      <div class="flex gap-2">
+        <button
+          @click="irAPaginaAnterior"
+          :disabled="paginaActual === 1"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          ← Anterior
+        </button>
+        <button
+          @click="irAPaginaSiguiente"
+          :disabled="paginaActual === totalPaginas"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </div>
+
     <!-- ======================================================== -->
     <!-- MODAL: ETIQUETAS COMPLETAS                               -->
     <!-- ======================================================== -->
@@ -188,7 +211,7 @@
         <div class="mt-4 flex justify-end">
           <button
             @click="modalEtiquetasVisible = false"
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+            class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
           >
             Cerrar
           </button>
@@ -251,7 +274,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium mb-1">Costo</label>
+              <label class="block  text-sm font-medium mb-1">Costo</label>
               <input
                 v-model="form.costo_unitario"
                 type="number"
@@ -347,7 +370,17 @@ const etiquetas = ref([])
 const busqueda = ref('')
 const cargando = ref(false)
 
+// ============================================================
+// PAGINACIÓN
+// ============================================================
+const paginaActual = ref(1)
+const totalPaginas = ref(1)
+const totalProductos = ref(0)
+const porPagina = 10
+
 const productosFiltrados = computed(() => {
+  // El filtro de búsqueda solo actúa sobre los productos ya cargados
+  // (la página actual). Es una búsqueda "rápida" dentro de la página.
   if (!busqueda.value) return productos.value
   const q = busqueda.value.toLowerCase()
   return productos.value.filter(p =>
@@ -355,8 +388,24 @@ const productosFiltrados = computed(() => {
     p.codigo_barras?.includes(q)
   )
 })
+const irAPaginaAnterior = () => {
+  if (paginaActual.value > 1) {
+    paginaActual.value--
+    cargarProductos()
+  }
+}
 
-// MODAL PRODUCTO
+const irAPaginaSiguiente = () => {
+  if (paginaActual.value < totalPaginas.value) {
+    paginaActual.value++
+    cargarProductos()
+  }
+}
+
+// ============================================================
+// MODAL: PRODUCTO
+// ============================================================
+
 const modalVisible = ref(false)
 const editando = ref(false)
 const form = ref({
@@ -379,9 +428,15 @@ const cargarProductos = async () => {
   cargando.value = true
   try {
     const response = await axios.get(`${baseUrl}/api/productos`, {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
+      headers: { 'Authorization': `Bearer ${authStore.token}` },
+      params: {
+        page: paginaActual.value,
+        limit: porPagina
+      }
     })
-    productos.value = response.data
+    productos.value = response.data.productos
+    totalPaginas.value = response.data.totalPages
+    totalProductos.value = response.data.total
   } catch (error) {
     console.error('Error cargando productos:', error)
   } finally {
@@ -469,6 +524,10 @@ const eliminarProducto = async (id) => {
     await axios.delete(`${baseUrl}/api/productos/${id}`, {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     })
+    // Si era el único producto de esta página y no es la primera, retrocedemos
+    if (productos.value.length === 1 && paginaActual.value > 1) {
+      paginaActual.value--
+    }
     cargarProductos()
   } catch (error) {
     alert(error.response?.data?.error || 'Error al eliminar')

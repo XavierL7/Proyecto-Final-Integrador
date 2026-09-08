@@ -3,9 +3,13 @@ integrantes: Lara Veloso,  Xavier Lacunza, Lautaro Sanchez
 
 TODO
 
-Dashboard	
+cambiar Dashboard	
 
 Sobrescribe el extox existente (Stock)
+
+se debe poder vender mas de un producto a la vez si el Stock es Negativo
+
+Agregar boton "Agregar" en el Stock para cargar mecaderia 
 
 ---que al crear a caja te envie a ventas---
 
@@ -21,11 +25,11 @@ stock buscar por etiqueta
 
 hacer menú desplegable para editar->etiquetas
 
-que solo aparezcan 10 cosas en el stock y  lechas para pasarde pagina y que no muestre todo
+---que solo aparezcan 10 cosas en el stock y  lechas para pasarde pagina y que no muestre todo---
 
 reworkear panel de administración
 
-Crear paquete/o que los descuentos apliquen a etiquetas también
+---Crear paquete/o que los descuentos apliquen a etiquetas también---
 
-descuento se aplique automáticamente
+---descuento se aplique automáticamente---
 

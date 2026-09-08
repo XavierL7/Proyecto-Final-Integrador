@@ -21,7 +21,7 @@
               <th class="px-4 py-3 text-right">Descuento</th>
               <th class="px-4 py-3">Condición</th>
               <th class="px-4 py-3">Vigencia</th>
-              <th class="px-4 py-3">Productos</th>
+              <th class="px-4 py-3">Alcance</th>
               <th class="px-4 py-3">Estado</th>
               <th class="px-4 py-3">Acciones</th>
             </tr>
@@ -34,6 +34,7 @@
               <td colspan="8" class="px-4 py-6 text-center">Todavía no creaste ninguna promoción.</td>
             </tr>
             <tr v-for="promo in promociones" :key="promo.id_promocion" class="hover:bg-gray-50">
+
               <td class="px-4 py-3 font-medium">{{ promo.nombre_promo }}</td>
               <td class="px-4 py-3">{{ etiquetaTipo(promo.tipo_promo) }}</td>
               <td class="px-4 py-3 text-right font-semibold">{{ promo.porcentaje_descuento }}%</td>
@@ -138,8 +139,10 @@
             <option value="descuento_directo">Descuento directo (% sobre el precio)</option>
             <option value="por_volumen">Por volumen (comprando N unidades o más)</option>
             <option value="por_metodo_pago">Por método de pago</option>
+            <option value="combo_nxm">Combo NxM (ej. 2x1, 3x2)</option>
           </select>
         </div>
+
 
         <div class="mb-3">
           <label class="block text-sm font-medium mb-1">Porcentaje de descuento</label>
@@ -152,6 +155,30 @@
             placeholder="Ej: 15"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
+        </div>
+
+        <div class="mb-3" v-if="form.tipo_promo === 'combo_nxm'">
+          <label class="block text-gray-700 text-sm font-medium mb-1">Combo</label>
+          <div class="flex items-center gap-2">
+            <input
+              v-model="form.cantidad_minima"
+              type="number"
+              min="2"
+              placeholder="N (lleva)"
+              class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+            <span class="text-gray-500 font-medium">x</span>
+            <input
+              v-model="form.cantidad_paga"
+              type="number"
+              min="1"
+              placeholder="M (paga)"
+              class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+          <p class="text-xs text-gray-400 mt-1">
+            Ej: 2x1 → lleva 2 (N), paga 1 (M). Solo se descuentan grupos completos de N: si compran 3 con un 2x1, se aplica a 2 y la tercera queda a precio normal.
+          </p>
         </div>
 
         <div class="mb-3" v-if="form.tipo_promo === 'por_volumen'">
@@ -221,6 +248,7 @@
             <label
               v-for="producto in productosFiltrados"
               :key="producto.id_producto"
+
               class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 dark:hover:text-white cursor-pointer"
             >
               <input
@@ -233,6 +261,36 @@
             </label>
             <p v-if="productosFiltrados.length === 0" class="px-3 py-2 text-xs text-gray-400">
               No se encontraron productos.
+            </p>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">
+            Etiquetas a las que aplica
+          </label>
+          <p class="text-xs text-gray-400 mb-2">
+            Marcá una etiqueta para que la promo aplique a TODOS los productos
+            que la tengan (ej. etiquetá "Coca" en tus 3 variedades de Coca y
+            hacé un solo 2x1 para las tres). Se combina con los productos
+            puntuales de arriba, no los reemplaza.
+          </p>
+          <div class="border border-gray-200 rounded-lg max-h-32 overflow-y-auto divide-y divide-gray-100">
+            <label
+              v-for="etiqueta in etiquetas"
+              :key="etiqueta.id_etiqueta"
+              class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 dark:hover:text-white cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                :checked="form.id_etiquetas.includes(etiqueta.id_etiqueta)"
+                @change="toggleEtiqueta(etiqueta.id_etiqueta)"
+                class="w-4 h-4 text-teal-500"
+              />
+              {{ etiqueta.nombre_etiqueta }}
+            </label>
+            <p v-if="etiquetas.length === 0" class="px-3 py-2 text-xs">
+              No tenés etiquetas creadas todavía.
             </p>
           </div>
         </div>
@@ -272,6 +330,7 @@ const headers = () => ({ headers: { 'Authorization': `Bearer ${authStore.token}`
 const promociones = ref([])
 const cargando = ref(true)
 const productos = ref([])
+const etiquetas = ref([])
 const metodosPago = ref([])
 
 const cargarPromociones = async () => {
@@ -288,10 +347,33 @@ const cargarPromociones = async () => {
 
 const cargarProductos = async () => {
   try {
-    const response = await axios.get(`${baseUrl}/api/productos`, headers())
-    productos.value = response.data
+    // /api/productos devuelve resultados paginados:
+    // { productos: [...], total, page, totalPages }
+    // Para el picker de la promoción necesitamos TODOS los productos, así
+    // que recorremos las páginas hasta juntarlas todas.
+    let todos = []
+    let page = 1
+    let totalPages = 1
+
+    do {
+      const response = await axios.get(`${baseUrl}/api/productos?page=${page}`, headers())
+      todos = todos.concat(response.data.productos || [])
+      totalPages = response.data.totalPages || 1
+      page++
+    } while (page <= totalPages)
+
+    productos.value = todos
   } catch (error) {
     console.error('Error cargando productos:', error)
+  }
+}
+
+const cargarEtiquetas = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/api/etiquetas`, headers())
+    etiquetas.value = Array.isArray(response.data) ? response.data : (response.data.etiquetas || [])
+  } catch (error) {
+    console.error('Error cargando etiquetas:', error)
   }
 }
 
@@ -307,13 +389,29 @@ const cargarMetodosPago = async () => {
 const etiquetaTipo = (tipo) => ({
   descuento_directo: 'Descuento directo',
   por_volumen: 'Por volumen',
-  por_metodo_pago: 'Por método de pago'
+  por_metodo_pago: 'Por método de pago',
+  combo_nxm: 'Combo NxM'
 }[tipo] || tipo)
+
+const etiquetaDescuento = (promo) => {
+  if (promo.tipo_promo === 'combo_nxm') {
+    return `${promo.cantidad_minima}x${promo.cantidad_paga}`
+  }
+  return `${promo.porcentaje_descuento}%`
+}
 
 const condicion = (promo) => {
   if (promo.tipo_promo === 'por_volumen') return `Mín. ${promo.cantidad_minima} unidades`
   if (promo.tipo_promo === 'por_metodo_pago') return `Pagando con ${promo.metodo_pago_requerido}`
+  if (promo.tipo_promo === 'combo_nxm') return `Cada ${promo.cantidad_minima}, paga ${promo.cantidad_paga}`
   return '-'
+}
+
+const alcance = (promo) => {
+  const nombresProductos = promo.productos_promociones.map(pp => pp.producto.nombre_producto)
+  const nombresEtiquetas = promo.promociones_etiquetas?.map(pe => `#${pe.etiqueta.nombre_etiqueta}`) || []
+  const partes = [...nombresProductos, ...nombresEtiquetas]
+  return partes.length === 0 ? 'Todos' : partes.join(', ')
 }
 
 const estaVigente = (promo) => {
@@ -338,11 +436,13 @@ const form = ref({
   tipo_promo: 'descuento_directo',
   porcentaje_descuento: '',
   cantidad_minima: '',
+  cantidad_paga: '',
   metodo_pago_requerido: '',
   fecha_inicio: '',
   fecha_fin: '',
   activa: true,
-  id_productos: []
+  id_productos: [],
+  id_etiquetas: []
 })
 
 const productosFiltrados = computed(() => {
@@ -360,6 +460,15 @@ const toggleProducto = (idProducto) => {
   }
 }
 
+const toggleEtiqueta = (idEtiqueta) => {
+  const idx = form.value.id_etiquetas.indexOf(idEtiqueta)
+  if (idx >= 0) {
+    form.value.id_etiquetas.splice(idx, 1)
+  } else {
+    form.value.id_etiquetas.push(idEtiqueta)
+  }
+}
+
 // Convierte un ISO datetime a "yyyy-mm-dd" para el <input type="date">
 const aFechaInput = (iso) => new Date(iso).toISOString().split('T')[0]
 
@@ -371,13 +480,15 @@ const abrirModal = (promo = null) => {
     form.value = {
       nombre_promo: promo.nombre_promo,
       tipo_promo: promo.tipo_promo,
-      porcentaje_descuento: promo.porcentaje_descuento,
+      porcentaje_descuento: promo.porcentaje_descuento || '',
       cantidad_minima: promo.cantidad_minima || '',
+      cantidad_paga: promo.cantidad_paga || '',
       metodo_pago_requerido: promo.metodo_pago_requerido || '',
       fecha_inicio: aFechaInput(promo.fecha_inicio),
       fecha_fin: aFechaInput(promo.fecha_fin),
       activa: promo.activa,
-      id_productos: promo.productos_promociones.map(pp => pp.producto.id_producto)
+      id_productos: promo.productos_promociones.map(pp => pp.producto.id_producto),
+      id_etiquetas: (promo.promociones_etiquetas || []).map(pe => pe.etiqueta.id_etiqueta)
     }
   } else {
     form.value = {
@@ -385,11 +496,13 @@ const abrirModal = (promo = null) => {
       tipo_promo: 'descuento_directo',
       porcentaje_descuento: '',
       cantidad_minima: '',
+      cantidad_paga: '',
       metodo_pago_requerido: '',
       fecha_inicio: '',
       fecha_fin: '',
       activa: true,
-      id_productos: []
+      id_productos: [],
+      id_etiquetas: []
     }
   }
 
@@ -397,8 +510,18 @@ const abrirModal = (promo = null) => {
 }
 
 const guardarPromocion = async () => {
-  if (!form.value.nombre_promo || !form.value.porcentaje_descuento || !form.value.fecha_inicio || !form.value.fecha_fin) {
-    alert('Completá nombre, porcentaje y las fechas de vigencia.')
+  if (!form.value.nombre_promo || !form.value.fecha_inicio || !form.value.fecha_fin) {
+    alert('Completá nombre y las fechas de vigencia.')
+    return
+  }
+
+  if (form.value.tipo_promo === 'combo_nxm') {
+    if (!form.value.cantidad_minima || !form.value.cantidad_paga) {
+      alert('Completá cuántas unidades se llevan (N) y cuántas se pagan (M).')
+      return
+    }
+  } else if (!form.value.porcentaje_descuento) {
+    alert('Completá el porcentaje de descuento.')
     return
   }
 
@@ -442,6 +565,7 @@ const eliminarPromocion = async (promo) => {
 onMounted(() => {
   cargarPromociones()
   cargarProductos()
+  cargarEtiquetas()
   cargarMetodosPago()
 })
 </script>
