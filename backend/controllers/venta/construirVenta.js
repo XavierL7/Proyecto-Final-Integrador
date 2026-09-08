@@ -1,5 +1,6 @@
 // backend/controllers/venta/construirVenta.js
 import prisma from '../../db.js'
+import { resolverPromocion, includeParaResolver } from '../../lib/resolverPromocion.js'
 
 const MAX_LARGO_IDENTIFICADOR = 34
 
@@ -19,8 +20,8 @@ function redondear2(numero) {
 // un error: la selección es automática, así que un candidato que no
 // aplica simplemente no se usa, no rompe la venta.
 function montoSiAplica(item, promo, metodoPagoNombre) {
-  const productosPermitidos = promo.productos_promociones.map(pp => pp.id_producto)
-  const aplicaAlProducto = productosPermitidos.length === 0 || productosPermitidos.includes(item.id_producto)
+  const { productos_aplicables, sin_restriccion } = resolverPromocion(promo)
+  const aplicaAlProducto = sin_restriccion || productos_aplicables.includes(item.id_producto)
   if (!aplicaAlProducto) return 0
 
   if (promo.tipo_promo === 'por_metodo_pago') {
@@ -94,7 +95,7 @@ export async function validarVenta({ items, total, metodo_pago, id_cliente }) {
       fecha_inicio: { lte: ahora },
       fecha_fin: { gte: ahora }
     },
-    include: { productos_promociones: { select: { id_producto: true } } }
+    include: includeParaResolver
   })
 
   const itemsConDescuento = items.map(item => {

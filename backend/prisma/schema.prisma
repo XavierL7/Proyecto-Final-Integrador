@@ -222,6 +222,7 @@ model Promocion {
   activa                Boolean                 @default(true)
   detalle_ventas        Detalle_Venta[]
   productos_promociones Productos_Promociones[]
+  promociones_etiquetas Promociones_Etiquetas[]
 
   @@map("Promociones")
 }
@@ -241,8 +242,19 @@ model Etiqueta {
   nombre_etiqueta     String                @db.VarChar(50)
   descripcion         String?               @db.VarChar(255)
   productos_etiquetas Productos_Etiquetas[]
+  promociones_etiquetas Promociones_Etiquetas[]
 
   @@map("Etiquetas")
+}
+
+model Promociones_Etiquetas {
+  id_promocion Int
+  id_etiqueta  Int
+  promocion    Promocion @relation(fields: [id_promocion], references: [id_promocion], onDelete: Cascade)
+  etiqueta     Etiqueta  @relation(fields: [id_etiqueta], references: [id_etiqueta], onDelete: Cascade)
+
+  @@id([id_promocion, id_etiqueta])
+  @@map("Promociones_Etiquetas")
 }
 
 model Productos_Etiquetas {

@@ -200,8 +200,9 @@ const seleccionarMetodoPago = (metodo) => {
 // Espeja exactamente la lógica del backend (construirVenta.js) para que
 // lo que se ve en el carrito coincida con lo que después se cobra.
 const montoSiAplica = (item, promo) => {
-  const productosPermitidos = promo.productos_promociones.map(pp => pp.id_producto)
-  const aplicaAlProducto = productosPermitidos.length === 0 || productosPermitidos.includes(item.id_producto)
+  // El backend ya resolvió esto (incluyendo lo que aplique por etiqueta,
+  // no solo por producto puntual): acá solo consultamos el resultado.
+  const aplicaAlProducto = promo.sin_restriccion || promo.productos_aplicables.includes(item.id_producto)
   if (!aplicaAlProducto) return 0
 
   if (promo.tipo_promo === 'por_metodo_pago') {

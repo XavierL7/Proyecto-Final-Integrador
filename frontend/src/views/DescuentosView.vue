@@ -21,7 +21,7 @@
               <th class="px-4 py-3 text-right">Descuento</th>
               <th class="px-4 py-3">Condición</th>
               <th class="px-4 py-3">Vigencia</th>
-              <th class="px-4 py-3">Productos</th>
+              <th class="px-4 py-3">Alcance</th>
               <th class="px-4 py-3">Estado</th>
               <th class="px-4 py-3">Acciones</th>
             </tr>
@@ -42,9 +42,7 @@
                 {{ formatearFecha(promo.fecha_inicio) }} → {{ formatearFecha(promo.fecha_fin) }}
               </td>
               <td class="px-4 py-3 text-gray-500 text-xs">
-                {{ promo.productos_promociones.length === 0
-                  ? 'Todos'
-                  : promo.productos_promociones.map(pp => pp.producto.nombre_producto).join(', ') }}
+                {{ alcance(promo) }}
               </td>
               <td class="px-4 py-3">
                 <div class="flex flex-col gap-1">
@@ -232,6 +230,36 @@
           </div>
         </div>
 
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-medium mb-1">
+            Etiquetas a las que aplica
+          </label>
+          <p class="text-xs text-gray-400 mb-2">
+            Marcá una etiqueta para que la promo aplique a TODOS los productos
+            que la tengan (ej. etiquetá "Coca" en tus 3 variedades de Coca y
+            hacé un solo 2x1 para las tres). Se combina con los productos
+            puntuales de arriba, no los reemplaza.
+          </p>
+          <div class="border border-gray-200 rounded-lg max-h-32 overflow-y-auto divide-y divide-gray-100">
+            <label
+              v-for="etiqueta in etiquetas"
+              :key="etiqueta.id_etiqueta"
+              class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                :checked="form.id_etiquetas.includes(etiqueta.id_etiqueta)"
+                @change="toggleEtiqueta(etiqueta.id_etiqueta)"
+                class="w-4 h-4 text-teal-500"
+              />
+              {{ etiqueta.nombre_etiqueta }}
+            </label>
+            <p v-if="etiquetas.length === 0" class="px-3 py-2 text-xs text-gray-400">
+              No tenés etiquetas creadas todavía.
+            </p>
+          </div>
+        </div>
+
         <div class="flex justify-end gap-3">
           <button
             @click="modalAbierto = false"
@@ -267,6 +295,7 @@ const headers = () => ({ headers: { 'Authorization': `Bearer ${authStore.token}`
 const promociones = ref([])
 const cargando = ref(true)
 const productos = ref([])
+const etiquetas = ref([])
 const metodosPago = ref([])
 
 const cargarPromociones = async () => {
@@ -304,6 +333,15 @@ const cargarProductos = async () => {
   }
 }
 
+const cargarEtiquetas = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/api/etiquetas`, headers())
+    etiquetas.value = Array.isArray(response.data) ? response.data : (response.data.etiquetas || [])
+  } catch (error) {
+    console.error('Error cargando etiquetas:', error)
+  }
+}
+
 const cargarMetodosPago = async () => {
   try {
     const response = await axios.get(`${baseUrl}/api/metodos-pago`, headers())
@@ -334,6 +372,13 @@ const condicion = (promo) => {
   return '-'
 }
 
+const alcance = (promo) => {
+  const nombresProductos = promo.productos_promociones.map(pp => pp.producto.nombre_producto)
+  const nombresEtiquetas = promo.promociones_etiquetas?.map(pe => `#${pe.etiqueta.nombre_etiqueta}`) || []
+  const partes = [...nombresProductos, ...nombresEtiquetas]
+  return partes.length === 0 ? 'Todos' : partes.join(', ')
+}
+
 const estaVigente = (promo) => {
   const ahora = new Date()
   return ahora >= new Date(promo.fecha_inicio) && ahora <= new Date(promo.fecha_fin)
@@ -361,7 +406,8 @@ const form = ref({
   fecha_inicio: '',
   fecha_fin: '',
   activa: true,
-  id_productos: []
+  id_productos: [],
+  id_etiquetas: []
 })
 
 const productosFiltrados = computed(() => {
@@ -376,6 +422,15 @@ const toggleProducto = (idProducto) => {
     form.value.id_productos.splice(idx, 1)
   } else {
     form.value.id_productos.push(idProducto)
+  }
+}
+
+const toggleEtiqueta = (idEtiqueta) => {
+  const idx = form.value.id_etiquetas.indexOf(idEtiqueta)
+  if (idx >= 0) {
+    form.value.id_etiquetas.splice(idx, 1)
+  } else {
+    form.value.id_etiquetas.push(idEtiqueta)
   }
 }
 
@@ -397,7 +452,8 @@ const abrirModal = (promo = null) => {
       fecha_inicio: aFechaInput(promo.fecha_inicio),
       fecha_fin: aFechaInput(promo.fecha_fin),
       activa: promo.activa,
-      id_productos: promo.productos_promociones.map(pp => pp.producto.id_producto)
+      id_productos: promo.productos_promociones.map(pp => pp.producto.id_producto),
+      id_etiquetas: (promo.promociones_etiquetas || []).map(pe => pe.etiqueta.id_etiqueta)
     }
   } else {
     form.value = {
@@ -410,7 +466,8 @@ const abrirModal = (promo = null) => {
       fecha_inicio: '',
       fecha_fin: '',
       activa: true,
-      id_productos: []
+      id_productos: [],
+      id_etiquetas: []
     }
   }
 
@@ -473,6 +530,7 @@ const eliminarPromocion = async (promo) => {
 onMounted(() => {
   cargarPromociones()
   cargarProductos()
+  cargarEtiquetas()
   cargarMetodosPago()
 })
 </script>

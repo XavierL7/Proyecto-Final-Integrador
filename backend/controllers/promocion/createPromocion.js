@@ -57,7 +57,8 @@ export const createPromocion = async (req, res) => {
       fecha_inicio,
       fecha_fin,
       activa,
-      id_productos
+      id_productos,
+      id_etiquetas
     } = req.body
 
     if (!nombre_promo || !tipo_promo || !fecha_inicio || !fecha_fin) {
@@ -97,6 +98,15 @@ export const createPromocion = async (req, res) => {
         await tx.productos_Promociones.createMany({
           data: id_productos.map(id_producto => ({
             id_producto: Number(id_producto),
+            id_promocion: promo.id_promocion
+          }))
+        })
+      }
+
+      if (Array.isArray(id_etiquetas) && id_etiquetas.length > 0) {
+        await tx.promociones_Etiquetas.createMany({
+          data: id_etiquetas.map(id_etiqueta => ({
+            id_etiqueta: Number(id_etiqueta),
             id_promocion: promo.id_promocion
           }))
         })
