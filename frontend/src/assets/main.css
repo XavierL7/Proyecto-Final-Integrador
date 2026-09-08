@@ -12,3 +12,46 @@ html.dark body {
   background-color: #021120;
   color: #ffff;
 }
+
+/* ======================================================== */
+/* Regla global para hover en filas de tablas               */
+/* ======================================================== */
+
+/* Modo Claro: Gris intermedio con buen contraste sobre texto oscuro */
+table tbody tr:hover {
+  background-color: #e2e8f0 !important;
+}
+
+/* Modo Oscuro por sistema */
+@media (prefers-color-scheme: dark) {
+  table tbody tr:hover {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+  }
+}
+
+/* Modo Oscuro por clase html.dark */
+html.dark table tbody tr:hover {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+}
+
+/* ======================================================== */
+/* MODO OSCURO PARA MODALES Y VENTANAS EMERGENTES (GLOBAL)  */
+/* ======================================================== */
+
+.dark .bg-white {
+  background-color: #1f2937 !important; /* gray-800 */
+  color: #f3f4f6 !important;            /* gray-100 */
+}
+
+/* Para ajustar los bordes internos de las ventanas en modo oscuro */
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: #374151 !important;     /* gray-700 */
+}
+
+/* Para asegurar que las divisiones internas no queden blancas */
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #374151 !important;
+}

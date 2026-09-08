@@ -6,13 +6,16 @@
     <select
       :value="modelValue ?? ''"
       @change="onChange"
-      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+      class="w-full border rounded-lg px-3 py-2 text-sm text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
     >
-      <option value="">Cliente General</option>
+      <option value="" class="text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-100">
+        Cliente General
+      </option>
       <option
         v-for="cliente in clientes"
         :key="cliente.id_cliente"
         :value="cliente.id_cliente"
+        class="text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-100"
       >
         {{ cliente.nombre }} {{ cliente.apellido }} — DNI {{ cliente.dni }}
       </option>

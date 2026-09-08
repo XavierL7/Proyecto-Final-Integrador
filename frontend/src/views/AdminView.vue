@@ -61,19 +61,34 @@
                 </span>
               </div>
             </div>
-            <div class="flex gap-1">
+            <!-- Botones de Acción -->
+            <div class="flex items-center gap-2">
+              <!-- Botón Editar -->
               <button
                 @click="abrirModalRol(rol)"
-                class="text-blue-500 hover:text-blue-700"
+                class="flex items-center justify-center w-8 h-8 rounded-lg  bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors"
+                title="Editar"
               >
-                Editar
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
               </button>
+
+              <!-- Botón Borrar -->
               <button
                 @click="eliminarRol(rol.id_rol)"
-                class="text-red-500 hover:text-red-700"
                 v-if="rol.id_rol !== 1"
+                class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 transition-colors"
+                title="Borrar"
               >
-                Borrar
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  <line x1="10" x2="10" y1="11" y2="17"/>
+                  <line x1="14" x2="14" y1="11" y2="17"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -81,95 +96,111 @@
       </div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- TAB 2: TRABAJADORES                                      -->
-    <!-- ======================================================== -->
-    <div v-if="tabActivo === 'trabajadores'">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold">Trabajadores</h2>
-        <button
-          @click="abrirModalTrabajador()"
-          class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-        >
-          + Nuevo Trabajador
-        </button>
-      </div>
+<!-- ======================================================== -->
+<!-- TAB 2: TRABAJADORES                                      -->
+<!-- ======================================================== -->
+<div v-if="tabActivo === 'trabajadores'">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-semibold">Trabajadores</h2>
+    <button
+      @click="abrirModalTrabajador()"
+      class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+    >
+      + Nuevo Trabajador
+    </button>
+  </div>
 
-      <div class="overflow-x-auto rounded-lg shadow">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Nombre</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Apellido</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase">DNI</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Rol</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Huella</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="trabajador in trabajadores" :key="trabajador.id_trabajador">
-              <td class="px-6 py-4 text-sm">{{ trabajador.nombre }}</td>
-              <td class="px-6 py-4 text-sm">{{ trabajador.apellido }}</td>
-              <td class="px-6 py-4 text-sm">{{ trabajador.dni }}</td>
-              <td class="px-6 py-4 text-sm">
-                {{ trabajador.rol?.nombre_rol || 'Sin rol' }}
-              </td>
-              <td class="px-6 py-4 text-sm">
-                <span
-                  v-if="!trabajador.hash_huella"
-                  class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded"
-                >
-                  Sin huella
-                </span>
-                <span
-                  v-else-if="trabajador.huella_pendiente"
-                  class="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded"
-                >
-                  Pendiente (#{{ trabajador.hash_huella }})
-                </span>
-                <span
-                  v-else
-                  class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded"
-                >
-                  Registrada (#{{ trabajador.hash_huella }})
-                </span>
+  <div class="overflow-x-auto rounded-lg shadow">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase">Nombre</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase">Apellido</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase">DNI</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase">Rol</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase">Huella</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <tr v-for="trabajador in trabajadores" :key="trabajador.id_trabajador">
+          <td class="px-6 py-4 text-sm">{{ trabajador.nombre }}</td>
+          <td class="px-6 py-4 text-sm">{{ trabajador.apellido }}</td>
+          <td class="px-6 py-4 text-sm">{{ trabajador.dni }}</td>
+          <td class="px-6 py-4 text-sm">
+            {{ trabajador.rol?.nombre_rol || 'Sin rol' }}
+          </td>
+          <td class="px-6 py-4 text-sm">
+            <span
+              v-if="!trabajador.hash_huella"
+              class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded"
+            >
+              Sin huella
+            </span>
+            <span
+              v-else-if="trabajador.huella_pendiente"
+              class="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded"
+            >
+              Pendiente (#{{ trabajador.hash_huella }})
+            </span>
+            <span
+              v-else
+              class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded"
+            >
+              Registrada (#{{ trabajador.hash_huella }})
+            </span>
 
-                <button
-                  v-if="!trabajador.hash_huella"
-                  @click="solicitarHuella(trabajador)"
-                  class="block text-blue-500 hover:text-blue-700 text-xs mt-1"
-                >
-                  Registrar huella
-                </button>
-                <button
-                  v-else-if="trabajador.huella_pendiente"
-                  @click="cancelarHuella(trabajador)"
-                  class="block text-red-500 hover:text-red-700 text-xs mt-1"
-                >
-                  Cancelar
-                </button>
-              </td>
-              <td class="px-6 py-4 text-sm">
-                <button
-                  @click="abrirModalTrabajador(trabajador)"
-                  class="text-blue-500 hover:text-blue-700 mr-2"
-                >
-                  Editar
-                </button>
-                <button
-                  @click="eliminarTrabajador(trabajador.id_trabajador)"
-                  class="text-red-500 hover:text-red-700"
-                  v-if="trabajador.id_trabajador !== 1"
-                >
-                  Borrar
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+            <button
+              v-if="!trabajador.hash_huella"
+              @click="solicitarHuella(trabajador)"
+              class="block text-blue-500 hover:text-blue-700 text-xs mt-1"
+            >
+              Registrar huella
+            </button>
+            <button
+              v-else-if="trabajador.huella_pendiente"
+              @click="cancelarHuella(trabajador)"
+              class="block text-red-500 hover:text-red-700 text-xs mt-1"
+            >
+              Cancelar
+            </button>
+          </td>
+          <td class="px-6 py-4 text-sm whitespace-nowrap">
+            <div class="flex items-center gap-2">
+              <!-- Botón Editar -->
+              <button
+                @click="abrirModalTrabajador(trabajador)"
+                class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600  transition-colors"
+                title="Editar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+              </button>
+
+              <!-- Botón Borrar -->
+              <button
+                @click="eliminarTrabajador(trabajador.id_trabajador)"
+                v-if="trabajador.id_trabajador !== 1"
+                class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 transition-colors"
+                title="Borrar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  <line x1="10" x2="10" y1="11" y2="17"/>
+                  <line x1="14" x2="14" y1="11" y2="17"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
     <!-- ======================================================== -->
     <!-- MODAL: ROL                                               -->
@@ -180,12 +211,12 @@
       @click.self="modalRol = false"
     >
       <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
+        <h2 class="text-xl font-bold mb-4">
           {{ rolEditando ? 'Editar Rol' : 'Nuevo Rol' }}
         </h2>
         <form @submit.prevent="guardarRol">
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-medium mb-1">Nombre del rol</label>
+            <label class="block text-sm font-medium mb-1">Nombre del rol</label>
             <input
               v-model="rolForm.nombre_rol"
               type="text"
@@ -194,7 +225,7 @@
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-medium mb-1">Permisos</label>
+            <label class="block text-sm font-medium mb-1">Permisos</label>
             <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
               <div
                 v-for="func in funcionalidades"
@@ -207,9 +238,9 @@
                   v-model="rolForm.funcionalidades"
                   class="w-4 h-4 text-blue-500"
                 />
-                <label class="text-sm text-gray-700">{{ func.nombre_func }}</label>
+                <label class="text-sm">{{ func.nombre_func }}</label>
               </div>
-              <p v-if="funcionalidades.length === 0" class="text-sm text-gray-500 py-2">
+              <p v-if="funcionalidades.length === 0" class="text-sm py-2">
                 No hay funcionalidades disponibles. Crea una en la base de datos.
               </p>
             </div>
@@ -218,7 +249,7 @@
             <button
               type="button"
               @click="modalRol = false"
-              class="px-4 py-2 text-gray-600 hover:text-gray-800"
+              class="px-4 py-2 hover:text-gray-800"
             >
               Cancelar
             </button>
@@ -242,12 +273,12 @@
       @click.self="modalTrabajador = false"
     >
       <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
+        <h2 class="text-xl font-bold mb-4">
           {{ trabajadorEditando ? 'Editar Trabajador' : 'Nuevo Trabajador' }}
         </h2>
         <form @submit.prevent="guardarTrabajador">
           <div class="mb-3">
-            <label class="block text-gray-700 text-sm font-medium mb-1">Nombre</label>
+            <label class="block  text-sm font-medium mb-1">Nombre</label>
             <input
               v-model="trabajadorForm.nombre"
               type="text"
@@ -256,7 +287,7 @@
             />
           </div>
           <div class="mb-3">
-            <label class="block text-gray-700 text-sm font-medium mb-1">Apellido</label>
+            <label class="block  text-sm font-medium mb-1">Apellido</label>
             <input
               v-model="trabajadorForm.apellido"
               type="text"
@@ -265,7 +296,7 @@
             />
           </div>
           <div class="mb-3">
-            <label class="block text-gray-700 text-sm font-medium mb-1">DNI</label>
+            <label class="block  text-sm font-medium mb-1">DNI</label>
             <input
               v-model="trabajadorForm.dni"
               type="number"
@@ -274,7 +305,7 @@
             />
           </div>
           <div class="mb-3">
-            <label class="block text-gray-700 text-sm font-medium mb-1">Rol</label>
+            <label class="block  text-sm font-medium mb-1">Rol</label>
             <select
               v-model="trabajadorForm.id_rol"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -291,7 +322,7 @@
             </select>
           </div>
           <div class="mb-3" v-if="!trabajadorEditando">
-            <label class="block text-gray-700 text-sm font-medium mb-1">Contraseña</label>
+            <label class="block  text-sm font-medium mb-1">Contraseña</label>
             <input
               v-model="trabajadorForm.password"
               type="password"
@@ -301,7 +332,7 @@
             />
           </div>
           <div class="mb-3" v-if="!trabajadorEditando">
-            <label class="flex items-center gap-2 text-sm text-gray-700">
+            <label class="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
                 v-model="trabajadorForm.registrarHuella"
@@ -325,7 +356,7 @@
             <button
               type="button"
               @click="modalTrabajador = false"
-              class="px-4 py-2 text-gray-600 hover:text-gray-800"
+              class="px-4 py-2 hover:text-gray-300"
             >
               Cancelar
             </button>

@@ -19,8 +19,6 @@
           </h2>
           
           <form @submit.prevent="guardarCliente" class="space-y-4">
-            <!-- El ID se omitió porque es autoincremental -->
-            
             <div>
               <label class="block text-xs font-semibold mb-1">Nombre</label>
               <input 
@@ -28,7 +26,7 @@
                 type="text" 
                 required 
                 placeholder="Ej. Juan"
-                class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
 
@@ -39,7 +37,7 @@
                 type="text" 
                 required 
                 placeholder="Ej. Pérez"
-                class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
 
@@ -50,7 +48,7 @@
                 type="number" 
                 required 
                 placeholder="Sin puntos"
-                class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
 
@@ -60,7 +58,7 @@
                 v-model="nuevoCliente.telefono" 
                 type="text" 
                 placeholder="Ej. 11 1234-5678"
-                class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                class="w-full  border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
 
@@ -69,7 +67,7 @@
               <input 
                 v-model="nuevoCliente.fecha_ultima_compra" 
                 type="date" 
-                class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                class="w-full  border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
 
@@ -121,19 +119,35 @@
                   <td class="p-3">
                     {{ cliente.fecha_ultima_compra ? new Date(cliente.fecha_ultima_compra).toLocaleDateString('es-AR', { timeZone: 'UTC' }) : '-' }}
                   </td>
-                  <td class="p-3 text-right space-x-2">
-                    <button 
-                      @click="seleccionarParaEditar(cliente)" 
-                      class="text-teal-600 font-semibold hover:underline text-xs"
-                    >
-                      Editar
-                    </button>
-                    <button 
-                      @click="eliminarCliente(cliente.id_cliente)" 
-                      class="text-rose-500 font-semibold hover:underline text-xs"
-                    >
-                      Eliminar
-                    </button>
+                  <td class="p-3 text-right whitespace-nowrap">
+                    <div class="flex items-center justify-end gap-2">
+                      <!-- Botón Editar -->
+                      <button
+                        @click="seleccionarParaEditar(cliente)"
+                        class="flex items-center justify-center w-8 h-8 rounded-lg  bg-emerald-50 hover:bg-emerald-100 text-emerald-600  transition-colors"
+                        title="Editar"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M12 20h9"/>
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                        </svg>
+                      </button>
+
+                      <!-- Botón Eliminar -->
+                      <button
+                        @click="eliminarCliente(cliente.id_cliente)"
+                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 transition-colors"
+                        title="Eliminar"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M3 6h18"/>
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                          <line x1="10" x2="10" y1="11" y2="17"/>
+                          <line x1="14" x2="14" y1="11" y2="17"/>
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>

@@ -5,7 +5,7 @@
       <h2 class="font-bold">🛒 Carrito</h2>
     </div>
 
-    <div v-if="items.length === 0" class="p-8 text-center text-gray-400">
+    <div v-if="items.length === 0" class="p-8 text-center">
       <p>El carrito está vacío</p>
     </div>
 
@@ -18,21 +18,21 @@
 
         <div class="flex items-center gap-3">
           <div class="flex-1">
-            <p class="font-medium text-gray-800">{{ item.nombre_producto }}</p>
-            <p class="text-sm text-gray-500">${{ item.precio_unitario }} c/u</p>
+            <p class="font-medium">{{ item.nombre_producto }}</p>
+            <p class="text-sm">${{ item.precio_unitario }} c/u</p>
           </div>
 
           <div class="flex items-center gap-2">
             <button
               @click="actualizarCantidad(index, item.cantidad - 1)"
-              class="w-7 h-7 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition"
+              class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-300 transition"
             >
               -
             </button>
             <span class="w-8 text-center font-medium">{{ item.cantidad }}</span>
             <button
               @click="actualizarCantidad(index, item.cantidad + 1)"
-              class="w-7 h-7 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 transition"
+              class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-300 transition"
               :disabled="item.cantidad >= item.stock"
             >
               +
@@ -40,7 +40,7 @@
           </div>
 
           <div class="text-right min-w-[80px]">
-            <p v-if="descuentoDe(item) > 0" class="text-xs text-gray-400 line-through">
+            <p v-if="descuentoDe(item) > 0" class="text-xs line-through">
               ${{ (item.cantidad * item.precio_unitario).toFixed(2) }}
             </p>
             <p class="font-bold text-blue-600">
@@ -63,7 +63,7 @@
           <select
             :value="item.id_promocion || ''"
             @change="(e) => aplicarDescuento(index, e.target.value ? Number(e.target.value) : null)"
-            class="text-xs border border-gray-200 rounded px-2 py-1 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            class="text-xs border border-gray-200 rounded px-2 py-1 bg-gray-300 focus:outline-none focus:ring-1 focus:ring-teal-500"
           >
             <option value="">Sin descuento</option>
             <option

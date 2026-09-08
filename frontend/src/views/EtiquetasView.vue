@@ -6,7 +6,7 @@
     <!-- Barra de búsqueda y botón -->
     <div class="flex  flex-wrap gap-3 mb-6">
       <div class="flex-1 min-w-[200px] relative">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2">
         </span>
         <input
           v-model="busqueda"
@@ -93,7 +93,7 @@
     >
       <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-gray-800">
+          <h2 class="text-xl font-bold">
             {{ editando ? 'Editar Etiqueta' : 'Nueva Etiqueta' }}
           </h2>
           <button
@@ -108,8 +108,8 @@
 
         <form @submit.prevent="guardarEtiqueta">
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-medium mb-1.5">
-              Nombre <span class="text-xs text-gray-400">(max. 20 caracteres)</span>
+            <label class="block text-sm font-medium mb-1.5">
+              Nombre <span class="text-xs">(max. 20 caracteres)</span>
             </label>
             <input
               v-model="form.nombre_etiqueta"
@@ -120,14 +120,14 @@
               required
             />
             <div class="flex justify-end mt-1">
-              <span class="text-xs text-gray-400" :class="form.nombre_etiqueta?.length >= 18 ? 'text-orange-500' : ''">
+              <span class="text-xs" :class="form.nombre_etiqueta?.length >= 18 ? 'text-orange-500' : ''">
                 {{ form.nombre_etiqueta?.length || 0 }} / 20
               </span>
             </div>
           </div>
 
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-medium mb-1.5">Descripcion</label>
+            <label class="block text-sm font-medium mb-1.5">Descripcion</label>
             <input
               v-model="form.descripcion"
               type="text"

@@ -2,20 +2,20 @@
 <template>
   <div class="p-6 max-w-6xl mx-auto">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Descuentos</h1>
+      <h1 class="text-2xl font-bold">Descuentos</h1>
       <button
         @click="abrirModal()"
-        class="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition text-sm font-semibold"
+        class="bg-teal-500 px-4 py-2 rounded-lg hover:bg-teal-600 transition text-sm font-semibold text-white"
       >
         + Nueva Promoción
       </button>
     </div>
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="rounded-lg shadow overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase">
+            <tr class="border-b border-gray-200 text-xs font-semibold uppercase">
               <th class="px-4 py-3">Nombre</th>
               <th class="px-4 py-3">Tipo</th>
               <th class="px-4 py-3 text-right">Descuento</th>
@@ -28,20 +28,20 @@
           </thead>
           <tbody class="divide-y divide-gray-100 text-sm">
             <tr v-if="cargando">
-              <td colspan="8" class="px-4 py-6 text-center text-gray-400">Cargando...</td>
+              <td colspan="8" class="px-4 py-6 text-center">Cargando...</td>
             </tr>
             <tr v-else-if="promociones.length === 0">
-              <td colspan="8" class="px-4 py-6 text-center text-gray-400">Todavía no creaste ninguna promoción.</td>
+              <td colspan="8" class="px-4 py-6 text-center">Todavía no creaste ninguna promoción.</td>
             </tr>
             <tr v-for="promo in promociones" :key="promo.id_promocion" class="hover:bg-gray-50">
-              <td class="px-4 py-3 font-medium text-gray-900">{{ promo.nombre_promo }}</td>
-              <td class="px-4 py-3 text-gray-700">{{ etiquetaTipo(promo.tipo_promo) }}</td>
-              <td class="px-4 py-3 text-right text-gray-900 font-semibold">{{ promo.porcentaje_descuento }}%</td>
-              <td class="px-4 py-3 text-gray-500 text-xs">{{ condicion(promo) }}</td>
-              <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
+              <td class="px-4 py-3 font-medium">{{ promo.nombre_promo }}</td>
+              <td class="px-4 py-3">{{ etiquetaTipo(promo.tipo_promo) }}</td>
+              <td class="px-4 py-3 text-right font-semibold">{{ promo.porcentaje_descuento }}%</td>
+              <td class="px-4 py-3 text-xs">{{ condicion(promo) }}</td>
+              <td class="px-4 py-3 text-xs whitespace-nowrap">
                 {{ formatearFecha(promo.fecha_inicio) }} → {{ formatearFecha(promo.fecha_fin) }}
               </td>
-              <td class="px-4 py-3 text-gray-500 text-xs">
+              <td class="px-4 py-3 text-xs">
                 {{ promo.productos_promociones.length === 0
                   ? 'Todos'
                   : promo.productos_promociones.map(pp => pp.producto.nombre_producto).join(', ') }}
@@ -60,15 +60,46 @@
                 </div>
               </td>
               <td class="px-4 py-3 whitespace-nowrap">
-                <button @click="abrirModal(promo)" class="text-blue-500 hover:text-blue-700 mr-2 text-sm">
-                  Editar
-                </button>
-                <button @click="toggleActiva(promo)" class="text-amber-600 hover:text-amber-800 mr-2 text-sm">
-                  {{ promo.activa ? 'Desactivar' : 'Activar' }}
-                </button>
-                <button @click="eliminarPromocion(promo)" class="text-red-500 hover:text-red-700 text-sm">
-                  Borrar
-                </button>
+                <div class="flex items-center gap-2">
+                  <!-- Botón Editar -->
+                  <button
+                    @click="abrirModal(promo)"
+                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors"
+                    title="Editar"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 20h9"/>
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                  </button>
+
+                  <!-- Botón Desactivar / Activar -->
+                  <button
+                    @click="toggleActiva(promo)"
+                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 transition-colors"
+                    :title="promo.activa ? 'Desactivar' : 'Activar'"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="6" y="4" width="4" height="16" rx="1"/>
+                      <rect x="14" y="4" width="4" height="16" rx="1"/>
+                    </svg>
+                  </button>
+
+                  <!-- Botón Borrar -->
+                  <button
+                    @click="eliminarPromocion(promo)"
+                    class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 transition-colors"
+                    title="Borrar"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                      <line x1="10" x2="10" y1="11" y2="17"/>
+                      <line x1="14" x2="14" y1="11" y2="17"/>
+                    </svg>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -76,7 +107,6 @@
       </div>
     </div>
 
-    <!-- ============================================================ -->
     <!-- MODAL: crear/editar promoción -->
     <!-- ============================================================ -->
     <div
@@ -85,12 +115,12 @@
       @click.self="modalAbierto = false"
     >
       <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <h2 class="text-lg font-bold text-gray-800 mb-4">
+        <h2 class="text-lg font-bold mb-4">
           {{ promocionEditando ? 'Editar Promoción' : 'Nueva Promoción' }}
         </h2>
 
         <div class="mb-3">
-          <label class="block text-gray-700 text-sm font-medium mb-1">Nombre</label>
+          <label class="block text-sm font-medium mb-1">Nombre</label>
           <input
             v-model="form.nombre_promo"
             type="text"
@@ -100,7 +130,7 @@
         </div>
 
         <div class="mb-3">
-          <label class="block text-gray-700 text-sm font-medium mb-1">Tipo de promoción</label>
+          <label class="block text-sm font-medium mb-1">Tipo de promoción</label>
           <select
             v-model="form.tipo_promo"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -112,7 +142,7 @@
         </div>
 
         <div class="mb-3">
-          <label class="block text-gray-700 text-sm font-medium mb-1">Porcentaje de descuento</label>
+          <label class="block text-sm font-medium mb-1">Porcentaje de descuento</label>
           <input
             v-model="form.porcentaje_descuento"
             type="number"
@@ -125,7 +155,7 @@
         </div>
 
         <div class="mb-3" v-if="form.tipo_promo === 'por_volumen'">
-          <label class="block text-gray-700 text-sm font-medium mb-1">Cantidad mínima de unidades</label>
+          <label class="block text-sm font-medium mb-1">Cantidad mínima de unidades</label>
           <input
             v-model="form.cantidad_minima"
             type="number"
@@ -136,7 +166,7 @@
         </div>
 
         <div class="mb-3" v-if="form.tipo_promo === 'por_metodo_pago'">
-          <label class="block text-gray-700 text-sm font-medium mb-1">Método de pago que la activa</label>
+          <label class="block text-sm font-medium mb-1">Método de pago que la activa</label>
           <select
             v-model="form.metodo_pago_requerido"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -150,7 +180,7 @@
 
         <div class="grid grid-cols-2 gap-3 mb-3">
           <div>
-            <label class="block text-gray-700 text-sm font-medium mb-1">Desde</label>
+            <label class="block text-sm font-medium mb-1">Desde</label>
             <input
               v-model="form.fecha_inicio"
               type="date"
@@ -158,7 +188,7 @@
             />
           </div>
           <div>
-            <label class="block text-gray-700 text-sm font-medium mb-1">Hasta</label>
+            <label class="block text-sm font-medium mb-1">Hasta</label>
             <input
               v-model="form.fecha_fin"
               type="date"
@@ -168,14 +198,14 @@
         </div>
 
         <div class="mb-3">
-          <label class="flex items-center gap-2 text-sm text-gray-700">
+          <label class="flex items-center gap-2 text-sm">
             <input type="checkbox" v-model="form.activa" class="w-4 h-4 text-teal-500" />
             Activa
           </label>
         </div>
 
         <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-medium mb-1">
+          <label class="block text-sm font-medium mb-1">
             Productos a los que aplica
           </label>
           <p class="text-xs text-gray-400 mb-2">
@@ -191,7 +221,7 @@
             <label
               v-for="producto in productosFiltrados"
               :key="producto.id_producto"
-              class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+              class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 dark:hover:text-white cursor-pointer"
             >
               <input
                 type="checkbox"

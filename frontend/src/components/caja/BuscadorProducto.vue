@@ -17,19 +17,27 @@
       </button>
     </div>
 
-    <!-- Resultados -->
-    <div v-if="resultados.length > 0" class="mt-2 rounded-lg shadow border border-gray-300 max-h-60 overflow-y-auto">
+
+    <!-- Resultados desplegables -->
+    <div
+      v-if="resultados.length > 0"
+      class="mt-2 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-slate-700"
+    >
       <div
         v-for="producto in resultados"
         :key="producto.id_producto"
-        class="flex justify-between items-center px-4 py-2 hover:bg-gray-200 cursor-pointer border-b border-gray-100 last:border-0"
+        class="flex justify-between items-center px-4 py-2.5 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
         @click="agregar(producto)"
       >
-        <div>
+        <div class="text-slate-800 dark:text-slate-100">
           <span class="font-medium">{{ producto.nombre_producto }}</span>
-          <span class="text-sm">(Stock: {{ producto.stock_actual }})</span>
+          <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">
+            (Stock: {{ producto.stock_actual }})
+          </span>
         </div>
-        <span class="font-bold text-blue-600">${{ producto.precio_unitario }}</span>
+        <span class="font-bold text-blue-600 dark:text-blue-400">
+          ${{ producto.precio_unitario }}
+        </span>
       </div>
     </div>
   </div>
@@ -57,7 +65,6 @@ const buscarProducto = async () => {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     })
 
-    // Si es un solo producto, lo ponemos en un array
     resultados.value = Array.isArray(response.data) ? response.data : [response.data]
   } catch (error) {
     if (error.response?.status === 404) {
