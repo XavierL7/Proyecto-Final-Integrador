@@ -3,11 +3,11 @@ integrantes: Lara Veloso,  Xavier Lacunza, Lautaro Sanchez
 
 TODO
 
-Dashboard	
+cambiar Dashboard	
 
 Sobrescribe el extox existente (Stock)
 
-No se puede vender mas de un producto a la vez si el Stock es Negativo
+se debe poder vender mas de un producto a la vez si el Stock es Negativo
 
 Agregar boton "Agregar" en el Stock para cargar mecaderia 
 
@@ -29,7 +29,7 @@ hacer menú desplegable para editar->etiquetas
 
 reworkear panel de administración
 
-Crear paquete/o que los descuentos apliquen a etiquetas también
+---Crear paquete/o que los descuentos apliquen a etiquetas también---
 
-descuento se aplique automáticamente
+---descuento se aplique automáticamente---
 
