@@ -1,6 +1,33 @@
 /* frontend/src/assets/main.css */
 @import "tailwindcss";
 
+/* ======================================================== */
+/* FIX RAÍZ: registrar la variante "dark" por CLASE          */
+/* ======================================================== */
+/* En Tailwind v4, sin esto, todas las clases dark:* del     */
+/* proyecto (StockView, DescuentosView, etc.) responden al   */
+/* prefers-color-scheme del sistema operativo en vez de a la  */
+/* clase html.dark que alterna la app. Esto es lo que causaba */
+/* que el bug fuera inconsistente según el tema del sistema.  */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ======================================================== */
+/* FIX: controles nativos del navegador (select, checkbox,   */
+/* scrollbars) deben seguir el toggle de la app, no el SO     */
+/* ======================================================== */
+/* Sin esto, si el sistema operativo está en modo oscuro, el  */
+/* navegador pinta el listado desplegable de un <select> con  */
+/* colores oscuros (fondo gris, texto blanco) aunque la app    */
+/* esté en modo claro — es el bug del hover gris/ilegible en   */
+/* los <select>, por ejemplo en Descuentos. */
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
 /* Aplicar el fondo base directamente al body */
 body {
   background-color: #f8fafc;
@@ -18,38 +45,60 @@ html.dark body {
 /* HOVER EN FILAS DE TABLAS                                 */
 /* ======================================================== */
 
-/* Modo Claro: Gris intermedio con buen contraste sobre texto oscuro */
-table tbody tr:hover {
+/* Fallback SOLO para filas que no definen su propio hover:bg-*.
+   Antes esta regla era global con !important y tapaba hovers ya
+   diseñados a medida (ej. StockView usa hover:bg-blue-50/60 +
+   dark:hover:bg-slate-800, que ahora queda intacto). */
+table tbody tr:not([class*="hover:bg-"]):hover {
   background-color: #e2e8f0 !important;
 }
 
-/* Modo Oscuro por sistema */
-@media (prefers-color-scheme: dark) {
-  table tbody tr:hover {
-    background-color: #1e293b !important;
-    color: #ffffff !important;
-  }
-}
-
-/* Modo Oscuro por clase html.dark */
-html.dark table tbody tr:hover {
+/* Filas que sí tienen hover propio en claro pero no definieron una
+   versión dark:hover:bg-* (ej. AsistenciasView) reciben un hover
+   oscuro por defecto. Las que ya tienen su propia versión oscura
+   quedan sin tocar. */
+html.dark table tbody tr:hover:not([class*="dark:hover:bg-"]) {
   background-color: #1e293b !important;
   color: #ffffff !important;
 }
 
 /* ======================================================== */
-/* MODO OSCURO PARA MODALES Y VENTANAS EMERGENTES           */
+/* MODO OSCURO PARA TARJETAS, PANELES Y MODALES              */
 /* ======================================================== */
 
-/* Se aplica solo a modales/tarjetas oscuras sin tocar el header */
+/* Se aplica a cualquier bloque bg-white con sombra (tarjetas, */
+/* paneles de filtros, tablas envueltas) o dentro de overlays  */
+/* fijos (modales), sin tocar el header.                       */
 .dark .fixed .bg-white,
+.dark .shadow.bg-white,
 .dark .shadow-xl.bg-white,
 .dark .shadow-2xl.bg-white {
   background-color: #1f2937 !important; /* gray-800 */
   color: #f3f4f6 !important;            /* gray-100 */
 }
 
-/* Ajuste de bordes internos en modo oscuro */
+/* Dentro de esas tarjetas, los grises pensados para fondo claro
+   (text-gray-400/500/600/700/800...) pierden contraste sobre el
+   nuevo fondo oscuro. Se normalizan a un gris claro legible. */
+.dark .fixed .bg-white [class*="text-gray-"],
+.dark .shadow.bg-white [class*="text-gray-"],
+.dark .shadow-xl.bg-white [class*="text-gray-"],
+.dark .shadow-2xl.bg-white [class*="text-gray-"] {
+  color: #cbd5e1 !important; /* slate-300 */
+}
+
+/* Encabezados de tabla y etiquetas/chips neutros (bg-gray-50,
+   bg-gray-100) quedan casi blancos en modo oscuro si no se
+   corrigen aparte: no son bg-white, así que las reglas de
+   arriba no los alcanzan. Ej: el <thead> y el chip "Finalizado"
+   de AsistenciasView. */
+.dark [class~="bg-gray-50"],
+.dark [class~="bg-gray-100"] {
+  background-color: #374151 !important; /* gray-700 */
+  color: #e5e7eb !important;            /* gray-200 */
+}
+
+/* Ajuste de bordes internos en modo oscuro (aplica en toda la app) */
 .dark .border-gray-200,
 .dark .border-gray-300 {
   border-color: #374151 !important;     /* gray-700 */
@@ -58,6 +107,29 @@ html.dark table tbody tr:hover {
 /* Divisiones internas */
 .dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
   border-color: #374151 !important;
+}
+
+/* ======================================================== */
+/* MODO OSCURO PARA CAMPOS DE FORMULARIO                     */
+/* ======================================================== */
+
+/* input/select/textarea heredan color:inherit de Tailwind pero
+   NO su background, así que en modo oscuro quedan con texto
+   blanco (heredado) sobre el blanco por defecto del navegador.
+   Solo se corrigen los que no tienen ya un bg-* propio (p. ej.
+   bg-gray-300 en el login o bg-transparent en el formulario de
+   contacto no se tocan). */
+html.dark input:not([class*="bg-"]),
+html.dark select:not([class*="bg-"]),
+html.dark textarea:not([class*="bg-"]) {
+  background-color: #0f172a !important; /* slate-900 */
+  color: #f1f5f9 !important;            /* slate-100 */
+  border-color: #334155 !important;     /* slate-700 */
+}
+
+html.dark input:not([class*="bg-"])::placeholder,
+html.dark textarea:not([class*="bg-"])::placeholder {
+  color: #64748b !important; /* slate-500 */
 }
 
 /* ======================================================== */

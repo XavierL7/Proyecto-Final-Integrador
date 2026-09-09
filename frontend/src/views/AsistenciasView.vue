@@ -57,17 +57,17 @@
     <!-- TARJETAS CON METRICAS CLAVE -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       <div class="bg-white p-5 rounded-lg shadow border-l-4 border-blue-500">
-        <span class="text-xs font-bold text-gray-400 uppercase">Registros Totales</span>
+        <span class="text-xs font-bold text-gray-600 uppercase">Registros Totales</span>
         <div class="text-2xl font-bold text-gray-800 mt-1">{{ historial.length }}</div>
       </div>
 
       <div class="bg-white p-5 rounded-lg shadow border-l-4 border-indigo-500">
-        <span class="text-xs font-bold text-gray-400 uppercase">Total Horas Acumuladas</span>
+        <span class="text-xs font-bold text-gray-600 uppercase">Total Horas Acumuladas</span>
         <div class="text-2xl font-bold text-gray-800 mt-1">{{ totalHorasAcumuladas }} hs</div>
       </div>
 
       <div class="bg-white p-5 rounded-lg shadow border-l-4 border-green-500">
-        <span class="text-xs font-bold text-gray-400 uppercase">Facturado en Turnos</span>
+        <span class="text-xs font-bold text-gray-600 uppercase">Facturado en Turnos</span>
         <div class="text-2xl font-bold text-green-600 mt-1">${{ totalFacturadoFormat }}</div>
       </div>
     </div>
@@ -102,21 +102,21 @@
             <tr v-for="item in historial" :key="item.id_asistencia" class="hover:bg-gray-50 transition">
               <!-- Trabajador -->
               <td class="p-4">
-                <div class="font-semibold text-gray-900">{{ item.trabajador.nombre_completo }}</div>
-                <div class="text-xs text-gray-500">DNI: {{ item.trabajador.dni }} | {{ item.trabajador.rol }}</div>
+                <div class="font-semibold">{{ item.trabajador.nombre_completo }}</div>
+                <div class="text-xs">DNI: {{ item.trabajador.dni }} | {{ item.trabajador.rol }}</div>
               </td>
 
               <!-- Entrada -->
               <td class="p-4">
                 <div class="font-medium">{{ formatearFecha(item.fecha_hora_entrada) }}</div>
-                <div class="text-xs text-gray-500">{{ formatearHora(item.fecha_hora_entrada) }}</div>
+                <div class="text-xs">{{ formatearHora(item.fecha_hora_entrada) }}</div>
               </td>
 
               <!-- Salida -->
               <td class="p-4">
                 <template v-if="item.fecha_hora_salida">
                   <div class="font-medium">{{ formatearFecha(item.fecha_hora_salida) }}</div>
-                  <div class="text-xs text-gray-500">{{ formatearHora(item.fecha_hora_salida) }}</div>
+                  <div class="text-xs text-gray-600">{{ formatearHora(item.fecha_hora_salida) }}</div>
                 </template>
                 <span v-else class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded">
                   En curso
@@ -132,14 +132,14 @@
                   >
                     {{ item.turno_activo ? 'Turno Activo' : 'Finalizado' }}
                   </span>
-                  <span class="text-xs text-gray-400 capitalize">
+                  <span class="text-xs  capitalize">
                     ({{ item.tipo_autenticacion || 'Huella' }})
                   </span>
                 </div>
               </td>
 
               <!-- Horas Trabajadas -->
-              <td class="p-4 text-center font-bold text-gray-700">
+              <td class="p-4 text-center font-bold">
                 {{ item.horas_trabajadas }} hs
               </td>
 
@@ -148,7 +148,7 @@
                 <div class="font-bold text-green-600">
                   ${{ item.metricas_turno.total_facturado.toLocaleString('es-AR', { minimumFractionDigits: 2 }) }}
                 </div>
-                <div class="text-xs text-gray-500">
+                <div class="text-xs">
                   {{ item.metricas_turno.cantidad_ventas }} venta(s)
                 </div>
               </td>
