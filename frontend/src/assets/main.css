@@ -1,3 +1,4 @@
+/* frontend/src/assets/main.css */
 @import "tailwindcss";
 
 /* Aplicar el fondo base directamente al body */
@@ -10,5 +11,70 @@ body {
 /* Cuando <html> tiene la clase .dark, cambia el body */
 html.dark body {
   background-color: #021120;
-  color: #ffff;
+  color: #ffffff;
+}
+
+/* ======================================================== */
+/* HOVER EN FILAS DE TABLAS                                 */
+/* ======================================================== */
+
+/* Modo Claro: Gris intermedio con buen contraste sobre texto oscuro */
+table tbody tr:hover {
+  background-color: #e2e8f0 !important;
+}
+
+/* Modo Oscuro por sistema */
+@media (prefers-color-scheme: dark) {
+  table tbody tr:hover {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+  }
+}
+
+/* Modo Oscuro por clase html.dark */
+html.dark table tbody tr:hover {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+}
+
+/* ======================================================== */
+/* MODO OSCURO PARA MODALES Y VENTANAS EMERGENTES           */
+/* ======================================================== */
+
+/* Se aplica solo a modales/tarjetas oscuras sin tocar el header */
+.dark .fixed .bg-white,
+.dark .shadow-xl.bg-white,
+.dark .shadow-2xl.bg-white {
+  background-color: #1f2937 !important; /* gray-800 */
+  color: #f3f4f6 !important;            /* gray-100 */
+}
+
+/* Ajuste de bordes internos en modo oscuro */
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: #374151 !important;     /* gray-700 */
+}
+
+/* Divisiones internas */
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #374151 !important;
+}
+
+/* ======================================================== */
+/* PROTECCIÓN EXPLÍCITA PARA EL HEADER                     */
+/* ======================================================== */
+
+/* Garantiza que el header se mantenga siempre blanco con texto oscuro */
+html.dark header,
+html.dark header *,
+.dark header,
+.dark header * {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Mantener el color de los iconos SVG dentro del header */
+html.dark header svg,
+.dark header svg {
+  stroke: #0f172a !important;
 }

@@ -5,7 +5,7 @@
       <h1 class="text-2xl font-bold">Stock</h1>
       <button
         @click="abrirModal()"
-        class="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition shadow-sm hover:shadow"
+        class="bg-blue-500 px-5 py-2 text-white rounded-lg hover:bg-blue-600 transition shadow-sm hover:shadow"
       >
         + Nuevo Producto
       </button>
@@ -23,28 +23,47 @@
 
     <!-- Tabla de productos -->
     <div class="overflow-x-auto rounded-lg shadow">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Código</th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Producto</th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Etiquetas</th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Precio</th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Stock</th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase">Acciones</th>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-gray-200 text-xs font-semibold uppercase">
+            <th class="px-4 py-3">Código</th>
+            <th class="px-4 py-3">Producto</th>
+            <th class="px-4 py-3">Etiquetas</th>
+            <th class="px-4 py-3">Precio</th>
+            <th class="px-4 py-3">Stock</th>
+            <th class="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="producto in productosFiltrados" :key="producto.id_producto">
-            <td class="px-4 py-3 text-sm">{{ producto.codigo_barras || '-' }}</td>
-            <td class="px-4 py-3 text-sm">{{ producto.nombre_producto }}</td>
-            <td class="px-4 py-3 text-sm">
-              <!-- 👇 NUEVO SISTEMA DE ETIQUETAS -->
+        <tbody class="divide-y divide-gray-100 text-sm">
+          <tr v-if="cargando">
+            <td colspan="6" class="px-4 py-6 text-center">Cargando productos...</td>
+          </tr>
+          <tr v-else-if="productosFiltrados.length === 0">
+            <td colspan="6" class="px-4 py-6 text-center">No se encontraron productos.</td>
+          </tr>
+          <tr
+            v-else
+            v-for="producto in productosFiltrados"
+            :key="producto.id_producto"
+            class="hover:bg-blue-50/60 dark:hover:bg-slate-800 transition-colors duration-150"
+          >
+            <!-- Código -->
+            <td class="px-4 py-3 whitespace-nowrap">
+              {{ producto.codigo_barras || '-' }}
+            </td>
+
+            <!-- Nombre Producto -->
+            <td class="px-4 py-3 font-medium whitespace-nowrap">
+              {{ producto.nombre_producto }}
+            </td>
+
+            <!-- Etiquetas -->
+            <td class="px-4 py-3">
               <div class="flex items-center gap-1">
-                <!-- Primera etiqueta (si existe) -->
+                <!-- Primera etiqueta -->
                 <span
                   v-if="producto.productos_etiquetas && producto.productos_etiquetas.length > 0"
-                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-sm"
                   :style="{
                     backgroundColor: colores[producto.productos_etiquetas[0].id_etiqueta % colores.length].bg,
                     color: colores[producto.productos_etiquetas[0].id_etiqueta % colores.length].text
@@ -52,29 +71,67 @@
                 >
                   {{ producto.productos_etiquetas[0].etiqueta.nombre_etiqueta }}
                 </span>
-                <span v-else class="text-gray-400 text-xs">Sin etiquetas</span>
+                <span v-else class="text-xs ">
+                  Sin etiquetas
+                </span>
 
                 <!-- Contador de etiquetas adicionales -->
                 <button
                   v-if="producto.productos_etiquetas && producto.productos_etiquetas.length > 1"
                   @click="abrirModalEtiquetas(producto)"
-                  class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold bg-blue-100 text-blue-700 hover:bg-blue-200 hover:scale-110 transition-all"
+                  class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-all hover:scale-110"
                   title="Ver más etiquetas"
                 >
                   +{{ producto.productos_etiquetas.length - 1 }}
                 </button>
               </div>
             </td>
-            <td class="px-4 py-3 text-sm">${{ producto.precio_unitario }}</td>
-            <td class="px-4 py-3 text-sm">
-              <span :class="producto.stock_actual < producto.stock_minimo ? 'text-red-500 font-bold' : 'text-sm'">
-                {{ producto.stock_actual }}
-              </span>
-              <span v-if="producto.stock_actual < producto.stock_minimo" class="text-red-500 text-xs ml-1"></span>
+
+            <!-- Precio -->
+            <td class="px-4 py-3 font-semibold whitespace-nowrap">
+              ${{ Number(producto.precio_unitario).toFixed(2) }}
             </td>
-            <td class="px-4 py-3 text-sm">
-              <button @click="abrirModal(producto)" class="text-blue-500 hover:text-blue-700 mr-2">Editar</button>
-              <button @click="eliminarProducto(producto.id_producto)" class="text-red-500 hover:text-red-700">Eliminar</button>
+
+           <!-- Stock -->
+          <td class="px-4 py-3 whitespace-nowrap">
+            <span
+              class="font-bold"
+              :style="{ color: Number(producto.stock_actual) < 0 ? '#ef4444' : 'inherit' }"
+            >
+              {{ producto.stock_actual }}
+            </span>
+          </td>
+
+            <!-- Acciones -->
+            <td class="px-4 py-3 text-right whitespace-nowrap">
+              <div class="flex items-center justify-end gap-2">
+
+                <!-- Botón Editar -->
+                <button
+                  @click="abrirModal(producto)"
+                  class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors"
+                  title="Editar producto"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                  </svg>
+                </button>
+                <!-- Botón Eliminar -->
+                <button
+                  @click="eliminarProducto(producto.id_producto)"
+                  class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 transition-colors"
+                  title="Eliminar producto"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    <line x1="10" x2="10" y1="11" y2="17"/>
+                    <line x1="14" x2="14" y1="11" y2="17"/>
+                  </svg>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -90,14 +147,14 @@
         <button
           @click="irAPaginaAnterior"
           :disabled="paginaActual === 1"
-          class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           ← Anterior
         </button>
         <button
           @click="irAPaginaSiguiente"
           :disabled="paginaActual === totalPaginas"
-          class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           Siguiente →
         </button>
@@ -112,9 +169,9 @@
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
       @click.self="modalEtiquetasVisible = false"
     >
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-fadeIn">
+      <div class=" rounded-2xl shadow-2xl w-full max-w-md p-6 animate-fadeIn">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-bold text-gray-800">
+          <h3 class="text-lg font-bold">
             Etiquetas de "{{ productoEtiquetas?.nombre_producto || '' }}"
           </h3>
           <button
@@ -154,7 +211,7 @@
         <div class="mt-4 flex justify-end">
           <button
             @click="modalEtiquetasVisible = false"
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+            class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
           >
             Cerrar
           </button>
@@ -163,16 +220,16 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- MODAL: PRODUCTO                                          -->
+    <!-- MODAL: PRODUCTO (CREAR / EDITAR)                         -->
     <!-- ======================================================== -->
     <div
       v-if="modalVisible"
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
       @click.self="modalVisible = false"
     >
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto text-gray-800">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-gray-800">
+          <h2 class="text-xl font-bold">
             {{ editando ? 'Editar Producto' : 'Nuevo Producto' }}
           </h2>
           <button @click="modalVisible = false" class="text-gray-400 hover:text-gray-600">
@@ -185,7 +242,7 @@
         <form @submit.prevent="guardarProducto">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Código de barras</label>
+              <label class="block text-sm font-medium mb-1">Código de barras</label>
               <input
                 v-model="form.codigo_barras"
                 type="text"
@@ -194,7 +251,7 @@
               />
             </div>
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Nombre *</label>
+              <label class="block text-sm font-medium mb-1">Nombre *</label>
               <input
                 v-model="form.nombre_producto"
                 type="text"
@@ -206,7 +263,7 @@
 
           <div class="grid grid-cols-2 gap-4 mt-3">
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Precio venta *</label>
+              <label class="block text-sm font-medium mb-1">Precio venta *</label>
               <input
                 v-model="form.precio_unitario"
                 type="number"
@@ -217,7 +274,7 @@
               />
             </div>
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Costo</label>
+              <label class="block  text-sm font-medium mb-1">Costo</label>
               <input
                 v-model="form.costo_unitario"
                 type="number"
@@ -231,17 +288,16 @@
 
           <div class="grid grid-cols-2 gap-4 mt-3">
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Stock actual *</label>
+              <label class="block text-sm font-medium mb-1">Stock actual *</label>
               <input
                 v-model="form.stock_actual"
                 type="number"
-                min="0"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-1">Stock mínimo</label>
+              <label class="block text-sm font-medium mb-1">Stock mínimo</label>
               <input
                 v-model="form.stock_minimo"
                 type="number"
@@ -253,7 +309,7 @@
           </div>
 
           <div class="mt-3">
-            <label class="block text-gray-700 text-sm font-medium mb-1">Etiquetas</label>
+            <label class="block text-sm font-medium mb-1">Etiquetas</label>
             <div class="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg max-h-32 overflow-y-auto">
               <label
                 v-for="etiqueta in etiquetas"
@@ -273,7 +329,7 @@
           </div>
 
           <div class="flex justify-end gap-3 mt-6">
-            <button type="button" @click="modalVisible = false" class="px-5 py-2.5 text-gray-600 hover:text-gray-800 rounded-xl hover:bg-gray-100">
+            <button type="button" @click="modalVisible = false" class="px-5 py-2.5 text-gray-600 hover:text-gray-800 rounded-xl hover:bg-gray-100 transition">
               Cancelar
             </button>
             <button type="submit" class="px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition">
@@ -294,7 +350,7 @@ import { useAuthStore } from '../stores/auth'
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
-// Paleta de colores para etiquetas
+// Paleta de colores suaves para etiquetas
 const colores = [
   { bg: '#E3F2FD', text: '#1565C0' },
   { bg: '#E8F5E9', text: '#2E7D32' },
@@ -308,12 +364,11 @@ const colores = [
   { bg: '#FBE9E7', text: '#BF360C' },
 ]
 
-// ============================================================
 // DATOS
-// ============================================================
 const productos = ref([])
 const etiquetas = ref([])
 const busqueda = ref('')
+const cargando = ref(false)
 
 // ============================================================
 // PAGINACIÓN
@@ -333,7 +388,6 @@ const productosFiltrados = computed(() => {
     p.codigo_barras?.includes(q)
   )
 })
-
 const irAPaginaAnterior = () => {
   if (paginaActual.value > 1) {
     paginaActual.value--
@@ -351,6 +405,7 @@ const irAPaginaSiguiente = () => {
 // ============================================================
 // MODAL: PRODUCTO
 // ============================================================
+
 const modalVisible = ref(false)
 const editando = ref(false)
 const form = ref({
@@ -364,16 +419,13 @@ const form = ref({
   etiquetas: []
 })
 
-// ============================================================
-// MODAL: ETIQUETAS
-// ============================================================
+// MODAL ETIQUETAS
 const modalEtiquetasVisible = ref(false)
 const productoEtiquetas = ref(null)
 
-// ============================================================
 // FUNCIONES
-// ============================================================
 const cargarProductos = async () => {
+  cargando.value = true
   try {
     const response = await axios.get(`${baseUrl}/api/productos`, {
       headers: { 'Authorization': `Bearer ${authStore.token}` },
@@ -387,6 +439,8 @@ const cargarProductos = async () => {
     totalProductos.value = response.data.total
   } catch (error) {
     console.error('Error cargando productos:', error)
+  } finally {
+    cargando.value = false
   }
 }
 
@@ -465,7 +519,7 @@ const guardarProducto = async () => {
 }
 
 const eliminarProducto = async (id) => {
-  if (!confirm('Eliminar este producto?')) return
+  if (!confirm('¿Eliminar este producto?')) return
   try {
     await axios.delete(`${baseUrl}/api/productos/${id}`, {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
@@ -480,9 +534,6 @@ const eliminarProducto = async (id) => {
   }
 }
 
-// ============================================================
-// LIFECYCLE
-// ============================================================
 onMounted(() => {
   cargarProductos()
   cargarEtiquetas()

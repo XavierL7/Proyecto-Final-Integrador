@@ -1,12 +1,12 @@
 <!-- frontend/src/views/CajasView.vue -->
 <template>
   <div class="p-6 max-w-5xl mx-auto">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Cajas</h1>
+    <h1 class="text-2xl font-bold mb-6">Cajas</h1>
 
     <!-- Aviso si vino redirigido desde /ventas por no tener caja abierta -->
     <div
       v-if="mensajeRedireccion"
-      class="mb-6 p-4 bg-amber-50 border border-amber-300 rounded-lg text-sm text-amber-800"
+      class="mb-6 p-4 border border-amber-300 rounded-lg text-sm text-amber-800"
     >
       {{ mensajeRedireccion }}
     </div>
@@ -14,8 +14,8 @@
     <!-- ============================================================ -->
     <!-- ESTADO ACTUAL: hay caja abierta o no -->
     <!-- ============================================================ -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-      <div v-if="cargandoActiva" class="text-gray-400 text-sm">Cargando estado de caja...</div>
+    <div class=" rounded-lg shadow p-6 mb-6">
+      <div v-if="cargandoActiva" class="text-sm">Cargando estado de caja...</div>
 
       <!-- Hay una caja abierta -->
       <div v-else-if="cajaActiva">
@@ -32,7 +32,7 @@
                 {{ cajaActiva.modo_autenticacion === 'por_venta' ? 'Compartida (huella por venta)' : 'Individual' }}
               </span>
             </div>
-            <p class="text-sm text-gray-600">
+            <p class="text-sm">
               Abierta por
               <strong>{{ cajaActiva.trabajador_apertura?.nombre }} {{ cajaActiva.trabajador_apertura?.apellido }}</strong>
               el {{ formatearFecha(cajaActiva.fecha_hora_apertura) }}
@@ -53,7 +53,7 @@
 
         <!-- Formulario de cierre -->
         <div v-if="mostrarFormCierre" class="mt-5 pt-5 border-t border-gray-200">
-          <label class="block text-sm text-gray-600 mb-1">
+          <label class="block text-sm mb-1">
             Monto real contado en el cajón (opcional)
           </label>
           <input
@@ -63,11 +63,11 @@
             placeholder="Ej: 15000"
             class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 mb-3"
           />
-          <p class="text-xs text-gray-400 mb-4">
+          <p class="text-xs mb-4">
             Si no lo completás, la caja igual se cierra y podés cargar el conteo después.
           </p>
 
-          <label class="block text-sm text-gray-600 mb-1">Observaciones (opcional)</label>
+          <label class="block text-sm mb-1">Observaciones (opcional)</label>
           <textarea
             v-model="observacionesCierre"
             rows="2"
@@ -78,7 +78,7 @@
           <div class="flex gap-3">
             <button
               @click="mostrarFormCierre = false"
-              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm"
+              class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
             >
               Cancelar
             </button>
@@ -90,7 +90,7 @@
               {{ cerrando ? 'Cerrando...' : 'Confirmar cierre y salir' }}
             </button>
           </div>
-          <p class="text-xs text-gray-500 mt-2">
+          <p class="text-xs mt-2">
             Al confirmar, se cierra tu sesión y volvés a la página principal.
           </p>
         </div>
@@ -98,10 +98,10 @@
 
       <!-- No hay caja abierta: formulario de apertura -->
       <div v-else>
-        <p class="text-sm text-gray-600 mb-4">
+        <p class="text-sm mb-4">
           No hay ninguna caja abierta. Abrí una para poder registrar ventas.
         </p>
-        <label class="block text-sm text-gray-600 mb-1">Monto inicial en caja</label>
+        <label class="block text-sm mb-1">Monto inicial en caja</label>
         <input
           v-model="montoInicial"
           type="number"
@@ -109,7 +109,7 @@
           placeholder="Ej: 5000"
           class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 mb-1"
         />
-        <p v-if="montoSugerido !== null" class="text-xs text-gray-400 mb-4">
+        <p v-if="montoSugerido !== null" class="text-xs mb-4">
           La última caja cerró con ${{ montoSugerido.toFixed(2) }} contados.
           <button @click="montoInicial = montoSugerido" type="button" class="text-teal-600 hover:underline">
             Usar ese monto
@@ -134,7 +134,7 @@
           <button
             @click="abrirCaja"
             :disabled="abriendo"
-            class="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition text-sm font-semibold disabled:opacity-50"
+            class="px-4 py-2 bg-teal-500 rounded-lg hover:bg-teal-600 transition text-sm font-semibold disabled:opacity-50"
           >
             {{ abriendo ? 'Abriendo...' : 'Abrir Caja' }}
           </button>
@@ -145,12 +145,12 @@
     <!-- ============================================================ -->
     <!-- HISTORIAL DE CAJAS -->
     <!-- ============================================================ -->
-    <h2 class="text-lg font-bold text-gray-800 mb-3">Historial</h2>
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <h2 class="text-lg font-bold mb-3">Historial</h2>
+    <div class=" rounded-lg shadow overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase">
+            <tr class=" border-b border-gray-200 text-xs font-semibold uppercase">
               <th class="px-4 py-3">#</th>
               <th class="px-4 py-3">Modo</th>
               <th class="px-4 py-3">Apertura</th>
@@ -181,32 +181,32 @@
                   {{ caja.modo_autenticacion === 'por_venta' ? 'Compartida' : 'Individual' }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-gray-700 whitespace-nowrap">{{ formatearFecha(caja.fecha_hora_apertura) }}</td>
-              <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
+              <td class="px-4 py-3 whitespace-nowrap">{{ formatearFecha(caja.fecha_hora_apertura) }}</td>
+              <td class="px-4 py-3 whitespace-nowrap">
                 {{ caja.fecha_hora_cierre ? formatearFecha(caja.fecha_hora_cierre) : '-' }}
               </td>
-              <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
+              <td class="px-4 py-3 whitespace-nowrap">
                 {{ caja.trabajador_apertura?.nombre }} {{ caja.trabajador_apertura?.apellido }}
               </td>
-              <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
+              <td class="px-4 py-3 whitespace-nowrap">
                 {{ caja.trabajador_cierre ? `${caja.trabajador_cierre.nombre} ${caja.trabajador_cierre.apellido}` : '-' }}
               </td>
-              <td class="px-4 py-3 text-right text-gray-700">${{ Number(caja.monto_inicial).toFixed(2) }}</td>
-              <td class="px-4 py-3 text-right text-gray-700">
+              <td class="px-4 py-3 text-right">${{ Number(caja.monto_inicial).toFixed(2) }}</td>
+              <td class="px-4 py-3 text-right">
                 {{ caja.monto_final_esperado !== null ? `$${Number(caja.monto_final_esperado).toFixed(2)}` : '-' }}
               </td>
-              <td class="px-4 py-3 text-right text-gray-700">
+              <td class="px-4 py-3 text-right">
                 {{ caja.monto_final_real !== null ? `$${Number(caja.monto_final_real).toFixed(2)}` : '-' }}
               </td>
               <td class="px-4 py-3">
                 <span
                   class="text-xs font-semibold px-2 py-1 rounded"
-                  :class="caja.estado === 'abierta' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+                  :class="caja.estado === 'abierta' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-red-700'"
                 >
                   {{ caja.estado }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-gray-500 text-xs max-w-xs">
+              <td class="px-4 py-3 text-xs max-w-xs">
                 {{ caja.arqueos_caja?.[0]?.observaciones || '-' }}
               </td>
             </tr>

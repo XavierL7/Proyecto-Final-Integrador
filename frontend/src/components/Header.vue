@@ -1,12 +1,12 @@
+<!-- frontend/src/components/Header.vue -->
 <template>
   <header 
-    class="fixed top-0 left-0 z-50 bg-white shadow-sm transition-all duration-300 px-4 md:px-8 py-3 w-full"
+    class="fixed top-0 left-0 z-50 !bg-white shadow-sm transition-all duration-300 px-4 md:px-8 py-3 w-full"
   >
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       
-      <!-- LADO IZQUIERDO: Botón Retroceder + Logo compacto -->
+      <!-- LADO IZQUIERDO -->
       <div class="flex items-center gap-3 shrink-0">
-
         <a href="/pagina" class="inline-flex items-center">
           <img 
             src="../assets/logo-removebg-preview.png" 
@@ -17,24 +17,24 @@
       </div>
 
       <!-- NAVEGACIÓN PRINCIPAL -->
-      <nav class="hidden md:flex items-center gap-8 text-[#0f172a] font-bold text-base">
+      <nav class="hidden md:flex items-center gap-8 !text-[#0f172a] font-bold text-base">
         <a 
           v-for="item in navLinks" 
           :key="item.text" 
           :href="item.href" 
-          class="flex items-center gap-1 hover:opacity-80 transition-opacity"
+          class="flex items-center gap-1 hover:opacity-80 transition-opacity !text-[#0f172a]"
         >
           {{ item.text }}
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 !text-[#0f172a]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
           </svg>
         </a>
       </nav>
 
       <!-- ACCIONES DE USUARIO -->
-      <div class="flex items-center gap-6 text-[#0f172a] font-bold text-sm shrink-0">
-        <a href="/contacto" class="hover:opacity-80">Servicio al cliente</a>
-        <a href="/login" class="hover:opacity-80">Ingresar</a>
+      <div class="flex items-center gap-6 !text-[#0f172a] font-bold text-sm shrink-0">
+        <a href="/contacto" class="hover:opacity-80 !text-[#0f172a]">Servicio al cliente</a>
+        <a href="/login" class="hover:opacity-80 !text-[#0f172a]">Ingresar</a>
       </div>
 
     </div>
