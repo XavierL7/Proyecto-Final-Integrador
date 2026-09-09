@@ -48,15 +48,19 @@ export const getHistorialAsistencias = async (req, res) => {
       }
     });
 
-    // Calcular horas trabajadas y total de ventas por turno
+    // Calcular tiempo trabajado y total de ventas por turno
     const historialProcesado = await Promise.all(
       asistencias.map(async (registro) => {
         const inicio = new Date(registro.fecha_hora_entrada);
         const fin = registro.fecha_hora_salida ? new Date(registro.fecha_hora_salida) : new Date();
 
-        // 1. Duración en horas del turno
+        // 1. Cálculo de duración en minutos y formato hh:mm
         const duracionMs = fin - inicio;
-        const horasTrabajadas = Number((duracionMs / (1000 * 60 * 60)).toFixed(2));
+        const totalMinutos = Math.floor(duracionMs / (1000 * 60));
+        const horas = Math.floor(totalMinutos / 60);
+        const minutos = totalMinutos % 60;
+        
+        const tiempoFormateado = `${horas}h ${minutos}m`; // Ej: "0h 58m" o "1h 15m"
 
         // 2. Suma total de ventas realizadas por el trabajador durante ESTE turno
         const resumenVentas = await prisma.venta.aggregate({
@@ -87,7 +91,8 @@ export const getHistorialAsistencias = async (req, res) => {
           fecha_hora_salida: registro.fecha_hora_salida,
           turno_activo: !registro.fecha_hora_salida,
           tipo_autenticacion: registro.tipo_autenticacion,
-          horas_trabajadas: horasTrabajadas,
+          horas_trabajadas: tiempoFormateado, // Conservamos la propiedad 'horas_trabajadas' pero con formato "0h 58m"
+          minutos_trabajados: totalMinutos,  // Dato entero útil para cálculos
           metricas_turno: {
             cantidad_ventas: resumenVentas._count.id_venta || 0,
             total_facturado: Number(resumenVentas._sum.total_neto || 0)
@@ -102,4 +107,3 @@ export const getHistorialAsistencias = async (req, res) => {
     return res.status(500).json({ error: 'Error interno del servidor al procesar el historial.' });
   }
 };
-

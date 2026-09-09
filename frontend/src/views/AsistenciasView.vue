@@ -63,7 +63,7 @@
 
       <div class="bg-white p-5 rounded-lg shadow border-l-4 border-indigo-500">
         <span class="text-xs font-bold text-gray-600 uppercase">Total Horas Acumuladas</span>
-        <div class="text-2xl font-bold text-gray-800 mt-1">{{ totalHorasAcumuladas }} hs</div>
+        <div class="text-2xl font-bold text-gray-800 mt-1">{{ totalHorasAcumuladas }}</div>
       </div>
 
       <div class="bg-white p-5 rounded-lg shadow border-l-4 border-green-500">
@@ -132,7 +132,7 @@
                   >
                     {{ item.turno_activo ? 'Turno Activo' : 'Finalizado' }}
                   </span>
-                  <span class="text-xs  capitalize">
+                  <span class="text-xs capitalize">
                     ({{ item.tipo_autenticacion || 'Huella' }})
                   </span>
                 </div>
@@ -140,7 +140,7 @@
 
               <!-- Horas Trabajadas -->
               <td class="p-4 text-center font-bold">
-                {{ item.horas_trabajadas }} hs
+                {{ item.horas_trabajadas }}
               </td>
 
               <!-- Métricas del Turno -->
@@ -181,10 +181,15 @@ const filtros = ref({
   id_trabajador: ''
 })
 
-// COMPUTED
+// COMPUTED CORREGIDO
 const totalHorasAcumuladas = computed(() => {
-  const total = historial.value.reduce((sum, item) => sum + (item.horas_trabajadas || 0), 0)
-  return total.toFixed(1)
+  // Sumamos los minutos_trabajados enteros que vienen del backend
+  const totalMinutos = historial.value.reduce((sum, item) => sum + (item.minutos_trabajados || 0), 0)
+  
+  const horas = Math.floor(totalMinutos / 60)
+  const minutos = totalMinutos % 60
+
+  return `${horas}h ${minutos}m`
 })
 
 const totalFacturadoFormat = computed(() => {
