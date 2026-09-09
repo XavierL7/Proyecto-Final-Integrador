@@ -16,6 +16,7 @@
         />
       </div>
       <button
+        v-if="authStore.tienePermiso('Agregar_Etiquetas')"
         @click="abrirModal()"
         class="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition shadow-sm hover:shadow"
       >
@@ -32,7 +33,8 @@
         :style="{
           backgroundColor: colores[etiqueta.id_etiqueta % colores.length].bg,
           color: colores[etiqueta.id_etiqueta % colores.length].text,
-          borderColor: colores[etiqueta.id_etiqueta % colores.length].border
+          borderColor: colores[etiqueta.id_etiqueta % colores.length].border,
+          opacity: etiqueta.activo === false ? 0.5 : 1
         }"
         style="border: 1px solid transparent;"
       >
@@ -53,6 +55,7 @@
         <!-- Acciones (aparecen al hacer hover sobre la etiqueta) -->
         <div class="etiqueta-acciones flex items-center gap-0.5">
           <button
+            v-if="authStore.tienePermiso('Editar_Etiquetas')"
             @click="abrirModal(etiqueta)"
             class="hover:scale-110 transition-transform p-0.5 rounded hover:bg-black/5"
             title="Editar"
@@ -62,6 +65,17 @@
             </svg>
           </button>
           <button
+            v-if="authStore.tienePermiso('Deshabilitar_Etiquetas')"
+            @click="toggleActivaEtiqueta(etiqueta)"
+            class="hover:scale-110 transition-transform p-0.5 rounded hover:bg-black/5"
+            :title="etiqueta.activo === false ? 'Habilitar' : 'Deshabilitar'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18.36 6.64a9 9 0 11-12.73 0M12 3v9" />
+            </svg>
+          </button>
+          <button
+            v-if="authStore.tienePermiso('Borrar_Etiquetas')"
             @click="eliminarEtiqueta(etiqueta.id_etiqueta)"
             class="hover:scale-110 transition-transform p-0.5 rounded hover:bg-black/5 hover:text-red-600"
             title="Eliminar"
@@ -268,6 +282,19 @@ const eliminarEtiqueta = async (id) => {
     cargarEtiquetas()
   } catch (error) {
     alert(error.response?.data?.error || 'Error al eliminar')
+  }
+}
+
+// Habilitar/deshabilitar una etiqueta sin borrarla
+const toggleActivaEtiqueta = async (etiqueta) => {
+  try {
+    await axios.put(`${baseUrl}/api/etiquetas/${etiqueta.id_etiqueta}/activa`,
+      { activo: etiqueta.activo === false }, // si estaba deshabilitada, la habilita; si no, la deshabilita
+      { headers: { 'Authorization': `Bearer ${authStore.token}` } }
+    )
+    cargarEtiquetas()
+  } catch (error) {
+    alert(error.response?.data?.error || 'Error al cambiar el estado de la etiqueta')
   }
 }
 

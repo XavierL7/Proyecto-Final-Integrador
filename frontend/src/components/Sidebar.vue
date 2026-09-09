@@ -72,7 +72,7 @@
 
       <!-- VENTAS -->
       <router-link
-        v-if="authStore.tienePermiso('dashboard_ventas')"
+        v-if="authStore.tienePermiso('Ver_Ventas')"
         to="/ventas"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
@@ -99,7 +99,7 @@
 
       <!-- STOCK -->
       <router-link
-        v-if="authStore.tienePermiso('gestionar_productos')"
+        v-if="authStore.tienePermiso('Ver_Stock')"
         to="/stock"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
@@ -129,7 +129,7 @@
       <!-- DESCUENTOS -->
       <!-- ============================================================ -->
       <router-link
-        v-if="authStore.tienePermiso('gestionar_productos')"
+        v-if="authStore.tienePermiso('Ver_Descuentos')"
         to="/descuentos"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
@@ -159,7 +159,7 @@
       <!-- ============================================================ -->
 
       <router-link
-        v-if="authStore.tienePermiso('gestionar_etiquetas')"
+        v-if="authStore.tienePermiso('Ver_Etiquetas')"
         to="/etiquetas"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
@@ -186,7 +186,7 @@
 
       <!-- CAJAS -->
       <router-link
-        v-if="authStore.tienePermiso('cerrar_caja')"
+        v-if="authStore.tienePermiso('Ver_Cajas')"
         to="/cajas"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
@@ -214,7 +214,7 @@
 
       <!-- CLIENTES -->
       <router-link
-        v-if="authStore.tienePermiso('ver_reportes')"
+        v-if="authStore.tienePermiso('Ver_Clientes')"
         to="/clientes"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
@@ -241,7 +241,7 @@
 
       <!-- HISTORIAL DE VENTAS -->
       <router-link
-        v-if="authStore.tienePermiso('ver_reportes')"
+        v-if="authStore.tienePermiso('Ver_Historial_Ventas')"
         to="/historial"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
@@ -268,7 +268,7 @@
 
       <!-- ADMINISTRACIÓN -->
       <router-link
-        v-if="authStore.tienePermiso('crear_roles')"
+        v-if="mostrarAdministracion"
         to="/administracion"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
@@ -350,7 +350,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useThemeStore } from '../stores/theme' // <-- Importamos el store del tema
@@ -359,6 +359,13 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore() // <-- Instanciamos el store del tema
+
+// Administración tiene pestañas de Roles, Trabajadores y Configuración:
+// se muestra el link si tiene el permiso de VER cualquiera de ellas
+// (mismo criterio que usa el router guard para dejarlo entrar).
+const mostrarAdministracion = computed(() =>
+  ['Ver_Roles', 'Ver_Trabajadores', 'Ver_configuracion'].some(p => authStore.tienePermiso(p))
+)
 
 const isOpen = ref(true)
 

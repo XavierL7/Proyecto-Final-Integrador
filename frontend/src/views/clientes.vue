@@ -13,7 +13,10 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <!-- Formulario de Registro -->
-        <div class="p-6 rounded-2xl shadow-md border border-slate-200/80 h-fit">
+        <div
+          v-if="authStore.tienePermiso('Agregar_Clientes') || authStore.tienePermiso('Editar_Clientes')"
+          class="p-6 rounded-2xl shadow-md border border-slate-200/80 h-fit"
+        >
           <h2 class="text-xl font-bold mb-4">
             {{ editando ? 'Editar Cliente' : 'Nuevo Cliente' }}
           </h2>
@@ -114,22 +117,34 @@
                 <tr v-if="clientes.length === 0">
                   <td colspan="5" class="p-4 text-center">No hay clientes registrados aún.</td>
                 </tr>
-                <tr v-for="cliente in clientes" :key="cliente.id_cliente" class="hover:bg-slate-50/80 transition-colors">
+                <tr v-for="cliente in clientes" :key="cliente.id_cliente" class="hover:bg-slate-50/80 transition-colors" :class="{ 'opacity-50': cliente.activo === false }">
                   <td class="p-3 font-medium">{{ cliente.dni }}</td>
-                  <td class="p-3 font-semibold">{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                  <td class="p-3 font-semibold">
+                    {{ cliente.nombre }} {{ cliente.apellido }}
+                    <span v-if="cliente.activo === false" class="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">Deshabilitado</span>
+                  </td>
                   <td class="p-3">{{ cliente.telefono || '-' }}</td>
                   <td class="p-3">
                     {{ cliente.fecha_ultima_compra ? new Date(cliente.fecha_ultima_compra).toLocaleDateString('es-AR', { timeZone: 'UTC' }) : '-' }}
                   </td>
                   <td class="p-3 text-right space-x-2">
-                    <button 
-                      @click="seleccionarParaEditar(cliente)" 
+                    <button
+                      v-if="authStore.tienePermiso('Editar_Clientes')"
+                      @click="seleccionarParaEditar(cliente)"
                       class="text-teal-600 font-semibold hover:underline text-xs"
                     >
                       Editar
                     </button>
-                    <button 
-                      @click="eliminarCliente(cliente.id_cliente)" 
+                    <button
+                      v-if="authStore.tienePermiso('Deshabilitar_Clientes')"
+                      @click="toggleActivaCliente(cliente)"
+                      class="text-amber-600 font-semibold hover:underline text-xs"
+                    >
+                      {{ cliente.activo === false ? 'Habilitar' : 'Deshabilitar' }}
+                    </button>
+                    <button
+                      v-if="authStore.tienePermiso('Deshabilitar_Clientes')"
+                      @click="eliminarCliente(cliente.id_cliente)"
                       class="text-rose-500 font-semibold hover:underline text-xs"
                     >
                       Eliminar
@@ -243,6 +258,20 @@ const guardarCliente = async () => {
     alert(error.response?.data?.error || 'Error al guardar el cliente')
   } finally {
     cargando.value = false
+  }
+}
+
+// Habilitar/deshabilitar un cliente sin borrarlo
+const toggleActivaCliente = async (cliente) => {
+  try {
+    await axios.put(`${baseUrl}/api/clientes/${cliente.id_cliente}/activa`,
+      { activo: cliente.activo === false }, // si estaba deshabilitado, lo habilita; si no, lo deshabilita
+      { headers: { 'Authorization': `Bearer ${authStore.token}` } }
+    )
+    obtenerClientes()
+  } catch (error) {
+    console.error('Error cambiando estado del cliente:', error)
+    alert(error.response?.data?.error || 'Error al cambiar el estado del cliente')
   }
 }
 

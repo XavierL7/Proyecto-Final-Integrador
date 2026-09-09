@@ -38,7 +38,7 @@ const routes = [
     component: () => import('../views/StockView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'gestionar_productos'
+      permiso: 'Ver_Stock'
     }
   },
 
@@ -48,7 +48,7 @@ const routes = [
     component: () => import('../views/DescuentosView.vue'),
     meta: {
       requiereAuth: true,
-      permiso: 'gestionar_productos'
+      permiso: 'Ver_Descuentos'
     }
   },
 
@@ -81,7 +81,7 @@ const routes = [
     component: () => import('../views/VentasView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'registrar_venta', // Requiere esta funcionalidad específica
+      permiso: 'Ver_Ventas', // antes: 'registrar_venta'
       requiereCajaAbierta: true // No se puede vender sin haber abierto una caja antes
     }
   },
@@ -92,7 +92,7 @@ const routes = [
     component: () => import('../views/HistorialVentasView.vue'),
     meta: {
       requiereAuth: true,
-      permiso: 'ver_reportes'
+      permiso: 'Ver_Historial_Ventas' // antes: 'ver_reportes'
     }
   },
 
@@ -102,7 +102,7 @@ const routes = [
     component: () => import('../views/CrearRolesView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'crear_roles' // Tu funcionalidad de la base de datos
+      permiso: 'Ver_Roles' // antes: 'crear_roles'
     }
   },
   {
@@ -111,7 +111,7 @@ const routes = [
     component: () => import('../views/CajasView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'abrir_caja'
+      permiso: 'Ver_Cajas' // antes: 'abrir_caja'
     }
   },
   {
@@ -120,7 +120,11 @@ const routes = [
     component: () => import('../views/AdminView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'crear_roles' // Solo perfiles autorizados (eladmin)
+      // La página tiene pestañas de Roles, Trabajadores y (más adelante)
+      // Configuración: entra si tiene el permiso de VER cualquiera de
+      // ellas. Cada pestaña adentro debe ocultarse sola según cuál de
+      // estos permisos tenga realmente (eso se hace en AdminView.vue).
+      permiso: ['Ver_Roles', 'Ver_Trabajadores', 'Ver_configuracion']
     }
   },
 
@@ -130,7 +134,7 @@ const routes = [
     component: () => import('../views/EtiquetasView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'gestionar_etiquetas'  // Solo usuarios con este permiso
+      permiso: 'Ver_Etiquetas' // antes: 'gestionar_etiquetas'
     }
   },
   // Ruta de escape por si intentan entrar a un lugar prohibido o inexistente
@@ -162,12 +166,16 @@ router.beforeEach(async (to, from, next) => {
     return next({ name: 'Dashboard' })
   }
 
-  // CASO 3: La ruta requiere un permiso específico
+  // CASO 3: La ruta requiere un permiso específico.
+  // meta.permiso puede ser un string ("necesito ESTE") o un array
+  // (["A","B"] = "necesito CUALQUIERA de estos"), para páginas con
+  // varias pestañas que se habilitan con distintos permisos.
   if (to.meta.permiso) {
-    const tienePermisoNecesario = authStore.tienePermiso(to.meta.permiso)
-    
+    const permisosNecesarios = Array.isArray(to.meta.permiso) ? to.meta.permiso : [to.meta.permiso]
+    const tienePermisoNecesario = permisosNecesarios.some(p => authStore.tienePermiso(p))
+
     if (!tienePermisoNecesario) {
-      console.warn(`Acceso denegado a ${to.path}. Falta el permiso: ${to.meta.permiso}`)
+      console.warn(`Acceso denegado a ${to.path}. Falta alguno de: ${permisosNecesarios.join(', ')}`)
       return next({ name: 'Dashboard' }) // Lo rebota al panel principal
     }
   }
