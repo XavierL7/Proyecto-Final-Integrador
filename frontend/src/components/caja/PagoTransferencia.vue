@@ -45,9 +45,11 @@
         </button>
         <button
           @click="confirmar"
-          class="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+          :disabled="cargando"
+          class="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          Confirmar pago
+          <span v-if="cargando" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+          <span>{{ cargando ? 'Procesando...' : 'Confirmar pago' }}</span>
         </button>
       </div>
     </div>

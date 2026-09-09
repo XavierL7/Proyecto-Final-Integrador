@@ -1,6 +1,25 @@
-<!-- frontend/src/views/CajaView.vue -->
+<!-- frontend/src/views/VentasView.vue -->
 <template>
-  <div class="p-6 max-w-6xl mx-auto">
+  <div class="p-6 max-w-6xl mx-auto relative">
+    
+    <!-- Banner de notificación visual -->
+
+<!-- Banner de notificación visual -->
+    <transition name="fade">
+      <div 
+        v-if="notificacion.visible"
+        class="banner-notificacion"
+        :class="notificacion.tipo === 'exito' ? 'banner-exito' : 'banner-error'"
+      >
+        <div class="icono-contenedor">
+          <span>{{ notificacion.tipo === 'exito' ? '✓' : '✕' }}</span>
+        </div>
+        <p class="mensaje-texto">
+          {{ notificacion.mensaje }}
+        </p>
+      </div>
+    </transition>
+
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">Caja Registradora</h1>
       <div class="flex items-center gap-3">
@@ -22,10 +41,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Columna izquierda: Buscador y carrito -->
       <div class="lg:col-span-2">
-        <!-- Buscador -->
         <BuscadorProducto @agregar="agregarAlCarrito" />
 
-        <!-- Carrito -->
         <CarritoCompras
           :items="carrito"
           :calcular-descuento="calcularDescuentoItem"
@@ -37,26 +54,25 @@
 
       <!-- Columna derecha: Resumen y pago -->
       <div class="lg:col-span-1">
-        <!-- Cliente -->
         <SelectorCliente
           :clientes="clientes"
           v-model="clienteSeleccionado"
         />
 
-        <!-- Resumen -->
         <ResumenVenta
           :subtotal="subtotal"
           :descuento="descuento"
           :total="total"
         />
 
-        <!-- ============================================================ -->
-        <!-- CAJA COMPARTIDA: esperando que alguien confirme con huella -->
-        <!-- ============================================================ -->
+        <!-- Esperando confirmación por huella -->
         <div
           v-if="esperandoHuella"
           class="mt-4 bg-purple-50 border border-purple-300 rounded-lg p-4 text-center"
         >
+          <div class="flex justify-center mb-2">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-800"></div>
+          </div>
           <p class="font-semibold text-purple-800 mb-1">Esperando confirmación...</p>
           <p class="text-sm text-purple-700 mb-3">
             Que la persona que hizo la venta ponga el dedo en el lector de huella.
@@ -69,10 +85,11 @@
           </button>
         </div>
 
-        <!-- Métodos de pago y formularios: ocultos mientras se espera huella -->
+        <!-- Métodos de pago y formularios -->
         <template v-else>
           <MetodosPago
             :metodos="metodosPago"
+            :disabled="procesandoVenta || carrito.length === 0"
             @seleccionar="seleccionarMetodoPago"
           />
 
@@ -80,23 +97,27 @@
             <PagoEfectivo
               v-if="metodoSeleccionado === 'Efectivo'"
               :total="total"
+              :cargando="procesandoVenta"
               @confirmar="finalizarVenta"
             />
             <PagoTarjeta
               v-else-if="metodoSeleccionado === 'Tarjeta Débito' || metodoSeleccionado === 'Tarjeta Crédito'"
               :tipo="metodoSeleccionado"
               :total="total"
+              :cargando="procesandoVenta"
               @confirmar="finalizarVenta"
             />
             <PagoTransferencia
               v-else-if="metodoSeleccionado === 'Transferencia' || metodoSeleccionado === 'Mercado Pago'"
               :tipo="metodoSeleccionado"
               :total="total"
+              :cargando="procesandoVenta"
               @confirmar="finalizarVenta"
             />
             <PagoCheque
               v-else-if="metodoSeleccionado === 'Cheque'"
               :total="total"
+              :cargando="procesandoVenta"
               @confirmar="finalizarVenta"
             />
           </div>
@@ -124,28 +145,29 @@ const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const headers = () => ({ headers: { 'Authorization': `Bearer ${authStore.token}` } })
 
-// ============================================================
 // STATE
-// ============================================================
 const carrito = ref([])
 const metodosPago = ref([])
 const metodoSeleccionado = ref(null)
 const clientes = ref([])
-// null = "Cliente General". Si no, es el id_cliente elegido en el selector.
 const clienteSeleccionado = ref(null)
-// Promociones activas y vigentes ahora mismo (se ofrecen en el carrito)
 const promocionesVigentes = ref([])
-// La caja de este trabajador: acá miramos modo_autenticacion para decidir
-// si la venta se registra directo o queda esperando huella.
 const cajaActiva = ref(null)
 
-// ============================================================
+// NUEVOS ESTADOS DE CONTROL DE PROCESO Y NOTIFICACIÓN
+const procesandoVenta = ref(false)
+const notificacion = ref({ visible: false, mensaje: '', tipo: 'exito' })
+
+const mostrarNotificacion = (mensaje, tipo = 'exito') => {
+  notificacion.value = { visible: true, mensaje, tipo }
+  setTimeout(() => {
+    notificacion.value.visible = false
+  }, 4000)
+}
+
 // COMPUTED
-// ============================================================
 const subtotal = computed(() => {
-  return carrito.value.reduce((sum, item) => {
-    return sum + (item.cantidad * item.precio_unitario)
-  }, 0)
+  return carrito.value.reduce((sum, item) => sum + (item.cantidad * item.precio_unitario), 0)
 })
 
 const descuento = computed(() => {
@@ -154,12 +176,9 @@ const descuento = computed(() => {
 
 const total = computed(() => subtotal.value - descuento.value)
 
-// ============================================================
-// MÉTODOS
-// ============================================================
+// MÉTODOS CARRITO
 const agregarAlCarrito = (producto) => {
   const existente = carrito.value.find(item => item.id_producto === producto.id_producto)
-
   if (existente) {
     existente.cantidad += 1
   } else {
@@ -179,9 +198,6 @@ const actualizarCantidad = (index, cantidad) => {
     return
   }
   carrito.value[index].cantidad = cantidad
-  // El descuento se recalcula solo (es reactivo): si al bajar/subir la
-  // cantidad deja de alcanzar un combo o una promo por volumen, se
-  // recalcula automáticamente a 0 sin que haya que hacer nada acá.
 }
 
 const eliminarDelCarrito = (index) => {
@@ -192,16 +208,8 @@ const seleccionarMetodoPago = (metodo) => {
   metodoSeleccionado.value = metodo
 }
 
-// ============================================================
-// DESCUENTOS / PROMOCIONES (automático: se elige solo el mejor)
-// ============================================================
-
-// Cuánto descuento le daría ESTA promo puntual a este item, si aplica.
-// Espeja exactamente la lógica del backend (construirVenta.js) para que
-// lo que se ve en el carrito coincida con lo que después se cobra.
+// PROMOCIONES
 const montoSiAplica = (item, promo) => {
-  // El backend ya resolvió esto (incluyendo lo que aplique por etiqueta,
-  // no solo por producto puntual): acá solo consultamos el resultado.
   const aplicaAlProducto = promo.sin_restriccion || promo.productos_aplicables.includes(item.id_producto)
   if (!aplicaAlProducto) return 0
 
@@ -216,22 +224,17 @@ const montoSiAplica = (item, promo) => {
   }
 
   if (promo.tipo_promo === 'combo_nxm') {
-    const n = promo.cantidad_minima // cuántas se llevan (ej. 2 en un 2x1)
-    const m = promo.cantidad_paga   // cuántas se pagan (ej. 1 en un 2x1)
+    const n = promo.cantidad_minima
+    const m = promo.cantidad_paga
     if (!n || m === null || m === undefined) return 0
     const gruposCompletos = Math.floor(item.cantidad / n)
     if (gruposCompletos === 0) return 0
-    // Solo los grupos completos entran en el combo; lo que sobra
-    // (item.cantidad % n) queda a precio normal.
     return Number((item.precio_unitario * gruposCompletos * (n - m)).toFixed(2))
   }
 
-  // descuento_directo
   return Number((item.cantidad * item.precio_unitario * (Number(promo.porcentaje_descuento) / 100)).toFixed(2))
 }
 
-// De todas las promociones vigentes, la que le conviene más al cliente
-// para este item (mayor descuento). Si ninguna aplica, no hay promo.
 const mejorPromoParaItem = (item) => {
   let mejor = { promo: null, monto: 0 }
   for (const promo of promocionesVigentes.value) {
@@ -253,9 +256,6 @@ const cargarPromociones = async () => {
   }
 }
 
-// ============================================================
-// CAJA ACTIVA (para saber si es individual o compartida)
-// ============================================================
 const cargarCajaActiva = async () => {
   try {
     const response = await axios.get(`${baseUrl}/api/cajas/activa`, headers())
@@ -265,9 +265,7 @@ const cargarCajaActiva = async () => {
   }
 }
 
-// ============================================================
-// FINALIZAR VENTA
-// ============================================================
+// FINALIZAR VENTA CON CONTROL DE BLOQUEO (DEBOUNCE/LOCK)
 const limpiarCarrito = () => {
   carrito.value = []
   metodoSeleccionado.value = null
@@ -275,46 +273,54 @@ const limpiarCarrito = () => {
 }
 
 const finalizarVenta = async (datosPago) => {
+  if (procesandoVenta.value) return // Previene clics dobles simultáneos
+  if (carrito.value.length === 0) {
+    mostrarNotificacion('El carrito está vacío', 'error')
+    return
+  }
+
+  procesandoVenta.value = true
+
   const venta = {
     items: carrito.value,
     total: total.value,
     metodo_pago: metodoSeleccionado.value,
     datos_pago: datosPago,
-    id_cliente: clienteSeleccionado.value // null si es "Cliente General"
+    id_cliente: clienteSeleccionado.value
   }
 
-  // Caja compartida: no se registra directo, queda esperando huella.
   if (cajaActiva.value?.modo_autenticacion === 'por_venta') {
     try {
       await axios.post(`${baseUrl}/api/ventas/pendiente`, venta, headers())
       iniciarEsperaHuella()
     } catch (error) {
       console.error('Error iniciando venta pendiente:', error)
-      alert(error.response?.data?.error || 'Error al iniciar la confirmación por huella')
+      mostrarNotificacion(error.response?.data?.error || 'Error al iniciar confirmación por huella', 'error')
+    } finally {
+      procesandoVenta.value = false
     }
     return
   }
 
-  // Caja individual: como siempre, directo.
   try {
     await axios.post(`${baseUrl}/api/ventas`, venta, headers())
-    alert('Venta realizada con éxito')
+    mostrarNotificacion('Venta realizada con éxito', 'exito')
     limpiarCarrito()
   } catch (error) {
     console.error('Error finalizando venta:', error)
-    alert(error.response?.data?.error || 'Error al procesar la venta')
+    mostrarNotificacion(error.response?.data?.error || 'Error al procesar la venta', 'error')
+  } finally {
+    procesandoVenta.value = false
   }
 }
 
-// ============================================================
-// ESPERA DE HUELLA (caja compartida)
-// ============================================================
+// ESPERA DE HUELLA
 const esperandoHuella = ref(false)
 let intervaloHuella = null
 let timeoutHuella = null
 
 const INTERVALO_MS = 2000
-const TIMEOUT_MS = 32000 // un poco más que el TTL de 30s del backend
+const TIMEOUT_MS = 32000
 
 const detenerEsperaHuella = () => {
   clearInterval(intervaloHuella)
@@ -335,37 +341,31 @@ const iniciarEsperaHuella = () => {
         detenerEsperaHuella()
         if (response.data.success) {
           const t = response.data.trabajador
-          alert(t ? `Venta confirmada por ${t.nombre} ${t.apellido}.` : 'Venta confirmada.')
+          mostrarNotificacion(t ? `Venta confirmada por ${t.nombre} ${t.apellido}.` : 'Venta confirmada.', 'exito')
           limpiarCarrito()
         } else {
-          alert(response.data.error || 'No se pudo confirmar la venta.')
-          // No limpiamos el carrito: el cajero puede reintentar el pago.
+          mostrarNotificacion(response.data.error || 'No se pudo confirmar la venta.', 'error')
         }
       }
     } catch (error) {
-      // Error de red puntual: seguimos intentando hasta el timeout.
+      // reintentar
     }
   }, INTERVALO_MS)
 
   timeoutHuella = setTimeout(() => {
     detenerEsperaHuella()
-    alert('No se confirmó la venta a tiempo. Podés intentar de nuevo.')
+    mostrarNotificacion('Tiempo agotado. No se confirmó la venta.', 'error')
   }, TIMEOUT_MS)
 }
 
 const cancelarEsperaHuella = () => {
   detenerEsperaHuella()
-  // El pedido en el backend expira solo a los 30s si nadie confirma;
-  // acá solo dejamos de esperar del lado del cajero.
 }
 
 onUnmounted(() => {
   detenerEsperaHuella()
 })
 
-// ============================================================
-// CARGAR MÉTODOS DE PAGO
-// ============================================================
 const cargarMetodosPago = async () => {
   try {
     const response = await axios.get(`${baseUrl}/api/metodos-pago`, headers())
@@ -375,9 +375,6 @@ const cargarMetodosPago = async () => {
   }
 }
 
-// ============================================================
-// CARGAR CLIENTES
-// ============================================================
 const cargarClientes = async () => {
   try {
     const response = await axios.get(`${baseUrl}/api/clientes`, headers())
@@ -394,3 +391,71 @@ onMounted(() => {
   cargarCajaActiva()
 })
 </script>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+/* Estilos explícitos del Banner para evitar transparencias */
+.banner-notificacion {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 9999;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Verde sólido para Éxito */
+.banner-exito {
+  background-color: #059669 !important; /* Emerald 600 */
+  border: 1px solid #10b981;
+}
+
+/* Rojo sólido para Error */
+.banner-error {
+  background-color: #e11d48 !important; /* Rose 600 */
+  border: 1px solid #f43f5e;
+}
+
+.icono-contenedor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.25);
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #ffffff !important;
+}
+
+.mensaje-texto {
+  color: #ffffff !important;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Transición suave de entrada y salida */
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0 !important;
+  transform: translateY(-10px);
+}
+</style>

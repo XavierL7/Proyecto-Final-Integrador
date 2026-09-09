@@ -39,6 +39,12 @@ cliente desactivaod no desactiva de ventas
 
 facilitar ventas
 
-evitar duplicado venta
+---evitar duplicado venta---
 
 historial de trabajadores
+
+error en descuentos de combo
+
+debe pedir que cambie tu contraseña la primera vez
+
+tengo que agregra la opcion de cambiar la contraseñajaja
