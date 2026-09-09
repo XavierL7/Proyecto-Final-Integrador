@@ -14,14 +14,17 @@ const router = express.Router()
 // Todas requieren autenticación
 router.use(verificarToken)
 
-// POST /api/ventas - Registrar una venta directo (caja individual)
-router.post('/', checkPermission('registrar_venta'), createVenta)
+// POST /api/ventas - Registrar una venta directo (caja individual).
+// El documento no distingue un permiso propio de "vender" además de
+// poder entrar a la pantalla, así que usamos Ver_Ventas para toda la
+// operatoria de venta (no solo para listar la pantalla).
+router.post('/', checkPermission('Ver_Ventas'), createVenta)
 
-// GET /api/ventas - Obtener ventas (permiso ver_reportes)
-router.get('/', checkPermission('ver_reportes'), getVentas)
+// GET /api/ventas - Historial de ventas
+router.get('/', checkPermission('Ver_Historial_Ventas'), getVentas)
 
 // Caja compartida: confirmar pago espera huella antes de persistir
-router.post('/pendiente', checkPermission('registrar_venta'), crearVentaPendiente)
-router.get('/pendiente/resultado', checkPermission('registrar_venta'), consultarVentaPendiente)
+router.post('/pendiente', checkPermission('Ver_Ventas'), crearVentaPendiente)
+router.get('/pendiente/resultado', checkPermission('Ver_Ventas'), consultarVentaPendiente)
 
 export default router

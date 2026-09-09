@@ -171,7 +171,12 @@
             <tr v-else-if="cajas.length === 0">
               <td colspan="11" class="px-4 py-6 text-center text-gray-400">Todavía no hay cajas registradas.</td>
             </tr>
-            <tr v-for="caja in cajas" :key="caja.id_caja" class="hover:bg-gray-50">
+            <tr
+              v-for="caja in cajas"
+              :key="caja.id_caja"
+              @click="abrirDetalle(caja)"
+              class="hover:bg-blue-50 cursor-pointer transition"
+            >
               <td class="px-4 py-3 text-gray-700">#{{ caja.id_caja }}</td>
               <td class="px-4 py-3">
                 <span
@@ -214,6 +219,12 @@
         </table>
       </div>
     </div>
+
+    <DetalleCajaModal
+      :visible="modalDetalleVisible"
+      :id-caja="idCajaSeleccionada"
+      @close="cerrarDetalle"
+    />
   </div>
 </template>
 
@@ -222,6 +233,7 @@ import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import DetalleCajaModal from '../components/caja/DetalleCajaModal.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -356,6 +368,21 @@ const cargarHistorial = async () => {
   } finally {
     cargandoHistorial.value = false
   }
+}
+
+// ============================================================
+// MODAL DE DETALLE
+// ============================================================
+const modalDetalleVisible = ref(false)
+const idCajaSeleccionada = ref(null)
+
+const abrirDetalle = (caja) => {
+  idCajaSeleccionada.value = caja.id_caja
+  modalDetalleVisible.value = true
+}
+
+const cerrarDetalle = () => {
+  modalDetalleVisible.value = false
 }
 
 const formatearFecha = (fecha) => {

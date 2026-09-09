@@ -39,7 +39,8 @@ export const crearVentaPendiente = async (req, res) => {
       })
     }
 
-    const resultado = await validarVenta({ items, total, metodo_pago, id_cliente })
+    const resultado = await validarVenta({ items, total, metodo_pago, id_cliente, userId })
+
     if (resultado.error) {
       return res.status(400).json({ error: resultado.error })
     }

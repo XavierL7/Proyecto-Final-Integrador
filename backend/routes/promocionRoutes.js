@@ -17,21 +17,25 @@ const router = express.Router()
 router.use(verificarToken)
 
 // GET /api/promociones - Listado completo (para la página de Descuentos)
-router.get('/', getPromociones)
+router.get('/', checkPermission('Ver_Descuentos'), getPromociones)
 
-// GET /api/promociones/vigentes - Solo las activas y en fecha (para la caja)
+// GET /api/promociones/vigentes - Las usa cualquier cajero desde Ventas
+// para saber qué descuentos ofrecer, no solo quien administra Descuentos
+// -> sin permiso extra, cualquier autenticado.
 router.get('/vigentes', getPromocionesVigentes)
 
-// POST /api/promociones - Crear (permiso para gestionar productos/precios)
-router.post('/', checkPermission('gestionar_productos'), createPromocion)
+// POST /api/promociones - Crear
+router.post('/', checkPermission('Agregar_Descuento'), createPromocion)
 
 // PUT /api/promociones/:id - Actualizar
-router.put('/:id', checkPermission('gestionar_productos'), updatePromocion)
+router.put('/:id', checkPermission('Editar_Descuento'), updatePromocion)
 
-// PUT /api/promociones/:id/activa - Activar/desactivar rápido
-router.put('/:id/activa', checkPermission('gestionar_productos'), toggleActivaPromocion)
+// PUT /api/promociones/:id/activa - Activar/desactivar: es exactamente
+// lo que pide Deshabilitar_Descuento ("si ya se usó, no se puede borrar,
+// se desactiva").
+router.put('/:id/activa', checkPermission('Deshabilitar_Descuento'), toggleActivaPromocion)
 
-// DELETE /api/promociones/:id - Eliminar (si no se usó en ventas)
-router.delete('/:id', checkPermission('gestionar_productos'), deletePromocion)
+// DELETE /api/promociones/:id - Eliminar (solo si no se usó en ventas)
+router.delete('/:id', checkPermission('Eliminar_Descuento'), deletePromocion)
 
 export default router

@@ -20,30 +20,34 @@ import { checkPermission } from '../middleware/permisos.js'
 
 const router = express.Router()
 
-// Todas las rutas de admin requieren autenticación y permiso 'crear_roles'
+// Todas las rutas de admin requieren autenticación. El permiso específico
+// se aplica por acción, no en bloque, siguiendo la regla:
+// Ver_X para entrar/listar, Agregar/Editar/Borrar_X para cada botón.
 router.use(verificarToken)
-router.use(checkPermission('crear_roles'))
 
 // Roles
-router.get('/roles', getRoles)
-router.post('/roles', createRol)
-router.put('/roles/:id', updateRol)
-router.delete('/roles/:id', deleteRol)
+router.get('/roles', checkPermission('Ver_Roles'), getRoles)
+router.post('/roles', checkPermission('Agregar_Roles'), createRol)
+router.put('/roles/:id', checkPermission('Editar_Roles'), updateRol)
+router.delete('/roles/:id', checkPermission('Borrar_Roles'), deleteRol)
 
 // Trabajadores
-router.get('/trabajadores', getTrabajadores)
-router.post('/trabajadores', createTrabajador) // acepta { ..., registrarHuella: true }
-router.put('/trabajadores/:id', updateTrabajador)
-router.delete('/trabajadores/:id', deleteTrabajador)
+router.get('/trabajadores', checkPermission('Ver_Trabajadores'), getTrabajadores)
+router.post('/trabajadores', checkPermission('Agregar_Trabajadores'), createTrabajador) // acepta { ..., registrarHuella: true }
+router.put('/trabajadores/:id', checkPermission('Editar_Trabajadores'), updateTrabajador)
+router.delete('/trabajadores/:id', checkPermission('Borrar_Trabajadores'), deleteTrabajador)
 
-// Huella (AS608): reservar el próximo ID de la secuencia (arranca en 5) y
-// dejarlo pendiente de captura física, o cancelar una reserva
-router.put('/trabajadores/:id/huella', solicitarHuella)
-router.put('/trabajadores/:id/huella/cancelar', cancelarHuella)
+// Huella (AS608): son parte de "editar" al trabajador (le suma un dato
+// de acceso), así que quedan detrás del mismo permiso que editarlo.
+router.put('/trabajadores/:id/huella', checkPermission('Editar_Trabajadores'), solicitarHuella)
+router.put('/trabajadores/:id/huella/cancelar', checkPermission('Editar_Trabajadores'), cancelarHuella)
 
-// Funcionalidades
-router.get('/funcionalidades', getFuncionalidades)
-router.post('/funcionalidades', createFuncionalidad)
-router.delete('/funcionalidades/:id', deleteFuncionalidad)
+// Funcionalidades: no hay un permiso propio en la lista todavía (definen
+// el sistema de permisos en sí), así que por ahora quedan atadas a la
+// gestión de roles -> si se necesita separarlas más adelante, se agrega
+// Ver/Agregar/Borrar_Funcionalidades como funcionalidades propias.
+router.get('/funcionalidades', checkPermission('Ver_Roles'), getFuncionalidades)
+router.post('/funcionalidades', checkPermission('Agregar_Roles'), createFuncionalidad)
+router.delete('/funcionalidades/:id', checkPermission('Borrar_Roles'), deleteFuncionalidad)
 
 export default router

@@ -4,26 +4,24 @@ import {
   getEtiquetas,
   createEtiqueta,
   updateEtiqueta,
-  deleteEtiqueta
+  deleteEtiqueta,
+  toggleActivaEtiqueta
 } from '../controllers/etiquetaController.js'
 import { verificarToken } from '../middleware/auth.js'
 import { checkPermission } from '../middleware/permisos.js'
 
 const router = express.Router()
 
-// Todas requieren autenticación
 router.use(verificarToken)
 
-// GET /api/etiquetas - Listar etiquetas (cualquier usuario autenticado)
-router.get('/', getEtiquetas)
+router.get('/', checkPermission('Ver_Etiquetas'), getEtiquetas)
+router.post('/', checkPermission('Agregar_Etiquetas'), createEtiqueta)
+router.put('/:id', checkPermission('Editar_Etiquetas'), updateEtiqueta)
 
-// POST /api/etiquetas - Crear etiqueta (permiso para gestionar productos)
-router.post('/', checkPermission('gestionar_productos'), createEtiqueta)
+// Deshabilitar (activo=false) sin borrar
+router.put('/:id/activa', checkPermission('Deshabilitar_Etiquetas'), toggleActivaEtiqueta)
 
-// PUT /api/etiquetas/:id - Actualizar etiqueta
-router.put('/:id', checkPermission('gestionar_productos'), updateEtiqueta)
-
-// DELETE /api/etiquetas/:id - Eliminar etiqueta
-router.delete('/:id', checkPermission('gestionar_productos'), deleteEtiqueta)
+// Eliminar de verdad, solo si no está en uso (por producto o promoción)
+router.delete('/:id', checkPermission('Borrar_Etiquetas'), deleteEtiqueta)
 
 export default router

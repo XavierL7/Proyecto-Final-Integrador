@@ -1,8 +1,21 @@
 // backend/controllers/venta/construirVenta.js
 import prisma from '../../db.js'
 import { resolverPromocion, includeParaResolver } from '../../lib/resolverPromocion.js'
+import { getUserPermissions } from '../../middleware/permisos.js'
 
 const MAX_LARGO_IDENTIFICADOR = 34
+
+// Qué funcionalidad habilita a cobrar con cada método (mismo mapeo que
+// MetodosPago.vue en el front, para que lo que ve el cajero coincida con
+// lo que el servidor realmente permite).
+const PERMISO_POR_METODO_PAGO = {
+  'Efectivo': 'Pago_Efectivo',
+  'Cheque': 'Pago_Cheque',
+  'Tarjeta Débito': 'Pago_Debito',
+  'Tarjeta Crédito': 'Pago_Credito',
+  'Transferencia': 'Pago_MercadoPago',
+  'Mercado Pago': 'Pago_MercadoPago'
+}
 
 export function sanearIdentificador(identificador) {
   if (!identificador) return null
@@ -78,7 +91,7 @@ function elegirMejorPromo(item, promocionesVigentes, metodoPagoNombre) {
 // (eso lo hace guardarVenta) — separar esto permite que una venta se
 // "valide" ahora y se "guarde" recién cuando se confirme con huella, en
 // el caso de caja compartida.
-export async function validarVenta({ items, total, metodo_pago, id_cliente }) {
+export async function validarVenta({ items, total, metodo_pago, id_cliente, userId }) {
   if (!items || items.length === 0) {
     return { error: 'La venta debe tener al menos un producto' }
   }
@@ -86,6 +99,21 @@ export async function validarVenta({ items, total, metodo_pago, id_cliente }) {
   const metodoPago = await prisma.metodoPago.findFirst({ where: { nombre: metodo_pago } })
   if (!metodoPago) {
     return { error: 'Método de pago no válido' }
+  }
+
+  // Si se pasa userId (todos los flujos que sí conocen quién está
+  // operando la venta), chequeamos que tenga el permiso Pago_X para el
+  // método elegido. Esto es lo que de verdad evita que alguien cobre con
+  // un método sin permiso llamando a la API directo (esconder el botón
+  // en el front no alcanza).
+  if (userId) {
+    const permisoNecesario = PERMISO_POR_METODO_PAGO[metodoPago.nombre]
+    if (permisoNecesario) {
+      const permisos = await getUserPermissions(userId)
+      if (!permisos.includes(permisoNecesario)) {
+        return { error: `No tenés permiso para cobrar con ${metodoPago.nombre}.` }
+      }
+    }
   }
 
   const ahora = new Date()
