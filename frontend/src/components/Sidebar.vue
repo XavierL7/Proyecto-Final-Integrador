@@ -266,6 +266,32 @@
         <span v-else class="text-sm font-medium">H</span>
       </router-link>
 
+      <!-- asistencia -->
+      <router-link
+        v-if="authStore.tienePermiso('Ver_Historial_Trabajadores')"
+        to="/asistencias"
+        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
+        :class="[isOpen ? 'justify-start' : 'justify-center']"
+        :style="{
+          color: $route.path === '/asistencias' ? '#4a8db7' : '#8ab4d6',
+          backgroundColor: $route.path === '/asistencias' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
+        }"
+        @mouseenter="(e) => {
+          if ($route.path !== '/asistencias') {
+            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
+            e.currentTarget.style.color = '#6aaec9'
+          }
+        }"
+        @mouseleave="(e) => {
+          if ($route.path !== '/asistencias') {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = '#8ab4d6'
+          }
+        }"
+      >
+        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Asistencias</span>
+        <span v-else class="text-sm font-medium">As</span>
+      </router-link>
       <!-- ADMINISTRACIÓN -->
       <router-link
         v-if="mostrarAdministracion"

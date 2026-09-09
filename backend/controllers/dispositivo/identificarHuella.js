@@ -92,6 +92,16 @@ export const identificarHuella = async (req, res) => {
     }
 
     // --- CASO 2: comportamiento normal, login por huella ---
+
+
+    await prisma.asistencia.create({
+      data: {
+        id_trabajador: trabajador.id_trabajador,
+        fecha_hora_entrada: new Date(),
+        tipo_autenticacion: 'huella'
+      }
+    })
+    
     const funcionalidades = trabajador.rol?.roles_funcionalidades
       ?.map(rf => rf.funcionalidad.nombre_func) || []
 

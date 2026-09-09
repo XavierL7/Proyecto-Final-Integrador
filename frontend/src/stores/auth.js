@@ -98,9 +98,19 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Cerrar sesión y vaciar la tienda
-  function logout() {
-    limpiarSesion()
-  }
+    async function logout() {
+        try {
+          if (token.value) {
+            await axios.post(`${baseUrl}/api/logout`, {}, {
+              headers: { Authorization: `Bearer ${token.value}` }
+            })
+          }
+        } catch (error) {
+          console.error('Error al registrar salida en el servidor:', error)
+        } finally {
+          limpiarSesion()
+        }
+    }
 
 
   // Retornamos todo para que pueda ser usado en los componentes de Vue

@@ -77,12 +77,29 @@ export const cerrarCaja = async (req, res) => {
         data: { fecha_hora_fin: new Date() }
       })
 
+      const asistenciaActiva = await tx.asistencia.findFirst({
+              where: {
+                id_trabajador: userId,
+                fecha_hora_salida: null
+              },
+              orderBy: {
+                fecha_hora_entrada: 'desc'
+              }
+            })
+
+            if (asistenciaActiva) {
+              await tx.asistencia.update({
+                where: { id_asistencia: asistenciaActiva.id_asistencia },
+                data: { fecha_hora_salida: new Date() }
+              })
+            }
+
       return { cajaActualizada, arqueo }
     })
 
-    res.json({
+  res.json({
       success: true,
-      message: 'Caja cerrada correctamente.',
+      message: 'Caja cerrada y asistencia finalizada correctamente.',
       caja: cajaActualizada,
       diferencia: arqueo?.diferencia !== undefined ? Number(arqueo.diferencia) : null
     })

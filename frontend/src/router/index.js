@@ -42,6 +42,17 @@ const routes = [
     }
   },
 
+
+  { 
+    path: '/asistencias', 
+    name: 'Asistencias', 
+    component: () => import('../views/AsistenciasView.vue'), 
+    meta: { 
+      requiresAuth: true, 
+      permiso: 'Ver_Historial_Trabajadores' 
+    } 
+  },
+  
   {
     path: '/descuentos',
     name: 'Descuentos',

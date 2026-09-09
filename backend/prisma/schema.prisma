@@ -6,6 +6,17 @@ datasource db {
   provider = "postgresql"
 }
 
+model Asistencia {
+  id_asistencia       Int        @id @default(autoincrement())
+  id_trabajador       Int
+  fecha_hora_entrada  DateTime   @default(now())
+  fecha_hora_salida   DateTime?
+  tipo_autenticacion  String?    @default("huella") @db.VarChar(50)
+  trabajador          Trabajador @relation(fields: [id_trabajador], references: [id_trabajador])
+
+  @@map("Asistencias")
+}
+
 model Rol {
   id_rol                Int                     @id @default(autoincrement())
   nombre_rol            String                  @db.VarChar(50)
@@ -45,6 +56,7 @@ model Trabajador {
   huella_pendiente  Boolean             @default(false)
   id_rol            Int
   fecha_registro    DateTime            @default(now()) @db.Date
+  asistencias       Asistencia[]
   arqueos_caja      Arqueo_Caja[]
   cajas_apertura    Caja[]              @relation("apertura")
   cajas_cierre      Caja[]              @relation("cierre")

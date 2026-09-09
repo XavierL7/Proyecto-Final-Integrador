@@ -1,6 +1,7 @@
 // backend/controllers/auth/consultarLoginHuella.js
 import { consumirLoginPorHuella } from '../../lib/loginHuellaState.js'
 
+
 // GET /api/auth/huella/resultado
 // La pantalla de login llama esto en loop corto (cada ~2s) mientras el
 // usuario tiene el dedo apoyado en el lector físico. No requiere JWT
@@ -13,4 +14,5 @@ export const consultarLoginHuella = (req, res) => {
   }
 
   res.json(resultado) // { token, trabajador, funcionalidades }
+  
 }

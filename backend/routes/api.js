@@ -3,12 +3,15 @@ import { registrarTrabajador, loginTrabajador } from '../controllers/authControl
 import { consultarLoginHuella } from '../controllers/auth/consultarLoginHuella.js';
 import { buscarProducto } from '../controllers/productoController.js';
 import { verificarToken } from '../middleware/auth.js';
+import { registrarSalida } from '../controllers/auth/logoutTrabajador.js';
 import adminRoutes from './adminRoutes.js';
 import etiquetaRoutes from './etiquetaRoutes.js'  
 import productoRoutes from './productoRoutes.js'
 import metodoPagoRoutes from './metodoPagoRoutes.js'
 import ventaRoutes from './ventaRoutes.js'
 import cajaRoutes from './cajaRoutes.js'
+import asistenciaRoutes from './asistenciaRoutes.js'
+
 
 import dispositivoRoutes from './dispositivoRoutes.js'
 
@@ -35,12 +38,14 @@ router.use('/cajas', cajaRoutes)
 
 router.use('/clientes', clientesRoutes)
 
+router.use('/asistencias', asistenciaRoutes);
 // descuentos / promociones
 router.use('/promociones', promocionRoutes)
 
 // Rutas de autenticación (usan el controlador)
 router.post('/auth/register', registrarTrabajador);
 router.post('/auth/login', loginTrabajador);
+router.post('/logout', verificarToken, registrarSalida);
 // Login solo con huella: el front hace polling acá mientras el usuario
 // tiene el dedo en el lector físico. Sin verificarToken a propósito:
 // se usa ANTES de tener sesión.

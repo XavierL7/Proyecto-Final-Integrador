@@ -38,4 +38,5 @@ router.post('/', checkPermisoApertura, abrirCaja)
 // PUT /api/cajas/:id/cerrar - Cerrar una caja
 router.put('/:id/cerrar', checkPermission('Cerrar_Caja'), cerrarCaja)
 
+
 export default router
