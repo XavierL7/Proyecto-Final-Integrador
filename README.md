@@ -41,9 +41,9 @@ facilitar ventas
 
 ---evitar duplicado venta---
 
-historial de trabajadores
+---historial de trabajadores---
 
-error en descuentos de combo
+---error en descuentos de combo---
 
 debe pedir que cambie tu contraseña la primera vez
 

@@ -2,7 +2,7 @@
 <template>
   <div class="bg-white rounded-lg shadow">
     <div class="p-4 border-b border-gray-200">
-      <h2 class="font-bold">🛒 Carrito</h2>
+      <h2 class="font-bold">Carrito</h2>
     </div>
 
     <div v-if="items.length === 0" class="p-8 text-center">

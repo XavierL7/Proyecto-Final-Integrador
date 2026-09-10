@@ -1,7 +1,7 @@
 <!-- frontend/src/components/caja/ResumenVenta.vue -->
 <template>
   <div class="rounded-lg shadow p-4">
-    <h3 class="font-bold mb-3">📋 Resumen</h3>
+    <h3 class="font-bold mb-3">Resumen</h3>
 
     <div class="space-y-2">
       <div class="flex justify-between">

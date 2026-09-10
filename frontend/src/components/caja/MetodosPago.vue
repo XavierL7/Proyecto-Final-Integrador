@@ -1,7 +1,7 @@
 <!-- frontend/src/components/ventas/MetodosPago.vue -->
 <template>
   <div class=" rounded-lg shadow p-4 mt-4">
-    <h3 class="font-bold mb-3">💳 Métodos de pago</h3>
+    <h3 class="font-bold mb-3">Métodos de pago</h3>
 
     <div class="grid grid-cols-2 gap-2">
       <button

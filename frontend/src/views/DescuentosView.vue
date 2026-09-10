@@ -37,15 +37,13 @@
 
               <td class="px-4 py-3 font-medium">{{ promo.nombre_promo }}</td>
               <td class="px-4 py-3">{{ etiquetaTipo(promo.tipo_promo) }}</td>
-              <td class="px-4 py-3 text-right font-semibold">{{ promo.porcentaje_descuento }}%</td>
+              <td class="px-4 py-3 text-right font-semibold">{{ etiquetaDescuento(promo) }}</td>
               <td class="px-4 py-3 text-xs">{{ condicion(promo) }}</td>
               <td class="px-4 py-3 text-xs whitespace-nowrap">
                 {{ formatearFecha(promo.fecha_inicio) }} → {{ formatearFecha(promo.fecha_fin) }}
               </td>
               <td class="px-4 py-3 text-xs">
-                {{ promo.productos_promociones.length === 0
-                  ? 'Todos'
-                  : promo.productos_promociones.map(pp => pp.producto.nombre_producto).join(', ') }}
+                {{ alcance(promo) }}
               </td>
               <td class="px-4 py-3">
                 <div class="flex flex-col gap-1">
@@ -115,7 +113,7 @@
       class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
       @click.self="modalAbierto = false"
     >
-      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto text-gray-800">
         <h2 class="text-lg font-bold mb-4">
           {{ promocionEditando ? 'Editar Promoción' : 'Nueva Promoción' }}
         </h2>
@@ -143,8 +141,8 @@
           </select>
         </div>
 
-
-        <div class="mb-3">
+        <!-- Oculto si el tipo de promo es Combo NxM -->
+        <div class="mb-3" v-if="form.tipo_promo !== 'combo_nxm'">
           <label class="block text-sm font-medium mb-1">Porcentaje de descuento</label>
           <input
             v-model="form.porcentaje_descuento"
@@ -248,7 +246,6 @@
             <label
               v-for="producto in productosFiltrados"
               :key="producto.id_producto"
-
               class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 dark:hover:text-white cursor-pointer"
             >
               <input
@@ -271,9 +268,7 @@
           </label>
           <p class="text-xs text-gray-400 mb-2">
             Marcá una etiqueta para que la promo aplique a TODOS los productos
-            que la tengan (ej. etiquetá "Coca" en tus 3 variedades de Coca y
-            hacé un solo 2x1 para las tres). Se combina con los productos
-            puntuales de arriba, no los reemplaza.
+            que la tengan. Se combina con los productos puntuales de arriba, no los reemplaza.
           </p>
           <div class="border border-gray-200 rounded-lg max-h-32 overflow-y-auto divide-y divide-gray-100">
             <label
@@ -289,7 +284,7 @@
               />
               {{ etiqueta.nombre_etiqueta }}
             </label>
-            <p v-if="etiquetas.length === 0" class="px-3 py-2 text-xs">
+            <p v-if="etiquetas.length === 0" class="px-3 py-2 text-xs text-gray-400">
               No tenés etiquetas creadas todavía.
             </p>
           </div>
@@ -347,10 +342,6 @@ const cargarPromociones = async () => {
 
 const cargarProductos = async () => {
   try {
-    // /api/productos devuelve resultados paginados:
-    // { productos: [...], total, page, totalPages }
-    // Para el picker de la promoción necesitamos TODOS los productos, así
-    // que recorremos las páginas hasta juntarlas todas.
     let todos = []
     let page = 1
     let totalPages = 1
@@ -408,8 +399,8 @@ const condicion = (promo) => {
 }
 
 const alcance = (promo) => {
-  const nombresProductos = promo.productos_promociones.map(pp => pp.producto.nombre_producto)
-  const nombresEtiquetas = promo.promociones_etiquetas?.map(pe => `#${pe.etiqueta.nombre_etiqueta}`) || []
+  const nombresProductos = (promo.productos_promociones || []).map(pp => pp.producto?.nombre_producto).filter(Boolean)
+  const nombresEtiquetas = (promo.promociones_etiquetas || []).map(pe => `#${pe.etiqueta?.nombre_etiqueta || ''}`).filter(e => e !== '#')
   const partes = [...nombresProductos, ...nombresEtiquetas]
   return partes.length === 0 ? 'Todos' : partes.join(', ')
 }
@@ -469,7 +460,6 @@ const toggleEtiqueta = (idEtiqueta) => {
   }
 }
 
-// Convierte un ISO datetime a "yyyy-mm-dd" para el <input type="date">
 const aFechaInput = (iso) => new Date(iso).toISOString().split('T')[0]
 
 const abrirModal = (promo = null) => {
@@ -487,8 +477,8 @@ const abrirModal = (promo = null) => {
       fecha_inicio: aFechaInput(promo.fecha_inicio),
       fecha_fin: aFechaInput(promo.fecha_fin),
       activa: promo.activa,
-      id_productos: promo.productos_promociones.map(pp => pp.producto.id_producto),
-      id_etiquetas: (promo.promociones_etiquetas || []).map(pe => pe.etiqueta.id_etiqueta)
+      id_productos: (promo.productos_promociones || []).map(pp => pp.id_producto || pp.producto?.id_producto),
+      id_etiquetas: (promo.promociones_etiquetas || []).map(pe => pe.id_etiqueta || pe.etiqueta?.id_etiqueta)
     }
   } else {
     form.value = {
