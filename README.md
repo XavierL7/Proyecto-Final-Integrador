@@ -33,9 +33,9 @@ reworkear panel de administración
 
 ---descuento se aplique automáticamente---
 
-etiqueta desactivada no desactiva lo del stock
+---etiqueta desactivada no desactiva lo del stock---
 
-cliente desactivaod no desactiva de ventas
+---cliente desactivaod no desactiva de ventas---
 
 facilitar ventas
 
