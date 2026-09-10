@@ -5,6 +5,7 @@ import {
   getCajaActiva,
   abrirCaja,
   cerrarCaja, 
+  obtenerResumenCajaActiva,
 } from '../controllers/cajaController.js'
 import { getCajaDetalle } from '../controllers/caja/getCajaDetalle.js'
 import { verificarToken } from '../middleware/auth.js'
@@ -38,5 +39,6 @@ router.post('/', checkPermisoApertura, abrirCaja)
 // PUT /api/cajas/:id/cerrar - Cerrar una caja
 router.put('/:id/cerrar', checkPermission('Cerrar_Caja'), cerrarCaja)
 
+router.get('/activa/resumen-dinero', verificarToken, obtenerResumenCajaActiva)
 
 export default router

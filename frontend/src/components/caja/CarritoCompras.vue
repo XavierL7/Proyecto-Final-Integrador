@@ -21,21 +21,16 @@
             <p class="text-sm">${{ item.precio_unitario }} c/u</p>
           </div>
 
+          <!-- Edición manual de cantidad sin límite de stock -->
           <div class="flex items-center gap-2">
-            <button
-              @click="actualizarCantidad(index, item.cantidad - 1)"
-              class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-300 transition"
-            >
-              -
-            </button>
-            <span class="w-8 text-center font-medium">{{ item.cantidad }}</span>
-            <button
-              @click="actualizarCantidad(index, item.cantidad + 1)"
-              class="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-300 transition"
-              :disabled="item.cantidad >= item.stock"
-            >
-              +
-            </button>
+            <input
+              type="number"
+              min="1"
+              :value="item.cantidad || 1"
+              @input="onInputCantidad(index, $event.target.value)"
+              @blur="onBlurCantidad(index, $event.target.value)"
+              class="w-16 border rounded px-2 py-1 text-center font-medium text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
           </div>
 
           <div class="text-right min-w-[80px]">
@@ -71,8 +66,7 @@ const props = defineProps({
     required: true
   },
   // Función que recibe un item y devuelve el monto de descuento que le
-  // corresponde (0 si ninguna promoción vigente le aplica). La calcula
-  // VentasView.vue automáticamente, sin que el cajero elija nada.
+  // corresponde (0 si ninguna promoción vigente le aplica).
   calcularDescuento: {
     type: Function,
     default: () => 0
@@ -87,8 +81,24 @@ const props = defineProps({
 
 const emit = defineEmits(['actualizar-cantidad', 'eliminar'])
 
-const actualizarCantidad = (index, cantidad) => {
-  emit('actualizar-cantidad', index, cantidad)
+const onInputCantidad = (index, valor) => {
+  let val = parseInt(valor, 10)
+  
+  if (isNaN(val) || val < 1) {
+    val = 1
+  }
+
+  emit('actualizar-cantidad', index, val)
+}
+
+const onBlurCantidad = (index, valor) => {
+  let val = parseInt(valor, 10)
+  
+  if (isNaN(val) || val < 1) {
+    val = 1
+  }
+
+  emit('actualizar-cantidad', index, val)
 }
 
 const eliminar = (index) => {

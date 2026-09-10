@@ -1,10 +1,9 @@
 <!-- frontend/src/views/VentasView.vue -->
+<!-- frontend/src/views/VentasView.vue -->
 <template>
   <div class="p-6 max-w-6xl mx-auto relative">
     
     <!-- Banner de notificación visual -->
-
-<!-- Banner de notificación visual -->
     <transition name="fade">
       <div 
         v-if="notificacion.visible"
@@ -29,12 +28,25 @@
         >
           Caja compartida
         </span>
+        <button
+          @click="mostrarModalDinero = true"
+          type="button"
+          class="bg-blue-500 hover:bg-blue-600  text-white px-4 py-2 rounded-lg transition "
+        >
+          Dinero en Caja
+        </button>
         <a
           class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
           href="/cajas"
         >
           Cerrar Caja
         </a>
+
+        <!-- Modales de la Vista -->
+        <ResumenDineroCajaModal 
+          v-if="mostrarModalDinero" 
+          @cerrar="mostrarModalDinero = false" 
+        />
       </div>
     </div>
 
@@ -52,7 +64,7 @@
         />
       </div>
 
-      <!-- Columna derecha: Resumen y pago -->
+      <!-- Columna derecha: Resumen y selección de pago -->
       <div class="lg:col-span-1">
         <SelectorCliente
           :clientes="clientes"
@@ -85,45 +97,66 @@
           </button>
         </div>
 
-        <!-- Métodos de pago y formularios -->
+        <!-- Métodos de pago -->
         <template v-else>
           <MetodosPago
             :metodos="metodosPago"
             :disabled="procesandoVenta || carrito.length === 0"
             @seleccionar="seleccionarMetodoPago"
           />
-
-          <div v-if="metodoSeleccionado" class="mt-4">
-            <PagoEfectivo
-              v-if="metodoSeleccionado === 'Efectivo'"
-              :total="total"
-              :cargando="procesandoVenta"
-              @confirmar="finalizarVenta"
-            />
-            <PagoTarjeta
-              v-else-if="metodoSeleccionado === 'Tarjeta Débito' || metodoSeleccionado === 'Tarjeta Crédito'"
-              :tipo="metodoSeleccionado"
-              :total="total"
-              :cargando="procesandoVenta"
-              @confirmar="finalizarVenta"
-            />
-            <PagoTransferencia
-              v-else-if="metodoSeleccionado === 'Transferencia' || metodoSeleccionado === 'Mercado Pago'"
-              :tipo="metodoSeleccionado"
-              :total="total"
-              :cargando="procesandoVenta"
-              @confirmar="finalizarVenta"
-            />
-            <PagoCheque
-              v-else-if="metodoSeleccionado === 'Cheque'"
-              :total="total"
-              :cargando="procesandoVenta"
-              @confirmar="finalizarVenta"
-            />
-          </div>
         </template>
       </div>
     </div>
+
+    <!-- VENTANA EMERGENTE (MODAL DE PAGO) -->
+    <div 
+      v-if="metodoSeleccionado" 
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4"
+    >
+      <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative animate-fadeIn">
+        
+        <!-- Botón para cerrar -->
+        <button 
+          @click="cerrarModalPago"
+          class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+        >
+          ✕
+        </button>
+
+        <!-- Formularios de Pago -->
+        <PagoEfectivo
+          v-if="metodoSeleccionado === 'Efectivo'"
+          :total="total"
+          :cargando="procesandoVenta"
+          @confirmar="finalizarVenta"
+          @cancelar="cerrarModalPago"
+        />
+        <PagoTarjeta
+          v-else-if="metodoSeleccionado === 'Tarjeta Débito' || metodoSeleccionado === 'Tarjeta Crédito'"
+          :tipo="metodoSeleccionado"
+          :total="total"
+          :cargando="procesandoVenta"
+          @confirmar="finalizarVenta"
+          @cancelar="cerrarModalPago"
+        />
+        <PagoTransferencia
+          v-else-if="metodoSeleccionado === 'Transferencia' || metodoSeleccionado === 'Mercado Pago'"
+          :tipo="metodoSeleccionado"
+          :total="total"
+          :cargando="procesandoVenta"
+          @confirmar="finalizarVenta"
+          @cancelar="cerrarModalPago"
+        />
+        <PagoCheque
+          v-else-if="metodoSeleccionado === 'Cheque'"
+          :total="total"
+          :cargando="procesandoVenta"
+          @confirmar="finalizarVenta"
+          @cancelar="cerrarModalPago"
+        />
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -140,6 +173,7 @@ import PagoTransferencia from '../components/caja/PagoTransferencia.vue'
 import PagoCheque from '../components/caja/PagoCheque.vue'
 import PagoTarjeta from '../components/caja/PagoTarjeta.vue'
 import SelectorCliente from '../components/caja/SelectorCliente.vue'
+import ResumenDineroCajaModal from '../components/caja/ResumenDineroCajaModal.vue'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -153,6 +187,7 @@ const clientes = ref([])
 const clienteSeleccionado = ref(null)
 const promocionesVigentes = ref([])
 const cajaActiva = ref(null)
+const mostrarModalDinero = ref(false)
 
 // NUEVOS ESTADOS DE CONTROL DE PROCESO Y NOTIFICACIÓN
 const procesandoVenta = ref(false)
@@ -206,6 +241,11 @@ const eliminarDelCarrito = (index) => {
 
 const seleccionarMetodoPago = (metodo) => {
   metodoSeleccionado.value = metodo
+}
+
+// cerrar ventanas emergentes de pago
+const cerrarModalPago = () => {
+  metodoSeleccionado.value = null
 }
 
 // PROMOCIONES

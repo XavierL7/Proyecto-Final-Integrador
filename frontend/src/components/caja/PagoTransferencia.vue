@@ -6,35 +6,7 @@
     </h4>
 
     <div class="space-y-3">
-      <div>
-        <label class="block text-sm mb-1">CBU o alias</label>
-        <input
-          v-model="form.cbu"
-          type="text"
-          placeholder="CBU o alias"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
 
-      <div>
-        <label class="block text-sm mb-1">CUIL/CUIT</label>
-        <input
-          v-model="form.cuil"
-          type="text"
-          placeholder="CUIL o CUIT"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div>
-        <label class="block text-sm mb-1">Nombre del titular</label>
-        <input
-          v-model="form.titular"
-          type="text"
-          placeholder="Nombre completo"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
 
       <div class="flex gap-3">
         <button
@@ -68,16 +40,11 @@ const emit = defineEmits(['confirmar', 'cancelar'])
 
 // CUIL y titular quedan para completar en pantalla (simulación), pero
 // solo el alias/CBU viaja al backend como "identificador".
-const form = ref({
-  cbu: '',
-  cuil: '',
-  titular: ''
-})
+
 
 const confirmar = () => {
   emit('confirmar', {
     tipo: props.tipo,
-    identificador: form.value.cbu
   })
 }
 </script>

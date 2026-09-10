@@ -3,6 +3,7 @@
   <div class="mb-4">
     <div class="flex gap-2">
       <input
+        ref="inputRef"
         v-model="busqueda"
         type="text"
         placeholder="Buscar por código de barras o nombre..."
@@ -44,7 +45,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../../stores/auth'
 
@@ -53,19 +54,37 @@ const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 const busqueda = ref('')
 const resultados = ref([])
+const inputRef = ref(null)
 
 const emit = defineEmits(['agregar'])
+
+const enfocarBusqueda = () => {
+  inputRef.value?.focus()
+}
 
 const buscarProducto = async () => {
   if (!busqueda.value.trim()) return
 
+  const termino = busqueda.value.trim()
+
   try {
     const response = await axios.get(`${baseUrl}/api/productos/buscar`, {
-      params: { q: busqueda.value },
+      params: { q: termino },
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     })
 
-    resultados.value = Array.isArray(response.data) ? response.data : [response.data]
+    const datos = Array.isArray(response.data) ? response.data : [response.data]
+
+    // Si el lector de código de barras escaneó un código que matchea
+    // exacto con un producto, lo agregamos directo sin mostrar el
+    // desplegable (el lector ya manda el Enter por su cuenta).
+    const coincidenciaExacta = datos.find(p => p.codigo_barras === termino)
+    if (coincidenciaExacta) {
+      agregar(coincidenciaExacta)
+      return
+    }
+
+    resultados.value = datos
   } catch (error) {
     if (error.response?.status === 404) {
       resultados.value = []
@@ -80,5 +99,33 @@ const agregar = (producto) => {
   emit('agregar', producto)
   resultados.value = []
   busqueda.value = ''
+  enfocarBusqueda()
 }
+
+// Devuelve el foco a la barra de búsqueda apenas nada más quede
+// seleccionado en la página (click en un área vacía, cierre de un
+// desplegable, etc.), para no tener que clickear el input cada vez
+// que se escanea o se tipea un código.
+let timeoutRefoco = null
+
+const manejarFocusOut = () => {
+  clearTimeout(timeoutRefoco)
+  timeoutRefoco = setTimeout(() => {
+    if (document.activeElement === document.body) {
+      enfocarBusqueda()
+    }
+  }, 50)
+}
+
+defineExpose({ focus: enfocarBusqueda })
+
+onMounted(() => {
+  enfocarBusqueda()
+  document.addEventListener('focusout', manejarFocusOut)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('focusout', manejarFocusOut)
+  clearTimeout(timeoutRefoco)
+})
 </script>

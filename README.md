@@ -37,7 +37,7 @@ reworkear panel de administración
 
 ---cliente desactivaod no desactiva de ventas---
 
-facilitar ventas
+---facilitar ventas---
 
 ---evitar duplicado venta---
 
