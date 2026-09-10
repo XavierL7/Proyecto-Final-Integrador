@@ -37,7 +37,7 @@
               <strong>{{ cajaActiva.trabajador_apertura?.nombre }} {{ cajaActiva.trabajador_apertura?.apellido }}</strong>
               el {{ formatearFecha(cajaActiva.fecha_hora_apertura) }}
             </p>
-            <p class="text-sm text-gray-600 mt-1">
+            <p class="text-sm mt-1">
               Monto inicial: <strong>${{ Number(cajaActiva.monto_inicial).toFixed(2) }}</strong>
             </p>
           </div>
@@ -120,7 +120,7 @@
         <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg mb-4 max-w-md cursor-pointer hover:bg-gray-50">
           <input type="checkbox" v-model="cajaCompartida" class="mt-1 w-4 h-4 text-teal-500" />
           <div>
-            <p class="text-sm font-medium text-gray-800">Caja compartida</p>
+            <p class="text-sm font-medium">Caja compartida</p>
             <p class="text-xs text-gray-500">
               Varios trabajadores pueden vender en esta misma caja. Cada venta
               queda pendiente hasta que alguien confirma el pago poniendo el
@@ -177,7 +177,7 @@
               @click="abrirDetalle(caja)"
               class="hover:bg-blue-50 cursor-pointer transition"
             >
-              <td class="px-4 py-3 text-gray-700">#{{ caja.id_caja }}</td>
+              <td class="px-4 py-3 ">#{{ caja.id_caja }}</td>
               <td class="px-4 py-3">
                 <span
                   class="text-xs font-semibold px-2 py-1 rounded"

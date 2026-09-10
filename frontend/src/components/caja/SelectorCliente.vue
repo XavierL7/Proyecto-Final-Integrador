@@ -12,7 +12,7 @@
         Cliente General
       </option>
       <option
-        v-for="cliente in clientes"
+        v-for="cliente in clientesActivos"
         :key="cliente.id_cliente"
         :value="cliente.id_cliente"
         class="text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-100"
@@ -38,6 +38,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
+// Filtra la lista para incluir únicamente clientes activos
+const clientesActivos = computed(() => 
+  props.clientes.filter(c => c.activo === true)
+)
+
 const onChange = (e) => {
   const valor = e.target.value
   // El <option> de "Cliente General" tiene value="" -> lo mandamos como null
@@ -45,6 +50,6 @@ const onChange = (e) => {
 }
 
 const clienteActual = computed(() =>
-  props.clientes.find(c => c.id_cliente === props.modelValue) || null
+  clientesActivos.value.find(c => c.id_cliente === props.modelValue) || null
 )
 </script>

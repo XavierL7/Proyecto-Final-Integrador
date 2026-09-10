@@ -311,8 +311,9 @@
           <div class="mt-3">
             <label class="block text-sm font-medium mb-1">Etiquetas</label>
             <div class="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg max-h-32 overflow-y-auto">
+              <!-- Se recorre etiquetasActivas en vez de la lista completa -->
               <label
-                v-for="etiqueta in etiquetas"
+                v-for="etiqueta in etiquetasActivas"
                 :key="etiqueta.id_etiqueta"
                 class="flex items-center gap-1.5 cursor-pointer"
               >
@@ -324,7 +325,7 @@
                 />
                 <span class="text-sm">{{ etiqueta.nombre_etiqueta }}</span>
               </label>
-              <p v-if="etiquetas.length === 0" class="text-sm text-gray-400">No hay etiquetas disponibles</p>
+              <p v-if="etiquetasActivas.length === 0" class="text-sm text-gray-400">No hay etiquetas activas disponibles</p>
             </div>
           </div>
 
@@ -370,6 +371,11 @@ const etiquetas = ref([])
 const busqueda = ref('')
 const cargando = ref(false)
 
+// COMPUTED: Filtra la lista de etiquetas traídas del backend para mostrar solo las activas
+const etiquetasActivas = computed(() => {
+  return etiquetas.value.filter(e => e.activo === true || e.activo === 1)
+})
+
 // ============================================================
 // PAGINACIÓN
 // ============================================================
@@ -379,8 +385,6 @@ const totalProductos = ref(0)
 const porPagina = 10
 
 const productosFiltrados = computed(() => {
-  // El filtro de búsqueda solo actúa sobre los productos ya cargados
-  // (la página actual). Es una búsqueda "rápida" dentro de la página.
   if (!busqueda.value) return productos.value
   const q = busqueda.value.toLowerCase()
   return productos.value.filter(p =>
@@ -388,6 +392,7 @@ const productosFiltrados = computed(() => {
     p.codigo_barras?.includes(q)
   )
 })
+
 const irAPaginaAnterior = () => {
   if (paginaActual.value > 1) {
     paginaActual.value--
@@ -458,6 +463,14 @@ const cargarEtiquetas = async () => {
 const abrirModal = (producto = null) => {
   if (producto) {
     editando.value = true
+    
+    // Al editar, se conservan las etiquetas activas asociadas al producto. 
+    // Si alguna etiqueta previa fue desactivada, quedará desmarcada de las disponibles para asignación activa.
+    const idsEtiquetasActivas = etiquetasActivas.value.map(e => e.id_etiqueta)
+    const etiquetasAsignadas = producto.productos_etiquetas
+      ?.map(rel => rel.id_etiqueta)
+      .filter(id => idsEtiquetasActivas.includes(id)) || []
+
     form.value = {
       id_producto: producto.id_producto,
       codigo_barras: producto.codigo_barras || '',
@@ -466,7 +479,7 @@ const abrirModal = (producto = null) => {
       costo_unitario: producto.costo_unitario || '',
       stock_actual: producto.stock_actual,
       stock_minimo: producto.stock_minimo || '',
-      etiquetas: producto.productos_etiquetas?.map(rel => rel.id_etiqueta) || []
+      etiquetas: etiquetasAsignadas
     }
   } else {
     editando.value = false
@@ -524,7 +537,6 @@ const eliminarProducto = async (id) => {
     await axios.delete(`${baseUrl}/api/productos/${id}`, {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     })
-    // Si era el único producto de esta página y no es la primera, retrocedemos
     if (productos.value.length === 1 && paginaActual.value > 1) {
       paginaActual.value--
     }
