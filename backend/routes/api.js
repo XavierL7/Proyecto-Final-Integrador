@@ -19,6 +19,8 @@ import clientesRoutes from './clientesRoutes.js'
 
 import promocionRoutes from './promocionRoutes.js'
 
+import estadisticasRoutes from './estadisticasRoutes.js'
+
 
 const router = express.Router();
 
@@ -41,6 +43,8 @@ router.use('/clientes', clientesRoutes)
 router.use('/asistencias', asistenciaRoutes);
 // descuentos / promociones
 router.use('/promociones', promocionRoutes)
+
+router.use ('/estadisticas', estadisticasRoutes);
 
 // Rutas de autenticación (usan el controlador)
 router.post('/auth/register', registrarTrabajador);

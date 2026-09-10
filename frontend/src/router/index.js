@@ -83,6 +83,12 @@ const routes = [
     meta: { requiereAuth: false } 
   },
 
+{
+    path: '/estadisticas',
+    name: 'estadisticas',
+    component: () => import('../views/estadisticas.vue'),
+    meta: { requiereAuth: false } 
+  },
 
 
 
