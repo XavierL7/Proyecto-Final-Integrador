@@ -11,14 +11,27 @@
       </button>
     </div>
 
-    <!-- Barra de búsqueda -->
-    <div class="mb-4">
-      <input
-        v-model="busqueda"
-        type="text"
-        placeholder="Buscar por nombre o código de barras..."
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
+    <!-- Barra de búsqueda + filtro por etiquetas, lado a lado -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-4">
+      <div class="flex-1">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Buscar</label>
+        <input
+          v-model="busqueda"
+          type="text"
+          placeholder="Nombre o código de barras..."
+          class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <!-- Filtro por etiquetas (barra de búsqueda con chips, no un listado gigante) -->
+      <div class="flex-1">
+        <label class="block text-xs font-medium text-gray-500 mb-1">Filtrar por etiquetas</label>
+        <SelectorEtiquetas
+          v-model="etiquetasFiltro"
+          :etiquetas="etiquetas"
+          placeholder="Buscar etiquetas para filtrar..."
+        />
+      </div>
     </div>
 
     <!-- Tabla de productos -->
@@ -310,23 +323,14 @@
 
           <div class="mt-3">
             <label class="block text-sm font-medium mb-1">Etiquetas</label>
-            <div class="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg max-h-32 overflow-y-auto">
-              <!-- Se recorre etiquetasActivas en vez de la lista completa -->
-              <label
-                v-for="etiqueta in etiquetasActivas"
-                :key="etiqueta.id_etiqueta"
-                class="flex items-center gap-1.5 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  :value="etiqueta.id_etiqueta"
-                  v-model="form.etiquetas"
-                  class="w-4 h-4 text-blue-500"
-                />
-                <span class="text-sm">{{ etiqueta.nombre_etiqueta }}</span>
-              </label>
-              <p v-if="etiquetasActivas.length === 0" class="text-sm text-gray-400">No hay etiquetas activas disponibles</p>
-            </div>
+            <SelectorEtiquetas
+              v-model="form.etiquetas"
+              :etiquetas="etiquetasActivas"
+              placeholder="Buscar etiquetas para agregar..."
+            />
+            <p v-if="etiquetasActivas.length === 0" class="text-sm text-gray-400 mt-1">
+              No hay etiquetas activas disponibles
+            </p>
           </div>
 
           <div class="flex justify-end gap-3 mt-6">
@@ -344,9 +348,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
+import SelectorEtiquetas from '../components/stock/SelectorEtiquetas.vue'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -369,6 +374,7 @@ const colores = [
 const productos = ref([])
 const etiquetas = ref([])
 const busqueda = ref('')
+const etiquetasFiltro = ref([]) // ids de etiquetas elegidas para filtrar el listado
 const cargando = ref(false)
 
 // COMPUTED: Filtra la lista de etiquetas traídas del backend para mostrar solo las activas
@@ -436,7 +442,8 @@ const cargarProductos = async () => {
       headers: { 'Authorization': `Bearer ${authStore.token}` },
       params: {
         page: paginaActual.value,
-        limit: porPagina
+        limit: porPagina,
+        etiquetas: etiquetasFiltro.value.length > 0 ? etiquetasFiltro.value.join(',') : undefined
       }
     })
     productos.value = response.data.productos
@@ -549,6 +556,13 @@ const eliminarProducto = async (id) => {
 onMounted(() => {
   cargarProductos()
   cargarEtiquetas()
+})
+
+// Cuando cambia el filtro de etiquetas, volvemos a la página 1 (si no,
+// podríamos quedar en una página que ya no existe para el filtro nuevo)
+watch(etiquetasFiltro, () => {
+  paginaActual.value = 1
+  cargarProductos()
 })
 </script>
 
