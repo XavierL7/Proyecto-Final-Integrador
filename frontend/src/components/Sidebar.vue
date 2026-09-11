@@ -42,7 +42,7 @@
     </button>
 
     <!-- MENÚ -->
-    <nav class="p-4 space-y-1 overflow-y-auto h-[calc(100vh-80px)]">
+    <nav class="p-4 space-y-1 overflow-y-auto h-[calc(100vh-80px)] custom-scrollbar">
       
       <!-- DASHBOARD -->
       <router-link
@@ -407,16 +407,13 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { useThemeStore } from '../stores/theme' // <-- Importamos el store del tema
+import { useThemeStore } from '../stores/theme'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-const themeStore = useThemeStore() // <-- Instanciamos el store del tema
+const themeStore = useThemeStore()
 
-// Administración tiene pestañas de Roles, Trabajadores y Configuración:
-// se muestra el link si tiene el permiso de VER cualquiera de ellas
-// (mismo criterio que usa el router guard para dejarlo entrar).
 const mostrarAdministracion = computed(() =>
   ['Ver_Roles', 'Ver_Trabajadores', 'Ver_configuracion'].some(p => authStore.tienePermiso(p))
 )
@@ -434,20 +431,29 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-aside::-webkit-scrollbar {
-  width: 4px;
+/* Estilos personalizados para la barra de desplazamiento */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #4a8db7 #021120; /* Firefox: thumb / track */
 }
 
-aside::-webkit-scrollbar-track {
+/* Chrome, Edge y Safari */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
   background: #021120;
-}
-
-aside::-webkit-scrollbar-thumb {
-  background: #0a2a40;
   border-radius: 4px;
 }
 
-aside::-webkit-scrollbar-thumb:hover {
-  background: #4a8db7;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #4a8db7;
+  border-radius: 4px;
+  border: 1px solid #021120;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #6aaec9;
 }
 </style>
