@@ -33,7 +33,12 @@
             <tr v-else-if="ventas.length === 0">
               <td colspan="8" class="px-4 py-6 text-center">No hay ventas registradas todavía.</td>
             </tr>
-            <tr v-for="venta in ventas" :key="venta.id_venta" class="hover:bg-gray-300">
+            <tr
+              v-for="venta in ventas"
+              :key="venta.id_venta"
+              @click="abrirDetalle(venta)"
+              class="hover:bg-blue-50 cursor-pointer transition"
+            >
               <td class="px-4 py-3 whitespace-nowrap">
                 {{ formatearFechaHora(venta.fecha_hora) }}
               </td>
@@ -66,6 +71,12 @@
         </table>
       </div>
     </div>
+
+    <DetalleVentaModal
+      :visible="modalDetalleVisible"
+      :venta="ventaSeleccionada"
+      @close="cerrarDetalle"
+    />
   </div>
 </template>
 
@@ -73,6 +84,7 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
+import DetalleVentaModal from '../components/caja/DetalleVentaModal.vue'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -108,6 +120,23 @@ const montoPagado = (venta) => {
 const cambio = (venta) => {
   const detalle = detallePago(venta)
   return Number(detalle?.cambio_devuelto || venta.cambio_total || 0)
+}
+
+// ============================================================
+// MODAL DE DETALLE
+// ============================================================
+const modalDetalleVisible = ref(false)
+const ventaSeleccionada = ref(null)
+
+// La venta ya viene completa desde /api/ventas (productos, descuentos,
+// pagos), así que el modal no necesita pedir nada de nuevo al backend.
+const abrirDetalle = (venta) => {
+  ventaSeleccionada.value = venta
+  modalDetalleVisible.value = true
+}
+
+const cerrarDetalle = () => {
+  modalDetalleVisible.value = false
 }
 
 const formatearFechaHora = (fecha) => {
