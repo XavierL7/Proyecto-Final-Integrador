@@ -45,6 +45,6 @@ reworkear panel de administración
 
 ---error en descuentos de combo---
 
-debe pedir que cambie tu contraseña la primera vez
+---debe pedir que cambie tu contraseña la primera vez---
 
-tengo que agregra la opcion de cambiar la contraseñajaja
+---tengo que agregra la opcion de cambiar la contraseñajaja---

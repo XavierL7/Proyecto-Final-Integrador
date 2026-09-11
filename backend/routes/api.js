@@ -1,5 +1,5 @@
 import express from 'express';
-import { registrarTrabajador, loginTrabajador } from '../controllers/authController.js';
+import { registrarTrabajador, loginTrabajador, cambiarPassword } from '../controllers/authController.js';
 import { consultarLoginHuella } from '../controllers/auth/consultarLoginHuella.js';
 import { buscarProducto } from '../controllers/productoController.js';
 import { verificarToken } from '../middleware/auth.js';
@@ -50,6 +50,8 @@ router.use ('/estadisticas', estadisticasRoutes);
 router.post('/auth/register', registrarTrabajador);
 router.post('/auth/login', loginTrabajador);
 router.post('/logout', verificarToken, registrarSalida);
+// Cambio de contraseña desde el perfil (o de forma obligatoria en el primer ingreso)
+router.patch('/auth/cambiar-password', verificarToken, cambiarPassword);
 // Login solo con huella: el front hace polling acá mientras el usuario
 // tiene el dedo en el lector físico. Sin verificarToken a propósito:
 // se usa ANTES de tener sesión.

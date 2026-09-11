@@ -3,3 +3,4 @@
 
 export { registrarTrabajador } from './auth/registrarTrabajador.js'
 export { loginTrabajador } from './auth/loginTrabajador.js'
+export { cambiarPassword } from './auth/cambiarPassword.js'

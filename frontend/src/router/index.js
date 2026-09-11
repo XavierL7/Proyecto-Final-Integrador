@@ -77,6 +77,13 @@ const routes = [
   },
 
   {
+    path: '/perfil',
+    name: 'Perfil',
+    component: () => import('../views/PerfilView.vue'),
+    meta: { requiereAuth: true } // Cualquier trabajador logueado puede ver/editar su propio perfil
+  },
+
+  {
     path: '/pagina',
     name: 'landingpage',
     component: () => import('../views/pagina.vue'),
@@ -181,6 +188,13 @@ router.beforeEach(async (to, from, next) => {
   // CASO 2: El usuario ya está logueado e intenta ir al Login (lo mandamos al inicio)
   if (to.name === 'Login' && authStore.estaAutenticado) {
     return next({ name: 'Dashboard' })
+  }
+
+  // CASO 2.5: Es el primer ingreso del trabajador (todavía tiene la
+  // contraseña provisoria) y no está yendo a /perfil a cambiarla. Lo
+  // mandamos ahí sí o sí antes de dejarlo usar el resto del sistema.
+  if (authStore.estaAutenticado && authStore.requiereCambioPassword && to.name !== 'Perfil') {
+    return next({ name: 'Perfil', query: { primerIngreso: '1' } })
   }
 
   // CASO 3: La ruta requiere un permiso específico.

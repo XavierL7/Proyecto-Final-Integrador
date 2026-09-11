@@ -4,11 +4,9 @@
   <div class="dashboard">
     <h1>Panel de Control - Kairo</h1>
     
-    <!-- muestra info del vendednor, nombre, apellido, rol y funcionalidades -->
+    <!-- muestra info basica del vendedor, nombre y apellido. rol y permisos ahora viven en /perfil -->
     <div class="user-info">
       <p>Usuario: {{ authStore.trabajador?.nombre }} {{ authStore.trabajador?.apellido }}</p>
-      <p>Rol: {{ authStore.rolActual }}</p>
-      <p>Permisos: {{ authStore.funcionalidades.join(', ') || 'Ninguno' }}</p>
     </div>
 
 
@@ -36,6 +34,14 @@
         @click="navigateTo('/cajas')"
       >
        Cajas
+      </button>
+
+      <!-- boton que lleva al perfil del usuario (datos, rol, permisos y cambio de contraseña) -->
+      <button 
+        class="btn-perfil"
+        @click="navigateTo('/perfil')"
+      >
+       Perfil
       </button>
     </div>
   </div>
@@ -122,5 +128,14 @@ button:hover {
 
 .btn-cajas:hover {
   background: #1976D2;
+}
+
+.btn-perfil {
+  background: #6c757d;
+  color: #fff;
+}
+
+.btn-perfil:hover {
+  background: #5a6268;
 }
 </style>

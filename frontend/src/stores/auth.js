@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
     const trabajador = ref(JSON.parse(localStorage.getItem('trabajador')) || null) //datos del trabajdor (nombre, apellido, etc.)
     const token = ref(localStorage.getItem('token') || null) //JWT
     const funcionalidades = ref(JSON.parse(localStorage.getItem('funcionalidades')) || []) //funcionalidades del trabjador
+    const requiereCambioPassword = ref(JSON.parse(localStorage.getItem('requiereCambioPassword')) || false) //true si es el primer ingreso del trabajador y todavia no cambio su contraseña provisoria
 
     //2  GETTERS (Datos calculados)      
     const estaAutenticado = computed(() => !!token.value && !!trabajador.value) //true solo si hay token y trabajador
@@ -37,10 +38,14 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = data.token
     trabajador.value = data.trabajador
     funcionalidades.value = data.funcionalidades
+    // Si el backend no manda el campo (ej. login por huella todavía no lo
+    // soporta), asumimos false para no romper a nadie.
+    requiereCambioPassword.value = data.requiereCambioPassword || false
 
     localStorage.setItem('token', data.token)
     localStorage.setItem('trabajador', JSON.stringify(data.trabajador))
     localStorage.setItem('funcionalidades', JSON.stringify(data.funcionalidades))
+    localStorage.setItem('requiereCambioPassword', JSON.stringify(requiereCambioPassword.value))
 
     axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
   }
@@ -49,9 +54,11 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     trabajador.value = null
     funcionalidades.value = []
+    requiereCambioPassword.value = false
     localStorage.removeItem('token')
     localStorage.removeItem('trabajador')
     localStorage.removeItem('funcionalidades')
+    localStorage.removeItem('requiereCambioPassword')
     delete axios.defaults.headers.common['Authorization']
   }
 
@@ -97,6 +104,31 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Cambia la contraseña del trabajador logueado (perfil, o cambio
+  // obligatorio en el primer ingreso). Si funciona, bajamos la bandera
+  // de requiereCambioPassword para que el guard del router lo deje pasar.
+  async function cambiarPassword(passwordActual, passwordNueva) {
+    try {
+      await axios.patch(`${baseUrl}/api/auth/cambiar-password`, {
+        passwordActual,
+        passwordNueva
+      }, {
+        headers: { Authorization: `Bearer ${token.value}` }
+      })
+
+      requiereCambioPassword.value = false
+      localStorage.setItem('requiereCambioPassword', JSON.stringify(false))
+
+      return { success: true }
+    } catch (error) {
+      console.error('Error al cambiar la contraseña:', error)
+      return {
+        success: false,
+        message: error.response?.data?.error || 'Error al conectar con el servidor'
+      }
+    }
+  }
+
   // Cerrar sesión y vaciar la tienda
     async function logout() {
         try {
@@ -118,11 +150,13 @@ export const useAuthStore = defineStore('auth', () => {
     trabajador,
     token,
     funcionalidades,
+    requiereCambioPassword,
     estaAutenticado,
     rolActual,
     tienePermiso,
     loginConContrasena,
     consultarLoginPorHuella,
+    cambiarPassword,
     logout
   }
 })

@@ -49,6 +49,14 @@ export const loginTrabajador = async (req, res) => {
     const funcionalidades = trabajador.rol?.roles_funcionalidades
       ?.map(rf => rf.funcionalidad.nombre_func) || []
 
+    // Si nunca tuvo una asistencia registrada, es su primer ingreso al
+    // sistema (no tiene fecha de entrada previa) y se le va a pedir que
+    // cambie la contraseña por defecto/provisoria.
+    const asistenciasPrevias = await prisma.asistencia.count({
+      where: { id_trabajador: trabajador.id_trabajador }
+    })
+    const primerIngreso = asistenciasPrevias === 0
+
     await prisma.asistencia.create({
       data: {
         id_trabajador: trabajador.id_trabajador,
@@ -77,7 +85,8 @@ export const loginTrabajador = async (req, res) => {
         dni: trabajador.dni,
         rol: { nombre_rol: trabajador.rol?.nombre_rol }
       },
-      funcionalidades
+      funcionalidades,
+      requiereCambioPassword: primerIngreso
     })
   } catch (error) {
     console.error('Error en Login:', error)
