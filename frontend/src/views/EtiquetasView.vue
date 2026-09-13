@@ -1,6 +1,6 @@
 <!-- frontend/src/views/EtiquetasView.vue -->
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
+  <div class="p-6 max-w-6xl mx-auto">
     <StockSubNav />
 
     <h1 class="text-2xl font-bold mb-6">Etiquetas</h1>
