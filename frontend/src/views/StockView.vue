@@ -1,6 +1,8 @@
 <!-- frontend/src/views/StockView.vue -->
 <template>
   <div class="p-6 max-w-6xl mx-auto">
+    <StockSubNav />
+
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">Stock</h1>
       <button
@@ -352,6 +354,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 import SelectorEtiquetas from '../components/stock/SelectorEtiquetas.vue'
+import StockSubNav from '../components/stock/StockSubNav.vue'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'

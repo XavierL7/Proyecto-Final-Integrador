@@ -1,6 +1,8 @@
 <!-- frontend/src/views/EtiquetasView.vue -->
 <template>
   <div class="p-6 max-w-4xl mx-auto">
+    <StockSubNav />
+
     <h1 class="text-2xl font-bold mb-6">Etiquetas</h1>
 
     <!-- Barra de búsqueda y botón -->
@@ -175,6 +177,7 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
+import StockSubNav from '../components/stock/StockSubNav.vue'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'

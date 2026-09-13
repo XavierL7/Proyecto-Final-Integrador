@@ -97,24 +97,27 @@
         <span v-else class="text-sm font-medium">V</span>
       </router-link>
 
-      <!-- STOCK -->
+      <!-- ============================================================ -->
+      <!-- STOCK (unifica Stock, Etiquetas y Descuentos: adentro hay -->
+      <!-- pestañas para moverse entre las tres) -->
+      <!-- ============================================================ -->
       <router-link
-        v-if="authStore.tienePermiso('Ver_Stock')"
+        v-if="mostrarStock"
         to="/stock"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
-          color: $route.path === '/stock' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/stock' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
+          color: seccionStockActiva ? '#4a8db7' : '#8ab4d6',
+          backgroundColor: seccionStockActiva ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
         }"
         @mouseenter="(e) => {
-          if ($route.path !== '/stock') {
+          if (!seccionStockActiva) {
             e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
             e.currentTarget.style.color = '#6aaec9'
           }
         }"
         @mouseleave="(e) => {
-          if ($route.path !== '/stock') {
+          if (!seccionStockActiva) {
             e.currentTarget.style.backgroundColor = 'transparent'
             e.currentTarget.style.color = '#8ab4d6'
           }
@@ -122,66 +125,6 @@
       >
         <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Stock</span>
         <span v-else class="text-sm font-medium">S</span>
-      </router-link>
-
-
-      <!-- ============================================================ -->
-      <!-- DESCUENTOS -->
-      <!-- ============================================================ -->
-      <router-link
-        v-if="authStore.tienePermiso('Ver_Descuentos')"
-        to="/descuentos"
-        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[isOpen ? 'justify-start' : 'justify-center']"
-        :style="{
-          color: $route.path === '/descuentos' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/descuentos' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
-        }"
-        @mouseenter="(e) => {
-          if ($route.path !== '/descuentos') {
-            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
-            e.currentTarget.style.color = '#6aaec9'
-          }
-        }"
-        @mouseleave="(e) => {
-          if ($route.path !== '/descuentos') {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#8ab4d6'
-          }
-        }"
-      >
-        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Descuentos</span>
-        <span v-else class="text-sm font-medium">D</span>
-      </router-link>
-
-      <!-- ============================================================ -->
-      <!-- ETIQUETAS (CORREGIDO) -->
-      <!-- ============================================================ -->
-
-      <router-link
-        v-if="authStore.tienePermiso('Ver_Etiquetas')"
-        to="/etiquetas"
-        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[isOpen ? 'justify-start' : 'justify-center']"
-        :style="{
-          color: $route.path === '/etiquetas' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/etiquetas' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
-        }"
-        @mouseenter="(e) => {
-          if ($route.path !== '/etiquetas') {
-            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
-            e.currentTarget.style.color = '#6aaec9'
-          }
-        }"
-        @mouseleave="(e) => {
-          if ($route.path !== '/etiquetas') {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#8ab4d6'
-          }
-        }"
-      >
-        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Etiquetas</span>
-        <span v-else class="text-sm font-medium">E</span>
       </router-link>
 
       <!-- CAJAS -->
@@ -416,6 +359,17 @@ const themeStore = useThemeStore()
 
 const mostrarAdministracion = computed(() =>
   ['Ver_Roles', 'Ver_Trabajadores', 'Ver_configuracion'].some(p => authStore.tienePermiso(p))
+)
+
+// El link "Stock" agrupa Stock, Etiquetas y Descuentos (adentro hay
+// pestañas para moverse entre las tres). Se muestra si tiene permiso
+// para ver cualquiera de las tres, y queda resaltado en las tres rutas.
+const mostrarStock = computed(() =>
+  ['Ver_Stock', 'Ver_Etiquetas', 'Ver_Descuentos'].some(p => authStore.tienePermiso(p))
+)
+
+const seccionStockActiva = computed(() =>
+  ['/stock', '/etiquetas', '/descuentos'].includes(route.path)
 )
 
 const isOpen = ref(true)
