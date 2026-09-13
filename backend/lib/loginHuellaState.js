@@ -12,13 +12,23 @@
 
 const TTL_MS = 20_000 // el login web tiene 20s para "recoger" el resultado
 
-let ultimoResultado = null // { token, trabajador, funcionalidades, expiraEn }
+let ultimoResultado = null // { token, trabajador, funcionalidades, expiraEn } | { error, expiraEn }
 
 export function publicarLoginPorHuella({ token, trabajador, funcionalidades }) {
   ultimoResultado = {
     token,
     trabajador,
     funcionalidades,
+    expiraEn: Date.now() + TTL_MS
+  }
+}
+
+// Usado cuando se identificó a alguien pero el login no puede completarse
+// (ej. login por huella deshabilitado desde Administración -> Configuración).
+// La pantalla de login lo recoge por el mismo polling y muestra el motivo.
+export function publicarErrorLoginPorHuella(mensaje) {
+  ultimoResultado = {
+    error: mensaje,
     expiraEn: Date.now() + TTL_MS
   }
 }

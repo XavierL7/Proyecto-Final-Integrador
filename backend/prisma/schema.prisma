@@ -280,6 +280,15 @@ model Productos_Etiquetas {
   @@map("Productos_Etiquetas")
 }
 
+model Configuracion {
+  id_configuracion    Int      @id @default(autoincrement())
+  clave               String   @unique @db.VarChar(100)
+  valor               String   @db.VarChar(100)
+  fecha_actualizacion DateTime @updatedAt
+
+  @@map("Configuraciones")
+}
+
 model Cliente {
   id_cliente          Int       @id @default(autoincrement())
   nombre              String    @db.VarChar(100)

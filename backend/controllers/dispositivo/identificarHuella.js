@@ -1,7 +1,8 @@
 // backend/controllers/dispositivo/identificarHuella.js
 import prisma from '../../db.js'
 import jwt from 'jsonwebtoken'
-import { publicarLoginPorHuella } from '../../lib/loginHuellaState.js'
+import { publicarLoginPorHuella, publicarErrorLoginPorHuella } from '../../lib/loginHuellaState.js'
+import { metodoLoginPermitido, MENSAJE_LOGIN_DESHABILITADO } from '../../lib/configuracion.js'
 import { hayVentaPendiente, obtenerVentaPendiente, resolverVentaPendiente } from '../../lib/ventaPendienteState.js'
 import { guardarVenta } from '../venta/construirVenta.js'
 
@@ -93,6 +94,15 @@ export const identificarHuella = async (req, res) => {
 
     // --- CASO 2: comportamiento normal, login por huella ---
 
+    // El admin puede restringir el sistema a un solo método de acceso
+    // desde Administración -> Configuración. El botón "Usar lector de
+    // huellas" del login sigue disponible siempre; acá simplemente no
+    // dejamos que el login se complete y avisamos el motivo por el mismo
+    // polling que usa la pantalla de login.
+    if (!(await metodoLoginPermitido('huella'))) {
+      publicarErrorLoginPorHuella(MENSAJE_LOGIN_DESHABILITADO.huella)
+      return res.status(403).json({ error: MENSAJE_LOGIN_DESHABILITADO.huella })
+    }
 
     await prisma.asistencia.create({
       data: {

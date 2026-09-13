@@ -5,11 +5,11 @@ TODO
 
 cambiar Dashboard	
 
-reworkear panel de administración
+---reworkear panel de administración---
 
 Agregar boton "Agregar" en el Stock para cargar mecaderia 
 
-se debe poder configurar login solo con contraseña
+se debe poder configurar login solo con contraseña/huella
 
 ---se debe poder vender mas de un producto a la vez si el Stock es Negativo---
 

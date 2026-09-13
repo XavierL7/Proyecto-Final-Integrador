@@ -260,10 +260,13 @@ const iniciarLoginPorHuella = () => {
   esperandoHuella.value = true
  
   intervaloHuella = setInterval(async () => {
-    const identificado = await authStore.consultarLoginPorHuella()
-    if (identificado) {
+    const { encontrado, error } = await authStore.consultarLoginPorHuella()
+    if (encontrado) {
       detenerPollingHuella()
       router.push('/')
+    } else if (error) {
+      detenerPollingHuella()
+      errorHuella.value = error
     }
   }, INTERVALO_MS)
  

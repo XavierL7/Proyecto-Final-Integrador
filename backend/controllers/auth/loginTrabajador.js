@@ -2,6 +2,7 @@
 import prisma from '../../db.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { metodoLoginPermitido, MENSAJE_LOGIN_DESHABILITADO } from '../../lib/configuracion.js'
 
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -14,6 +15,15 @@ export const loginTrabajador = async (req, res) => {
       return res.status(400).json({
         error: 'Nombre, apellido, DNI y contraseña son obligatorios.'
       })
+    }
+
+    // El admin puede restringir el sistema a un solo método de acceso
+    // desde Administración -> Configuración. El selector de método en el
+    // login sigue mostrándose siempre igual (no lo deshabilitamos ni lo
+    // ocultamos); acá simplemente no dejamos que el intento funcione y le
+    // avisamos al usuario por qué.
+    if (!(await metodoLoginPermitido('contrasena'))) {
+      return res.status(403).json({ error: MENSAJE_LOGIN_DESHABILITADO.contrasena })
     }
 
     // Buscar trabajador por nombre + apellido + dni

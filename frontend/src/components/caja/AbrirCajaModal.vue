@@ -84,6 +84,18 @@ const abriendo = ref(false)
 const error = ref('')
 const montoSugerido = ref(null)
 
+// Precarga el checkbox con el default que el admin haya guardado en
+// Administración -> Configuración (modo_caja_default). El trabajador
+// puede seguir cambiándolo para esta caja puntual si hace falta.
+const cargarModoCajaDefault = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/api/configuracion`, headers())
+    cajaCompartida.value = response.data.modo_caja_default === 'por_venta'
+  } catch (err) {
+    console.error('Error cargando el modo de caja por defecto:', err)
+  }
+}
+
 // Sugerencia: lo que quedó contado (monto_final_real) en la última caja
 // que se cerró. No lo forzamos -> el trabajador puede ajustarlo si hace
 // falta (por ejemplo, si se retiró plata para otra cosa).
@@ -120,5 +132,6 @@ const abrirCaja = async () => {
 
 onMounted(() => {
   cargarMontoSugerido()
+  cargarModoCajaDefault()
 })
 </script>

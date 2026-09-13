@@ -85,22 +85,28 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Consulta una sola vez si el lector de huellas (ESP32) identificó a
-  // alguien recién. Devuelve true si encontró un login y ya quedó
-  // guardada la sesión; false si todavía no hay nada (204 = "esperá").
-  // La usa LoginView.vue en un loop mientras el usuario tiene el dedo
-  // apoyado en el sensor.
+  // alguien recién. Devuelve { encontrado, error }: encontrado=true si
+  // ya quedó guardada la sesión; error trae un mensaje cuando el login
+  // no se pudo completar (ej. deshabilitado por configuración) aunque sí
+  // se identificó a alguien. La usa LoginView.vue en un loop mientras el
+  // usuario tiene el dedo apoyado en el sensor.
   async function consultarLoginPorHuella() {
     try {
       const response = await axios.get(`${baseUrl}/api/auth/huella/resultado`)
 
       if (response.status === 200 && response.data?.token) {
         guardarSesion(response.data)
-        return true
+        return { encontrado: true, error: null }
       }
-      return false // 204: todavía no identificó a nadie
+      return { encontrado: false, error: null } // 204: todavía no identificó a nadie
     } catch (error) {
+      // El backend identificó la huella pero no permitió el login (ej.
+      // método deshabilitado desde Administración -> Configuración).
+      if (error.response?.status === 403 && error.response?.data?.error) {
+        return { encontrado: false, error: error.response.data.error }
+      }
       console.error('Error consultando login por huella:', error)
-      return false
+      return { encontrado: false, error: null }
     }
   }
 

@@ -1,7 +1,10 @@
 // backend/controllers/caja/abrirCaja.js
 import prisma from '../../db.js'
+import { obtenerConfiguracion } from '../../lib/configuracion.js'
 
 // POST /api/cajas   { monto_inicial, compartida? }
+// "compartida" es opcional: si no viene, se usa el default que el admin
+// haya guardado en Administración -> Configuración (modo_caja_default).
 export const abrirCaja = async (req, res) => {
   try {
     const userId = req.userId
@@ -31,7 +34,15 @@ export const abrirCaja = async (req, res) => {
     // Individual (sesion_inicial): la caja queda registrada a este
     // trabajador. Compartida (por_venta): cualquiera puede vender en
     // ella, pero cada venta se confirma con huella.
-    const modoAutenticacion = compartida ? 'por_venta' : 'sesion_inicial'
+    // Si el front no mandó explícitamente "compartida" (true/false),
+    // recurrimos al default configurado por el admin.
+    let modoAutenticacion
+    if (compartida === undefined || compartida === null) {
+      const defaultConfigurado = await obtenerConfiguracion('modo_caja_default')
+      modoAutenticacion = defaultConfigurado === 'por_venta' ? 'por_venta' : 'sesion_inicial'
+    } else {
+      modoAutenticacion = compartida ? 'por_venta' : 'sesion_inicial'
+    }
 
     const { caja } = await prisma.$transaction(async (tx) => {
       const caja = await tx.caja.create({

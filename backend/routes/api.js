@@ -5,6 +5,7 @@ import { buscarProducto } from '../controllers/productoController.js';
 import { verificarToken } from '../middleware/auth.js';
 import { registrarSalida } from '../controllers/auth/logoutTrabajador.js';
 import adminRoutes from './adminRoutes.js';
+import configuracionRoutes from './configuracionRoutes.js';
 import etiquetaRoutes from './etiquetaRoutes.js'  
 import productoRoutes from './productoRoutes.js'
 import metodoPagoRoutes from './metodoPagoRoutes.js'
@@ -26,6 +27,8 @@ const router = express.Router();
 
 // rutas de admin
 router.use('/admin', adminRoutes);
+// configuración global del sistema (ej. método de login permitido)
+router.use('/configuracion', configuracionRoutes);
 // rutas de etiquetas
 router.use('/etiquetas', etiquetaRoutes)
 //ruta de productos

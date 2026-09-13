@@ -13,6 +13,10 @@ export const consultarLoginHuella = (req, res) => {
     return res.status(204).end() // nada nuevo todavía
   }
 
+  if (resultado.error) {
+    return res.status(403).json({ error: resultado.error })
+  }
+
   res.json(resultado) // { token, trabajador, funcionalidades }
   
 }

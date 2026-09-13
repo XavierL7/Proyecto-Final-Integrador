@@ -212,6 +212,73 @@ z<!-- frontend/src/views/AdminView.vue -->
 </div>
 
     <!-- ======================================================== -->
+    <!-- TAB 3: CONFIGURACIÓN                                     -->
+    <!-- ======================================================== -->
+    <div v-if="tabActivo === 'configuracion'" class="max-w-xl space-y-8">
+
+      <!-- Método de acceso al sistema -->
+      <div>
+        <h2 class="text-lg font-semibold mb-1">Método de acceso al sistema</h2>
+        <p class="text-sm text-gray-500 mb-4">
+          Define con qué método se puede iniciar sesión. El selector de
+          "Contraseña" / "Huella dactilar" en la pantalla de login sigue
+          mostrando siempre las dos opciones; si elegís restringir una, esa
+          opción simplemente no va a funcionar y se le avisará al usuario
+          que fue deshabilitada por el administrador.
+        </p>
+        <div class="space-y-2">
+          <label
+            v-for="opcion in opcionesMetodoLogin"
+            :key="opcion.valor"
+            class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
+            :class="metodoLogin === opcion.valor ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'"
+          >
+            <input
+              type="radio"
+              name="metodoLogin"
+              :value="opcion.valor"
+              v-model="metodoLogin"
+              class="mt-1 w-4 h-4 text-blue-500"
+            />
+            <span>
+              <span class="block text-sm font-medium">{{ opcion.titulo }}</span>
+              <span class="block text-xs text-gray-500">{{ opcion.descripcion }}</span>
+            </span>
+          </label>
+        </div>
+        <button
+          @click="guardarMetodoLogin"
+          :disabled="guardandoMetodoLogin"
+          class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+        >
+          {{ guardandoMetodoLogin ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+
+      <!-- Modo de caja por defecto -->
+      <div class="pt-6 border-t border-gray-200">
+        <h2 class="text-lg font-semibold mb-1">Modo de autenticación de caja por defecto</h2>
+        <p class="text-sm text-gray-500 mb-4">
+          Se aplica a las próximas cajas que se abran.
+        </p>
+        <select
+          v-model="modoCaja"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="sesion_inicial">Sesión inicial (huella una vez, al abrir caja)</option>
+          <option value="por_venta">Por venta (huella en cada venta)</option>
+        </select>
+        <button
+          @click="guardarModoCaja"
+          :disabled="guardandoConfig"
+          class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+        >
+          {{ guardandoConfig ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
     <!-- MODAL: ROL                                               -->
     <!-- ======================================================== -->
     <div
@@ -396,6 +463,14 @@ const tabActivo = ref('roles')
 const modoCaja = ref('sesion_inicial')
 const guardandoConfig = ref(false)
 
+const metodoLogin = ref('ambos')
+const guardandoMetodoLogin = ref(false)
+const opcionesMetodoLogin = [
+  { valor: 'ambos', titulo: 'Contraseña y huella dactilar', descripcion: 'Los trabajadores pueden usar cualquiera de los dos métodos.' },
+  { valor: 'solo_huella', titulo: 'Solo huella dactilar', descripcion: 'El login con contraseña queda deshabilitado, aunque siga visible en la pantalla.' },
+  { valor: 'solo_contrasena', titulo: 'Solo contraseña', descripcion: 'El login con huella queda deshabilitado, aunque siga visible en la pantalla.' }
+]
+
 // ============================================================
 // DATOS
 // ============================================================
@@ -485,8 +560,27 @@ const cargarConfiguracion = async () => {
     if (response.data.modo_caja_default) {
       modoCaja.value = response.data.modo_caja_default
     }
+    if (response.data.metodo_login) {
+      metodoLogin.value = response.data.metodo_login
+    }
   } catch (error) {
     console.error('Error cargando configuración:', error)
+  }
+}
+
+const guardarMetodoLogin = async () => {
+  guardandoMetodoLogin.value = true
+  try {
+    await axios.put(
+      `${baseUrl}/api/configuracion/metodo_login`,
+      { valor: metodoLogin.value },
+      { headers: { 'Authorization': `Bearer ${authStore.token}` } }
+    )
+    alert('Configuración guardada. Se aplica de inmediato en el login.')
+  } catch (error) {
+    alert(error.response?.data?.error || 'Error al guardar la configuración')
+  } finally {
+    guardandoMetodoLogin.value = false
   }
 }
 
