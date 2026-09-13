@@ -5,11 +5,13 @@ TODO
 
 cambiar Dashboard	
 
-Sobrescribe el extox existente (Stock)
-
-se debe poder vender mas de un producto a la vez si el Stock es Negativo
+reworkear panel de administración
 
 Agregar boton "Agregar" en el Stock para cargar mecaderia 
+
+se debe poder configurar login solo con contraseña
+
+---se debe poder vender mas de un producto a la vez si el Stock es Negativo---
 
 ---que al crear a caja te envie a ventas---
 
@@ -21,13 +23,11 @@ Agregar boton "Agregar" en el Stock para cargar mecaderia
 
 ---que el buscador de ventas entregue todo los resultados---
 
-stock buscar por etiqueta
+---stock buscar por etiqueta---
 
-hacer menú desplegable para editar->etiquetas
+---hacer menú desplegable para editar->etiquetas---
 
 ---que solo aparezcan 10 cosas en el stock y  lechas para pasarde pagina y que no muestre todo---
-
-reworkear panel de administración
 
 ---Crear paquete/o que los descuentos apliquen a etiquetas también---
 
