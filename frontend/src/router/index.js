@@ -1,7 +1,6 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import axios from 'axios'
 
 // router/index.js sirve para definir las rutas de la aplicación
 const routes = [
@@ -105,8 +104,10 @@ const routes = [
     component: () => import('../views/VentasView.vue'),
     meta: { 
       requiereAuth: true,
-      permiso: 'Ver_Ventas', // antes: 'registrar_venta'
-      requiereCajaAbierta: true // No se puede vender sin haber abierto una caja antes
+      permiso: 'Ver_Ventas' // antes: 'registrar_venta'
+      // La verificación de caja abierta ahora se hace adentro de la vista
+      // (VentasView.vue muestra una ventana emergente para abrir una si
+      // hace falta), ya no se redirige acá.
     }
   },
 
@@ -208,28 +209,6 @@ router.beforeEach(async (to, from, next) => {
     if (!tienePermisoNecesario) {
       console.warn(`Acceso denegado a ${to.path}. Falta alguno de: ${permisosNecesarios.join(', ')}`)
       return next({ name: 'Dashboard' }) // Lo rebota al panel principal
-    }
-  }
-
-  // CASO 4: La ruta (ej. /ventas) requiere que este trabajador tenga una
-  // caja abierta. Si no tiene, no lo dejamos vender: lo mandamos a /cajas
-  // para que abra una o vea la que ya tiene abierta.
-  if (to.meta.requiereCajaAbierta) {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-    try {
-      const response = await axios.get(`${baseUrl}/api/cajas/activa`, {
-        headers: { 'Authorization': `Bearer ${authStore.token}` }
-      })
-
-      if (!response.data) {
-        // null = no tiene ninguna caja abierta
-        return next({ name: 'Cajas', query: { motivo: 'necesita-caja' } })
-      }
-    } catch (error) {
-      console.error('No se pudo verificar la caja activa:', error)
-      // Si falla la verificación (ej. backend caído), preferimos no dejar
-      // vender a ciegas: lo mandamos igual a /cajas.
-      return next({ name: 'Cajas', query: { motivo: 'error-verificacion' } })
     }
   }
 

@@ -3,6 +3,14 @@
 <template>
   <div class="p-6 max-w-6xl mx-auto relative">
     
+    <!-- Ventana emergente para abrir caja: se muestra si todavía no -->
+    <!-- terminó de cargar el estado de la caja o si no hay ninguna abierta -->
+    <AbrirCajaModal
+      v-if="!cargandoCajaActiva && !cajaActiva"
+      @abierta="onCajaAbierta"
+      @cancelar="router.push('/')"
+    />
+
     <!-- Banner de notificación visual -->
     <transition name="fade">
       <div 
@@ -35,17 +43,24 @@
         >
           Dinero en Caja
         </button>
-        <a
+        <button
+          @click="mostrarModalCerrarCaja = true"
+          type="button"
           class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
-          href="/cajas"
         >
           Cerrar Caja
-        </a>
+        </button>
 
         <!-- Modales de la Vista -->
         <ResumenDineroCajaModal 
           v-if="mostrarModalDinero" 
           @cerrar="mostrarModalDinero = false" 
+        />
+        <CerrarCajaModal
+          v-if="mostrarModalCerrarCaja"
+          :caja-activa="cajaActiva"
+          @cerrada="onCajaCerrada"
+          @cancelar="mostrarModalCerrarCaja = false"
         />
       </div>
     </div>
@@ -163,6 +178,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import BuscadorProducto from '../components/caja/BuscadorProducto.vue'
 import CarritoCompras from '../components/caja/CarritoCompras.vue'
@@ -174,8 +190,11 @@ import PagoCheque from '../components/caja/PagoCheque.vue'
 import PagoTarjeta from '../components/caja/PagoTarjeta.vue'
 import SelectorCliente from '../components/caja/SelectorCliente.vue'
 import ResumenDineroCajaModal from '../components/caja/ResumenDineroCajaModal.vue'
+import AbrirCajaModal from '../components/caja/AbrirCajaModal.vue'
+import CerrarCajaModal from '../components/caja/CerrarCajaModal.vue'
 
 const authStore = useAuthStore()
+const router = useRouter()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const headers = () => ({ headers: { 'Authorization': `Bearer ${authStore.token}` } })
 
@@ -187,7 +206,9 @@ const clientes = ref([])
 const clienteSeleccionado = ref(null)
 const promocionesVigentes = ref([])
 const cajaActiva = ref(null)
+const cargandoCajaActiva = ref(true)
 const mostrarModalDinero = ref(false)
+const mostrarModalCerrarCaja = ref(false)
 
 // NUEVOS ESTADOS DE CONTROL DE PROCESO Y NOTIFICACIÓN
 const procesandoVenta = ref(false)
@@ -297,12 +318,28 @@ const cargarPromociones = async () => {
 }
 
 const cargarCajaActiva = async () => {
+  cargandoCajaActiva.value = true
   try {
     const response = await axios.get(`${baseUrl}/api/cajas/activa`, headers())
     cajaActiva.value = response.data
   } catch (error) {
     console.error('Error cargando caja activa:', error)
+  } finally {
+    cargandoCajaActiva.value = false
   }
+}
+
+// Se dispara cuando se abre una caja desde la ventana emergente
+const onCajaAbierta = (caja) => {
+  cajaActiva.value = caja
+}
+
+// Se dispara cuando se confirma el cierre de caja: termina el turno
+// (desloguea y vuelve a la landing page), igual que hacía antes CajasView.
+const onCajaCerrada = () => {
+  mostrarModalCerrarCaja.value = false
+  authStore.logout()
+  router.push('/pagina')
 }
 
 // FINALIZAR VENTA CON CONTROL DE BLOQUEO (DEBOUNCE/LOCK)
