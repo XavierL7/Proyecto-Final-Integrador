@@ -1,8 +1,10 @@
 <!-- frontend/src/views/HistorialVentasView.vue -->
 <template>
   <div class="p-6 max-w-7xl mx-auto">
+    <HistorialSubNav />
+
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Historial de Ventas</h1>
+      <h1 class="text-2xl font-bold">Ventas</h1>
       <button
         @click="cargarVentas"
         class="text-sm text-blue-500 hover:text-blue-700"
@@ -85,6 +87,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 import DetalleVentaModal from '../components/caja/DetalleVentaModal.vue'
+import HistorialSubNav from '../components/historial/HistorialSubNav.vue'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'

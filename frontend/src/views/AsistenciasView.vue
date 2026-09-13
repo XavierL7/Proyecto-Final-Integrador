@@ -1,10 +1,12 @@
 <!-- frontend/src/views/AsistenciasView.vue -->
 <template>
   <div class="p-6 max-w-7xl mx-auto">
+    <HistorialSubNav />
+
     <!-- TITULO DE PAGINA -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold">Historial de Asistencias</h1>
+        <h1 class="text-2xl font-bold">Asistencias</h1>
         <p class="text-sm text-gray-500">Control de entradas, salidas y rendimiento por turno de empleados</p>
       </div>
       <button 
@@ -164,6 +166,7 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
+import HistorialSubNav from '../components/historial/HistorialSubNav.vue'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'

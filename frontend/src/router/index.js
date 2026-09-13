@@ -47,7 +47,7 @@ const routes = [
     name: 'Asistencias', 
     component: () => import('../views/AsistenciasView.vue'), 
     meta: { 
-      requiresAuth: true, 
+      requiereAuth: true, 
       permiso: 'Ver_Historial_Trabajadores' 
     } 
   },

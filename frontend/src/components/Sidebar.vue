@@ -127,31 +127,34 @@
         <span v-else class="text-sm font-medium">S</span>
       </router-link>
 
-      <!-- CAJAS -->
+      <!-- ============================================================ -->
+      <!-- HISTORIAL (unifica Cajas, Ventas y Asistencias: adentro hay -->
+      <!-- pestañas para moverse entre las tres) -->
+      <!-- ============================================================ -->
       <router-link
-        v-if="authStore.tienePermiso('Ver_Cajas')"
+        v-if="mostrarHistorial"
         to="/cajas"
         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start' : 'justify-center']"
         :style="{
-          color: $route.path === '/cajas' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/cajas' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
+          color: seccionHistorialActiva ? '#4a8db7' : '#8ab4d6',
+          backgroundColor: seccionHistorialActiva ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
         }"
         @mouseenter="(e) => {
-          if ($route.path !== '/cajas') {
+          if (!seccionHistorialActiva) {
             e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
             e.currentTarget.style.color = '#6aaec9'
           }
         }"
         @mouseleave="(e) => {
-          if ($route.path !== '/cajas') {
+          if (!seccionHistorialActiva) {
             e.currentTarget.style.backgroundColor = 'transparent'
             e.currentTarget.style.color = '#8ab4d6'
           }
         }"
       >
-        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Cajas</span>
-        <span v-else class="text-sm font-medium">C</span>
+        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Historial</span>
+        <span v-else class="text-sm font-medium">H</span>
       </router-link>
 
 
@@ -182,33 +185,6 @@
         <span v-else class="text-sm font-medium">Cl</span>
       </router-link>
 
-      <!-- HISTORIAL DE VENTAS -->
-      <router-link
-        v-if="authStore.tienePermiso('Ver_Historial_Ventas')"
-        to="/historial"
-        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[isOpen ? 'justify-start' : 'justify-center']"
-        :style="{
-          color: $route.path === '/historial' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/historial' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
-        }"
-        @mouseenter="(e) => {
-          if ($route.path !== '/historial') {
-            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
-            e.currentTarget.style.color = '#6aaec9'
-          }
-        }"
-        @mouseleave="(e) => {
-          if ($route.path !== '/historial') {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#8ab4d6'
-          }
-        }"
-      >
-        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Historial de Ventas</span>
-        <span v-else class="text-sm font-medium">H</span>
-      </router-link>
-
       <!-- ============================================================ -->
       <!-- ESTADÍSTICAS -->
       <!-- ============================================================ -->
@@ -237,32 +213,6 @@
         <span v-else class="text-sm font-medium">Est</span>
       </router-link>
 
-      <!-- asistencia -->
-      <router-link
-        v-if="authStore.tienePermiso('Ver_Historial_Trabajadores')"
-        to="/asistencias"
-        class="flex items-center px-4 py-3 rounded-lg transition-all duration-200"
-        :class="[isOpen ? 'justify-start' : 'justify-center']"
-        :style="{
-          color: $route.path === '/asistencias' ? '#4a8db7' : '#8ab4d6',
-          backgroundColor: $route.path === '/asistencias' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
-        }"
-        @mouseenter="(e) => {
-          if ($route.path !== '/asistencias') {
-            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
-            e.currentTarget.style.color = '#6aaec9'
-          }
-        }"
-        @mouseleave="(e) => {
-          if ($route.path !== '/asistencias') {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#8ab4d6'
-          }
-        }"
-      >
-        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Asistencias</span>
-        <span v-else class="text-sm font-medium">As</span>
-      </router-link>
       <!-- ADMINISTRACIÓN -->
       <router-link
         v-if="mostrarAdministracion"
@@ -370,6 +320,17 @@ const mostrarStock = computed(() =>
 
 const seccionStockActiva = computed(() =>
   ['/stock', '/etiquetas', '/descuentos'].includes(route.path)
+)
+
+// El link "Historial" agrupa Cajas, Ventas y Asistencias (adentro hay
+// pestañas para moverse entre las tres). Se muestra si tiene permiso
+// para ver cualquiera de las tres, y queda resaltado en las tres rutas.
+const mostrarHistorial = computed(() =>
+  ['Ver_Cajas', 'Ver_Historial_Ventas', 'Ver_Historial_Trabajadores'].some(p => authStore.tienePermiso(p))
+)
+
+const seccionHistorialActiva = computed(() =>
+  ['/cajas', '/historial', '/asistencias'].includes(route.path)
 )
 
 const isOpen = ref(true)

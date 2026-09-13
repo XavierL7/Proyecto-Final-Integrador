@@ -1,12 +1,13 @@
 <!-- frontend/src/views/CajasView.vue -->
 <template>
   <div class="p-6 max-w-5xl mx-auto">
+    <HistorialSubNav />
+
     <h1 class="text-2xl font-bold mb-6">Cajas</h1>
 
     <!-- ============================================================ -->
     <!-- HISTORIAL DE CAJAS -->
     <!-- ============================================================ -->
-    <h2 class="text-lg font-bold mb-3">Historial</h2>
     <div class=" rounded-lg shadow overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
@@ -94,6 +95,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 import DetalleCajaModal from '../components/caja/DetalleCajaModal.vue'
+import HistorialSubNav from '../components/historial/HistorialSubNav.vue'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
