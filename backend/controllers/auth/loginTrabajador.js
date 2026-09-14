@@ -22,28 +22,30 @@ export const loginTrabajador = async (req, res) => {
     // login sigue mostrándose siempre igual (no lo deshabilitamos ni lo
     // ocultamos); acá simplemente no dejamos que el intento funcione y le
     // avisamos al usuario por qué.
-    if (!(await metodoLoginPermitido('contrasena'))) {
-      return res.status(403).json({ error: MENSAJE_LOGIN_DESHABILITADO.contrasena })
-    }
-
-    // Buscar trabajador por nombre + apellido + dni
-    const trabajador = await prisma.trabajador.findFirst({
-      where: {
-        nombre: nombre,
-        apellido: apellido,
-        dni: parseInt(dni)
-      },
-      include: {
-        rol: {
-          include: {
-            roles_funcionalidades: {
-              where: { activo: true },
-              include: { funcionalidad: true }
+    const [permitido, trabajador] = await Promise.all([
+      metodoLoginPermitido('contrasena'),
+      prisma.trabajador.findFirst({
+        where: {
+          nombre: nombre,
+          apellido: apellido,
+          dni: parseInt(dni)
+        },
+        include: {
+          rol: {
+            include: {
+              roles_funcionalidades: {
+                where: { activo: true },
+                include: { funcionalidad: true }
+              }
             }
           }
         }
-      }
-    })
+      })
+    ])
+
+    if (!permitido) {
+      return res.status(403).json({ error: MENSAJE_LOGIN_DESHABILITADO.contrasena })
+    }
 
     if (!trabajador) {
       return res.status(401).json({ error: 'Credenciales inválidas.' })

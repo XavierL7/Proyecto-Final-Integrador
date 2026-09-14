@@ -14,6 +14,7 @@ model Asistencia {
   tipo_autenticacion  String?    @default("huella") @db.VarChar(50)
   trabajador          Trabajador @relation(fields: [id_trabajador], references: [id_trabajador])
 
+  @@index([id_trabajador])
   @@map("Asistencias")
 }
 
