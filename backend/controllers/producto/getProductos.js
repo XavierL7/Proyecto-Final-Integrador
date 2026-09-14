@@ -1,5 +1,6 @@
 // backend/controllers/producto/getProductos.js
 import prisma from '../../db.js'
+import { manejarErrorDb } from '../../lib/manejarErrorDb.js'
 
 export const getProductos = async (req, res) => {
   try {
@@ -46,6 +47,7 @@ export const getProductos = async (req, res) => {
       totalPages: Math.max(Math.ceil(total / limit), 1)
     })
   } catch (error) {
+    if (manejarErrorDb(error, res, 'obtener productos')) return
     console.error('Error obteniendo productos:', error)
     res.status(500).json({ error: 'Error al obtener productos' })
   }

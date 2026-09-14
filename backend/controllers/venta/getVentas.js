@@ -1,5 +1,6 @@
 // backend/controllers/venta/getVentas.js
 import prisma from '../../db.js'
+import { manejarErrorDb } from '../../lib/manejarErrorDb.js'
 
 export const getVentas = async (req, res) => {
   try {
@@ -30,6 +31,7 @@ export const getVentas = async (req, res) => {
 
     res.json(ventas)
   } catch (error) {
+    if (manejarErrorDb(error, res, 'obtener ventas')) return
     console.error('Error obteniendo ventas:', error)
     res.status(500).json({ error: 'Error al obtener ventas' })
   }

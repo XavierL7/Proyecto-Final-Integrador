@@ -21,6 +21,7 @@
         ]"
       >
         <router-view />
+        <AlertaGlobal />
       </main>
     </div>
   </div>
@@ -29,6 +30,7 @@
 <script setup>
 import { useAuthStore } from './stores/auth'
 import Sidebar from './components/Sidebar.vue'
+import AlertaGlobal from './components/AlertaGlobal.vue'
 
 const authStore = useAuthStore()
 </script>
