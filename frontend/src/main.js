@@ -5,6 +5,7 @@ import App from './App.vue' // Importa app.vue
 import router from './router' // Importamos tu router index.js
 import './assets/main.css'
 import axios from 'axios'
+import { instalarManejadorErroresAxios } from './plugins/axiosErrorHandler'
 
 
 axios.interceptors.request.use(
@@ -47,6 +48,8 @@ const app = createApp(App) // Crea Vue con App.vue como raíz
 // 1. Instanciar y registrar Pinia
 const pinia = createPinia()
 app.use(pinia)
+
+instalarManejadorErroresAxios()
 
 // 2. Inicializar el tema oscuro/claro (debe ser después de app.use(pinia))
 const themeStore = useThemeStore()

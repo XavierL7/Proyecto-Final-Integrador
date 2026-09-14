@@ -1,5 +1,6 @@
 // backend/middleware/permisos/checkPermission.js
 import prisma from '../../db.js'
+import { manejarErrorDb } from '../../lib/manejarErrorDb.js'
 
 /**
  * Middleware que verifica si el usuario tiene un permiso específico
@@ -50,6 +51,7 @@ export const checkPermission = (requiredPermission) => {
       next()
 
     } catch (error) {
+      if (manejarErrorDb(error, res, `verificar el permiso "${requiredPermission}"`)) return
       console.error('Error en middleware de permisos:', error)
       res.status(500).json({ error: 'Error de servidor' })
     }
