@@ -254,6 +254,7 @@ model Etiqueta {
   nombre_etiqueta     String                @db.VarChar(50)
   descripcion         String?               @db.VarChar(255)
   activo                Boolean                 @default(true)
+  color                 String?                 @db.VarChar(20)
   productos_etiquetas Productos_Etiquetas[]
   promociones_etiquetas Promociones_Etiquetas[]
 

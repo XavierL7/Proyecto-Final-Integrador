@@ -18,6 +18,16 @@
         />
       </div>
       <button
+        type="button"
+        @click="desactivadasPrimero = !desactivadasPrimero"
+        class="flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition shrink-0"
+        :title="desactivadasPrimero ? 'Mostrando desactivadas primero (click para invertir)' : 'Mostrando desactivadas al final (click para invertir)'"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h13M3 12h9M3 17h5m8-10v14m0 0l-3-3m3 3l3-3" />
+        </svg>
+      </button>
+      <button
         v-if="authStore.tienePermiso('Agregar_Etiquetas')"
         @click="abrirModal()"
         class="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition shadow-sm hover:shadow"
@@ -33,9 +43,9 @@
         :key="etiqueta.id_etiqueta"
         class="etiqueta-item group relative inline-flex items-center gap-1 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200"
         :style="{
-          backgroundColor: colores[etiqueta.id_etiqueta % colores.length].bg,
-          color: colores[etiqueta.id_etiqueta % colores.length].text,
-          borderColor: colores[etiqueta.id_etiqueta % colores.length].border,
+          backgroundColor: obtenerColorEtiqueta(etiqueta.color).bg,
+          color: obtenerColorEtiqueta(etiqueta.color).text,
+          borderColor: obtenerColorEtiqueta(etiqueta.color).border,
           opacity: etiqueta.activo === false ? 0.5 : 1
         }"
         style="border: 1px solid transparent;"
@@ -152,6 +162,42 @@
             />
           </div>
 
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-1.5">Color</label>
+            <div class="flex items-center flex-wrap gap-2">
+              <button
+                v-for="c in PALETA_ETIQUETAS"
+                :key="c.key"
+                type="button"
+                @click="form.color = c.key"
+                class="w-8 h-8 rounded-full transition-transform hover:scale-110"
+                :style="{
+                  backgroundColor: c.bg,
+                  border: form.color === c.key ? `2px solid ${c.text}` : `2px solid ${c.border}`,
+                  boxShadow: form.color === c.key ? `0 0 0 2px white, 0 0 0 4px ${c.text}` : 'none'
+                }"
+                :title="c.label"
+              ></button>
+
+              <!-- Botón "al azar": dado -->
+              <button
+                type="button"
+                @click="form.color = colorEtiquetaAlAzar(form.color)"
+                class="w-8 h-8 rounded-full flex items-center justify-center border border-gray-300 hover:bg-gray-100 transition-colors"
+                title="Elegir color al azar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6aaec9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/>
+                  <circle cx="8" cy="8" r="1.2" fill="#6aaec9" stroke="none"/>
+                  <circle cx="16" cy="8" r="1.2" fill="#6aaec9" stroke="none"/>
+                  <circle cx="12" cy="12" r="1.2" fill="#6aaec9" stroke="none"/>
+                  <circle cx="8" cy="16" r="1.2" fill="#6aaec9" stroke="none"/>
+                  <circle cx="16" cy="16" r="1.2" fill="#6aaec9" stroke="none"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
           <div class="flex justify-end gap-3 mt-6">
             <button
               type="button"
@@ -178,23 +224,10 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 import StockSubNav from '../components/stock/StockSubNav.vue'
+import { PALETA_ETIQUETAS, obtenerColorEtiqueta, colorEtiquetaAlAzar } from '../utils/coloresEtiqueta'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
-// Paleta de colores para las etiquetas
-const colores = [
-  { bg: '#E3F2FD', text: '#1565C0', border: '#90CAF9' },
-  { bg: '#E8F5E9', text: '#2E7D32', border: '#A5D6A7' },
-  { bg: '#FFF3E0', text: '#E65100', border: '#FFCC80' },
-  { bg: '#FCE4EC', text: '#C62828', border: '#F48FB1' },
-  { bg: '#F3E5F5', text: '#6A1B9A', border: '#CE93D8' },
-  { bg: '#E0F7FA', text: '#00695C', border: '#80DEEA' },
-  { bg: '#FFFDE7', text: '#F57F17', border: '#FFD54F' },
-  { bg: '#EFEBE9', text: '#4E342E', border: '#BCAAA4' },
-  { bg: '#E8EAF6', text: '#283593', border: '#9FA8DA' },
-  { bg: '#FBE9E7', text: '#BF360C', border: '#FFAB91' },
-]
 
 // ============================================================
 // DATOS
@@ -202,12 +235,27 @@ const colores = [
 const etiquetas = ref([])
 const busqueda = ref('')
 
+// Por defecto las desactivadas van al final (así se distinguen fácil de
+// las activas, sin depender de que el color se note lo suficiente).
+// El botón de la barra de arriba permite invertir esto.
+const desactivadasPrimero = ref(false)
+
 const etiquetasFiltradas = computed(() => {
-  if (!busqueda.value) return etiquetas.value
-  const q = busqueda.value.toLowerCase()
-  return etiquetas.value.filter(e =>
-    e.nombre_etiqueta.toLowerCase().includes(q)
-  )
+  let lista = etiquetas.value
+  if (busqueda.value) {
+    const q = busqueda.value.toLowerCase()
+    lista = lista.filter(e => e.nombre_etiqueta.toLowerCase().includes(q))
+  }
+
+  // Orden estable: solo reacomoda activas vs. desactivadas, sin alterar
+  // el orden relativo dentro de cada grupo.
+  return [...lista].sort((a, b) => {
+    const aDesactivada = a.activo === false
+    const bDesactivada = b.activo === false
+    if (aDesactivada === bDesactivada) return 0
+    if (desactivadasPrimero.value) return aDesactivada ? -1 : 1
+    return aDesactivada ? 1 : -1
+  })
 })
 
 // ============================================================
@@ -218,7 +266,8 @@ const editando = ref(false)
 const form = ref({
   id_etiqueta: null,
   nombre_etiqueta: '',
-  descripcion: ''
+  descripcion: '',
+  color: PALETA_ETIQUETAS[0].key
 })
 
 // ============================================================
@@ -241,14 +290,16 @@ const abrirModal = (etiqueta = null) => {
     form.value = {
       id_etiqueta: etiqueta.id_etiqueta,
       nombre_etiqueta: etiqueta.nombre_etiqueta,
-      descripcion: etiqueta.descripcion || ''
+      descripcion: etiqueta.descripcion || '',
+      color: etiqueta.color || PALETA_ETIQUETAS[0].key
     }
   } else {
     editando.value = false
     form.value = {
       id_etiqueta: null,
       nombre_etiqueta: '',
-      descripcion: ''
+      descripcion: '',
+      color: colorEtiquetaAlAzar() // nueva etiqueta arranca con un color al azar, se puede cambiar antes de guardar
     }
   }
   modalVisible.value = true
@@ -263,7 +314,8 @@ const guardarEtiqueta = async () => {
 
     await axios[method](url, {
       nombre_etiqueta: form.value.nombre_etiqueta.trim(),
-      descripcion: form.value.descripcion?.trim() || null
+      descripcion: form.value.descripcion?.trim() || null,
+      color: form.value.color
     }, {
       headers: { 'Authorization': `Bearer ${authStore.token}` }
     })

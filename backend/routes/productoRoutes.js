@@ -8,6 +8,7 @@ import {
   updateProducto,
   deleteProducto
 } from '../controllers/productoController.js'
+import { sumarStock } from '../controllers/producto/sumarStock.js'
 import { verificarToken } from '../middleware/auth.js'
 import { checkPermission } from '../middleware/permisos.js'
 
@@ -32,6 +33,10 @@ router.post('/', checkPermission('Agregar_Producto'), createProducto)
 
 // PUT /api/productos/:id - Actualizar producto
 router.put('/:id', checkPermission('Editar_Producto'), updateProducto)
+
+// POST /api/productos/:id/sumar-stock - Sumar cantidad al stock existente
+// (no lo pisa). Mismo permiso que editar producto.
+router.post('/:id/sumar-stock', checkPermission('Editar_Producto'), sumarStock)
 
 // DELETE /api/productos/:id - Eliminar producto
 router.delete('/:id', checkPermission('Eliminar_Stock'), deleteProducto)

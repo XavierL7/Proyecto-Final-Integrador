@@ -1,9 +1,10 @@
 // backend/controllers/etiqueta/createEtiqueta.js
 import prisma from '../../db.js'
+import { colorEtiquetaValido, colorEtiquetaAlAzar } from '../../constants/coloresEtiqueta.js'
 
 export const createEtiqueta = async (req, res) => {
   try {
-    const { nombre_etiqueta, descripcion } = req.body
+    const { nombre_etiqueta, descripcion, color } = req.body
 
     // Validar que no esté vacío
     if (!nombre_etiqueta || nombre_etiqueta.trim() === '') {
@@ -14,6 +15,11 @@ export const createEtiqueta = async (req, res) => {
     if (nombre_etiqueta.length > 20) {
       return res.status(400).json({ error: 'El nombre no puede tener más de 20 caracteres' })
     }
+
+    // Si no mandan color (o mandan uno inválido), se asigna uno al azar
+    // en vez de rechazar la creación: el botón de dado del front ya
+    // manda uno válido, esto es más que nada una red de seguridad.
+    const colorFinal = colorEtiquetaValido(color) ? color : colorEtiquetaAlAzar()
 
     // Verificar que no exista
     const existe = await prisma.etiqueta.findFirst({
@@ -32,7 +38,8 @@ export const createEtiqueta = async (req, res) => {
     const nuevaEtiqueta = await prisma.etiqueta.create({
       data: {
         nombre_etiqueta: nombre_etiqueta.trim(),
-        descripcion: descripcion?.trim() || null
+        descripcion: descripcion?.trim() || null,
+        color: colorFinal
       }
     })
 

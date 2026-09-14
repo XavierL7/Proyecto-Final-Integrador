@@ -80,8 +80,8 @@
                   v-if="producto.productos_etiquetas && producto.productos_etiquetas.length > 0"
                   class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-sm"
                   :style="{
-                    backgroundColor: colores[producto.productos_etiquetas[0].id_etiqueta % colores.length].bg,
-                    color: colores[producto.productos_etiquetas[0].id_etiqueta % colores.length].text
+                    backgroundColor: obtenerColorEtiqueta(producto.productos_etiquetas[0].etiqueta.color).bg,
+                    color: obtenerColorEtiqueta(producto.productos_etiquetas[0].etiqueta.color).text
                   }"
                 >
                   {{ producto.productos_etiquetas[0].etiqueta.nombre_etiqueta }}
@@ -120,6 +120,18 @@
             <!-- Acciones -->
             <td class="px-4 py-3 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-2">
+
+                <!-- Botón Sumar Stock -->
+                <button
+                  @click="abrirModalSumarStock(producto)"
+                  class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
+                  title="Agregar stock"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" x2="12" y1="5" y2="19"/>
+                    <line x1="5" x2="19" y1="12" y2="12"/>
+                  </svg>
+                </button>
 
                 <!-- Botón Editar -->
                 <button
@@ -205,8 +217,8 @@
             :key="rel.id_etiqueta"
             class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium"
             :style="{
-              backgroundColor: colores[rel.id_etiqueta % colores.length].bg,
-              color: colores[rel.id_etiqueta % colores.length].text
+              backgroundColor: obtenerColorEtiqueta(rel.etiqueta.color).bg,
+              color: obtenerColorEtiqueta(rel.etiqueta.color).text
             }"
           >
             {{ rel.etiqueta.nombre_etiqueta }}
@@ -231,6 +243,60 @@
             Cerrar
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL: SUMAR STOCK                                       -->
+    <!-- ======================================================== -->
+    <div
+      v-if="modalSumarStockVisible"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
+      @click.self="modalSumarStockVisible = false"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-fadeIn text-gray-800">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="text-lg font-bold">Agregar stock</h3>
+          <button @click="modalSumarStockVisible = false" class="text-gray-400 hover:text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-sm text-gray-500 mb-4">{{ productoSumarStock?.nombre_producto }}</p>
+
+        <div class="flex items-center justify-between text-sm mb-4 bg-gray-50 rounded-lg px-3 py-2">
+          <span class="text-gray-500">Stock actual</span>
+          <span class="font-bold" :style="{ color: Number(productoSumarStock?.stock_actual) < 0 ? '#ef4444' : 'inherit' }">
+            {{ productoSumarStock?.stock_actual }}
+          </span>
+        </div>
+
+        <form @submit.prevent="confirmarSumaStock">
+          <label class="block text-sm font-medium mb-1">Cantidad a agregar *</label>
+          <input
+            v-model="cantidadASumar"
+            type="number"
+            min="1"
+            step="1"
+            autofocus
+            placeholder="Ej: 10"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <p v-if="cantidadASumar > 0" class="text-xs text-gray-400 mt-1">
+            Stock resultante: <strong>{{ Number(productoSumarStock?.stock_actual || 0) + Number(cantidadASumar) }}</strong>
+          </p>
+
+          <div class="flex justify-end gap-3 mt-6">
+            <button type="button" @click="modalSumarStockVisible = false" class="px-5 py-2.5 text-gray-600 hover:text-gray-800 rounded-xl hover:bg-gray-100 transition">
+              Cancelar
+            </button>
+            <button type="submit" class="px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition">
+              Agregar
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -355,23 +421,10 @@ import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 import SelectorEtiquetas from '../components/stock/SelectorEtiquetas.vue'
 import StockSubNav from '../components/stock/StockSubNav.vue'
+import { obtenerColorEtiqueta } from '../utils/coloresEtiqueta'
 
 const authStore = useAuthStore()
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
-// Paleta de colores suaves para etiquetas
-const colores = [
-  { bg: '#E3F2FD', text: '#1565C0' },
-  { bg: '#E8F5E9', text: '#2E7D32' },
-  { bg: '#FFF3E0', text: '#E65100' },
-  { bg: '#FCE4EC', text: '#C62828' },
-  { bg: '#F3E5F5', text: '#6A1B9A' },
-  { bg: '#E0F7FA', text: '#00695C' },
-  { bg: '#FFFDE7', text: '#F57F17' },
-  { bg: '#EFEBE9', text: '#4E342E' },
-  { bg: '#E8EAF6', text: '#283593' },
-  { bg: '#FBE9E7', text: '#BF360C' },
-]
 
 // DATOS
 const productos = ref([])
@@ -436,6 +489,11 @@ const form = ref({
 // MODAL ETIQUETAS
 const modalEtiquetasVisible = ref(false)
 const productoEtiquetas = ref(null)
+
+// MODAL SUMAR STOCK
+const modalSumarStockVisible = ref(false)
+const productoSumarStock = ref(null)
+const cantidadASumar = ref('')
 
 // FUNCIONES
 const cargarProductos = async () => {
@@ -510,6 +568,30 @@ const abrirModal = (producto = null) => {
 const abrirModalEtiquetas = (producto) => {
   productoEtiquetas.value = producto
   modalEtiquetasVisible.value = true
+}
+
+const abrirModalSumarStock = (producto) => {
+  productoSumarStock.value = producto
+  cantidadASumar.value = ''
+  modalSumarStockVisible.value = true
+}
+
+const confirmarSumaStock = async () => {
+  const cantidad = parseInt(cantidadASumar.value)
+  if (!cantidad || cantidad <= 0) return
+
+  try {
+    await axios.post(
+      `${baseUrl}/api/productos/${productoSumarStock.value.id_producto}/sumar-stock`,
+      { cantidad },
+      { headers: { 'Authorization': `Bearer ${authStore.token}` } }
+    )
+    modalSumarStockVisible.value = false
+    cargarProductos()
+  } catch (error) {
+    console.error('Error:', error)
+    alert(error.response?.data?.error || 'Error al agregar stock')
+  }
 }
 
 const guardarProducto = async () => {
