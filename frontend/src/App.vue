@@ -2,13 +2,15 @@
 <template>
   <div id="app" class="flex min-h-screen">
     <!-- Sidebar - SOLO si está autenticado -->
-    <Sidebar v-if="authStore.estaAutenticado" />
+    <Sidebar v-if="authStore.estaAutenticado" v-model="sidebarAbierto" />
 
     <!-- Contenido principal -->
     <div
       :class="[
         'flex-1 transition-all duration-300',
-        authStore.estaAutenticado ? 'ml-20 md:ml-64' : 'ml-0'
+        authStore.estaAutenticado
+          ? (sidebarAbierto ? 'ml-64' : 'ml-20')
+          : 'ml-0'
       ]"
     >
       <!-- 
@@ -28,11 +30,13 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useAuthStore } from './stores/auth'
 import Sidebar from './components/Sidebar.vue'
 import AlertaGlobal from './components/AlertaGlobal.vue'
 
 const authStore = useAuthStore()
+const sidebarAbierto = ref(true)
 </script>
 
 <style>

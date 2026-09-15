@@ -359,7 +359,15 @@ const seccionHistorialActiva = computed(() =>
   ['/cajas', '/historial', '/asistencias'].includes(route.path)
 )
 
-const isOpen = ref(true)
+const props = defineProps({
+  modelValue: { type: Boolean, default: true }
+})
+const emit = defineEmits(['update:modelValue'])
+
+const isOpen = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val)
+})
 
 const toggleSidebar = () => {
   isOpen.value = !isOpen.value
