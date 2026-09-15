@@ -1,3 +1,4 @@
+<!-- frontend/src/components/caja/ResumenDineroCajaModal.vue -->
 <template>
   <div 
     class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
@@ -78,15 +79,89 @@
           </div>
 
           <div class="border-t border-gray-200 pt-2 flex justify-between items-center font-bold text-gray-800">
-            <span>Total Recaudado</span>
+            <span>Total Recaudado (ventas)</span>
             <span class="text-emerald-600">
               +${{ resumen.total_ventas.toLocaleString('es-AR', { minimumFractionDigits: 2 }) }}
             </span>
           </div>
 
+          <!-- Movimientos manuales: ingresos y egresos no ligados a ventas -->
+          <div
+            v-if="resumen.total_ingresos_manuales > 0 || resumen.total_egresos_manuales > 0"
+            class="border-t border-gray-200 pt-2 space-y-1"
+          >
+            <div v-if="resumen.total_ingresos_manuales > 0" class="flex justify-between items-center text-xs">
+              <span class="text-gray-600 font-medium">Ingresos manuales</span>
+              <span class="font-bold text-emerald-600">
+                +${{ resumen.total_ingresos_manuales.toLocaleString('es-AR', { minimumFractionDigits: 2 }) }}
+              </span>
+            </div>
+            <div v-if="resumen.total_egresos_manuales > 0" class="flex justify-between items-center text-xs">
+              <span class="text-gray-600 font-medium">Egresos manuales</span>
+              <span class="font-bold text-red-600">
+                -${{ resumen.total_egresos_manuales.toLocaleString('es-AR', { minimumFractionDigits: 2 }) }}
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Botones para registrar un movimiento manual -->
+        <div v-if="!formularioAbierto" class="flex gap-3">
+          <button
+            @click="abrirFormulario('ingreso')"
+            class="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-xl font-medium transition text-sm border border-emerald-200"
+          >
+            + Ingreso
+          </button>
+          <button
+            @click="abrirFormulario('egreso')"
+            class="flex-1 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl font-medium transition text-sm border border-red-200"
+          >
+            − Egreso
+          </button>
+        </div>
+
+        <!-- Mini formulario: monto + descripción -->
+        <div v-else class="border border-gray-200 rounded-xl p-3 space-y-2">
+          <p class="text-sm font-semibold" :class="tipoMovimiento === 'ingreso' ? 'text-emerald-700' : 'text-red-700'">
+            Registrar {{ tipoMovimiento === 'ingreso' ? 'ingreso' : 'egreso' }}
+          </p>
+          <input
+            v-model="montoMovimiento"
+            type="number"
+            step="0.01"
+            placeholder="Monto"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+          <input
+            v-model="descripcionMovimiento"
+            type="text"
+            placeholder="Descripción (ej: pago de flete, retiro para compra de insumos)"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+          <p v-if="errorMovimiento" class="text-xs text-red-600">{{ errorMovimiento }}</p>
+          <div class="flex gap-2 pt-1">
+            <button
+              @click="cancelarFormulario"
+              type="button"
+              class="flex-1 py-2 border border-gray-300 rounded-lg text-xs text-gray-700 hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="guardarMovimiento"
+              :disabled="guardando"
+              class="flex-1 py-2 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
+              :class="tipoMovimiento === 'ingreso' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-red-500 hover:bg-red-600'"
+            >
+              {{ guardando ? 'Guardando...' : 'Confirmar' }}
+            </button>
+          </div>
         </div>
 
         <button
+          v-if="!formularioAbierto"
           @click="$emit('cerrar')"
           class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition text-sm"
         >
@@ -114,6 +189,14 @@ const resumen = ref(null)
 const cargando = ref(true)
 const error = ref('')
 
+// Estado del mini formulario de ingreso/egreso
+const formularioAbierto = ref(false)
+const tipoMovimiento = ref('ingreso') // 'ingreso' | 'egreso'
+const montoMovimiento = ref('')
+const descripcionMovimiento = ref('')
+const guardando = ref(false)
+const errorMovimiento = ref('')
+
 const obtenerResumenCaja = async () => {
   cargando.value = true
   error.value = ''
@@ -125,6 +208,50 @@ const obtenerResumenCaja = async () => {
     error.value = err.response?.data?.error || 'No se pudo cargar la información de la caja.'
   } finally {
     cargando.value = false
+  }
+}
+
+const abrirFormulario = (tipo) => {
+  tipoMovimiento.value = tipo
+  montoMovimiento.value = ''
+  descripcionMovimiento.value = ''
+  errorMovimiento.value = ''
+  formularioAbierto.value = true
+}
+
+const cancelarFormulario = () => {
+  formularioAbierto.value = false
+}
+
+const guardarMovimiento = async () => {
+  if (!montoMovimiento.value || Number(montoMovimiento.value) <= 0) {
+    errorMovimiento.value = 'Ingresá un monto válido, mayor a 0.'
+    return
+  }
+  if (!descripcionMovimiento.value.trim()) {
+    errorMovimiento.value = 'La descripción es obligatoria.'
+    return
+  }
+
+  errorMovimiento.value = ''
+  guardando.value = true
+  try {
+    await axios.post(
+      `${baseUrl}/api/cajas/${resumen.value.id_caja}/movimientos`,
+      {
+        tipo: tipoMovimiento.value,
+        monto: montoMovimiento.value,
+        descripcion: descripcionMovimiento.value.trim()
+      },
+      getHeaders()
+    )
+    formularioAbierto.value = false
+    // Recargamos el resumen para que el total ya refleje el movimiento nuevo
+    await obtenerResumenCaja()
+  } catch (err) {
+    errorMovimiento.value = err.response?.data?.error || 'Error al registrar el movimiento.'
+  } finally {
+    guardando.value = false
   }
 }
 

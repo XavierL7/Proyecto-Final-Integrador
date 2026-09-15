@@ -74,11 +74,9 @@ export const getCajaDetalle = async (req, res) => {
     const totalEfectivo = ingresosPorMetodo.get('Efectivo') || 0
 
     // --------------------------------------------------------
-    // Egresos manuales (retiros / ajustes negativos) hechos durante la caja
+    // Egresos manuales hechos durante la caja
     // --------------------------------------------------------
-    const egresos = movimientos.filter(m =>
-      m.tipo_movimiento === 'egreso_retiro' || m.tipo_movimiento === 'egreso_ajuste_negativo'
-    )
+    const egresos = movimientos.filter(m => m.tipo_movimiento === 'egreso')
     const totalEgresos = redondear2(egresos.reduce((sum, m) => sum + Number(m.monto), 0))
 
     // --------------------------------------------------------

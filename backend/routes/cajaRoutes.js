@@ -8,6 +8,8 @@ import {
   obtenerResumenCajaActiva,
 } from '../controllers/cajaController.js'
 import { getCajaDetalle } from '../controllers/caja/getCajaDetalle.js'
+import { registrarMovimiento } from '../controllers/caja/registrarMovimiento.js'
+import { getMovimientosManuales } from '../controllers/caja/getMovimientosManuales.js'
 import { verificarToken } from '../middleware/auth.js'
 import { checkPermission } from '../middleware/permisos.js'
 
@@ -40,5 +42,11 @@ router.post('/', checkPermisoApertura, abrirCaja)
 router.put('/:id/cerrar', checkPermission('Cerrar_Caja'), cerrarCaja)
 
 router.get('/activa/resumen-dinero', verificarToken, obtenerResumenCajaActiva)
+
+// POST /api/cajas/:id/movimientos - Registrar ingreso/egreso manual (no ligado a una venta)
+router.post('/:id/movimientos', checkPermission('EgresoIngreso'), registrarMovimiento)
+
+// GET /api/cajas/:id/movimientos - Ver los movimientos manuales de una caja
+router.get('/:id/movimientos', checkPermission('Ver_Cajas'), getMovimientosManuales)
 
 export default router

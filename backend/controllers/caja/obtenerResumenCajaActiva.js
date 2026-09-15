@@ -60,12 +60,27 @@ export const obtenerResumenCajaActiva = async (req, res) => {
       };
     });
 
-    // 4. Dinero total acumulado
-    const totalEnCaja = montoInicial + totalVentas;
+    // 4. Sumar los movimientos manuales (ingresos/egresos no ligados a ventas)
+    const movimientos = await prisma.movimiento_Caja.findMany({
+      where: { id_caja: cajaActiva.id_caja },
+    });
+
+    let totalIngresosManuales = 0;
+    let totalEgresosManuales = 0;
+    for (const m of movimientos) {
+      if (m.tipo_movimiento === 'ingreso') totalIngresosManuales += Number(m.monto);
+      if (m.tipo_movimiento === 'egreso') totalEgresosManuales += Number(m.monto);
+    }
+
+    // 5. Dinero total acumulado
+    const totalEnCaja = montoInicial + totalVentas + totalIngresosManuales - totalEgresosManuales;
 
     return res.json({
+      id_caja: cajaActiva.id_caja,
       monto_inicial: montoInicial,
       total_ventas: totalVentas,
+      total_ingresos_manuales: totalIngresosManuales,
+      total_egresos_manuales: totalEgresosManuales,
       total_en_caja: totalEnCaja,
       desglose: desglose,
     });

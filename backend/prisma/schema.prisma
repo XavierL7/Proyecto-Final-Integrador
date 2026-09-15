@@ -142,7 +142,6 @@ model Venta {
   detalle_pago_venta Detalle_Pago_Venta[]
   detalle_ventas     Detalle_Venta[]
   log_ventas_huella  Log_Ventas_Huella[]
-  movimientos_caja   Movimiento_Caja[]
   caja               Caja                 @relation(fields: [id_caja], references: [id_caja])
   cliente            Cliente?             @relation(fields: [id_cliente], references: [id_cliente])
   trabajador         Trabajador           @relation(fields: [id_trabajador], references: [id_trabajador])
@@ -183,13 +182,11 @@ model Movimiento_Caja {
   id_caja                Int
   fecha_hora             DateTime       @default(now())
   tipo_movimiento        TipoMovimiento
-  id_venta               Int?
   monto                  Decimal        @db.Decimal(10, 2)
   descripcion            String?        @db.VarChar(255)
   id_trabajador_registra Int
   caja                   Caja           @relation(fields: [id_caja], references: [id_caja])
   trabajador             Trabajador     @relation(fields: [id_trabajador_registra], references: [id_trabajador])
-  venta                  Venta?         @relation(fields: [id_venta], references: [id_venta])
 
   @@map("Movimientos_Caja")
 }
@@ -316,12 +313,8 @@ enum ModoAutenticacion {
 }
 
 enum TipoMovimiento {
-  ingreso_venta
-  ingreso_ajuste
-  egreso_retiro
-  egreso_ajuste_negativo
-  apertura
-  cierre
+  ingreso
+  egreso
 }
 
 enum TipoPromo {
