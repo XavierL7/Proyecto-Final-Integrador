@@ -10,6 +10,8 @@ import {
 import { getCajaDetalle } from '../controllers/caja/getCajaDetalle.js'
 import { registrarMovimiento } from '../controllers/caja/registrarMovimiento.js'
 import { getMovimientosManuales } from '../controllers/caja/getMovimientosManuales.js'
+import { consultarMovimientoPendiente } from '../controllers/caja/consultarMovimientoPendiente.js'
+import { getHistorialMovimientos } from '../controllers/caja/getHistorialMovimientos.js'
 import { verificarToken } from '../middleware/auth.js'
 import { checkPermission } from '../middleware/permisos.js'
 
@@ -43,7 +45,17 @@ router.put('/:id/cerrar', checkPermission('Cerrar_Caja'), cerrarCaja)
 
 router.get('/activa/resumen-dinero', verificarToken, obtenerResumenCajaActiva)
 
-// POST /api/cajas/:id/movimientos - Registrar ingreso/egreso manual (no ligado a una venta)
+// GET /api/cajas/movimientos/historial - Historial global de ingresos y
+// egresos manuales, de todas las cajas (pestaña nueva en Historial).
+router.get('/movimientos/historial', checkPermission('Ver_Movimientos_Caja'), getHistorialMovimientos)
+
+// GET /api/cajas/movimientos/pendiente/resultado - Poll de confirmación
+// por huella de un ingreso/egreso manual en caja compartida.
+router.get('/movimientos/pendiente/resultado', checkPermission('EgresoIngreso'), consultarMovimientoPendiente)
+
+// POST /api/cajas/:id/movimientos - Registrar ingreso/egreso manual (no ligado a una venta).
+// En caja compartida no persiste directo: devuelve 202 y queda esperando
+// confirmación por huella (ver registrarMovimiento.js).
 router.post('/:id/movimientos', checkPermission('EgresoIngreso'), registrarMovimiento)
 
 // GET /api/cajas/:id/movimientos - Ver los movimientos manuales de una caja

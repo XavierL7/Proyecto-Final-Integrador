@@ -106,8 +106,13 @@
 
         </div>
 
+        <!-- Mensaje de éxito tras confirmar un movimiento por huella -->
+        <p v-if="mensajeExito" class="text-xs text-emerald-600 font-semibold text-center">
+          {{ mensajeExito }}
+        </p>
+
         <!-- Botones para registrar un movimiento manual -->
-        <div v-if="!formularioAbierto" class="flex gap-3">
+        <div v-if="!formularioAbierto && !esperandoHuella" class="flex gap-3">
           <button
             @click="abrirFormulario('ingreso')"
             class="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-xl font-medium transition text-sm border border-emerald-200"
@@ -119,6 +124,26 @@
             class="flex-1 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl font-medium transition text-sm border border-red-200"
           >
             − Egreso
+          </button>
+        </div>
+
+        <!-- Caja compartida: esperando que alguien confirme con huella -->
+        <div
+          v-else-if="esperandoHuella"
+          class="bg-purple-50 border border-purple-300 rounded-xl p-4 text-center"
+        >
+          <div class="flex justify-center mb-2">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-800"></div>
+          </div>
+          <p class="font-semibold text-purple-800 mb-1">Esperando confirmación...</p>
+          <p class="text-sm text-purple-700 mb-3">
+            Que la persona que hizo el {{ tipoMovimiento }} ponga el dedo en el lector de huella.
+          </p>
+          <button
+            @click="cancelarEsperaHuella"
+            class="text-sm text-purple-600 hover:underline"
+          >
+            Cancelar
           </button>
         </div>
 
@@ -161,7 +186,7 @@
         </div>
 
         <button
-          v-if="!formularioAbierto"
+          v-if="!formularioAbierto && !esperandoHuella"
           @click="$emit('cerrar')"
           class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition text-sm"
         >
@@ -175,7 +200,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../../stores/auth'
 
@@ -196,6 +221,7 @@ const montoMovimiento = ref('')
 const descripcionMovimiento = ref('')
 const guardando = ref(false)
 const errorMovimiento = ref('')
+const mensajeExito = ref('')
 
 const obtenerResumenCaja = async () => {
   cargando.value = true
@@ -216,6 +242,7 @@ const abrirFormulario = (tipo) => {
   montoMovimiento.value = ''
   descripcionMovimiento.value = ''
   errorMovimiento.value = ''
+  mensajeExito.value = ''
   formularioAbierto.value = true
 }
 
@@ -236,7 +263,7 @@ const guardarMovimiento = async () => {
   errorMovimiento.value = ''
   guardando.value = true
   try {
-    await axios.post(
+    const response = await axios.post(
       `${baseUrl}/api/cajas/${resumen.value.id_caja}/movimientos`,
       {
         tipo: tipoMovimiento.value,
@@ -245,8 +272,16 @@ const guardarMovimiento = async () => {
       },
       getHeaders()
     )
+
+    // Caja compartida: el backend no lo guardó todavía, queda esperando
+    // que alguien confirme con el lector de huella.
+    if (response.status === 202) {
+      iniciarEsperaHuella()
+      return
+    }
+
+    // Caja individual: ya quedó guardado.
     formularioAbierto.value = false
-    // Recargamos el resumen para que el total ya refleje el movimiento nuevo
     await obtenerResumenCaja()
   } catch (err) {
     errorMovimiento.value = err.response?.data?.error || 'Error al registrar el movimiento.'
@@ -254,6 +289,63 @@ const guardarMovimiento = async () => {
     guardando.value = false
   }
 }
+
+// ============================================================
+// ESPERA DE CONFIRMACIÓN POR HUELLA (caja compartida)
+// ============================================================
+const esperandoHuella = ref(false)
+let intervaloHuella = null
+let timeoutHuella = null
+
+const INTERVALO_MS = 2000
+const TIMEOUT_MS = 32000
+
+const detenerEsperaHuella = () => {
+  clearInterval(intervaloHuella)
+  clearTimeout(timeoutHuella)
+  intervaloHuella = null
+  timeoutHuella = null
+  esperandoHuella.value = false
+}
+
+const iniciarEsperaHuella = () => {
+  esperandoHuella.value = true
+  errorMovimiento.value = ''
+
+  intervaloHuella = setInterval(async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/api/cajas/movimientos/pendiente/resultado`, getHeaders())
+
+      if (response.status === 200 && response.data) {
+        detenerEsperaHuella()
+        if (response.data.success) {
+          const t = response.data.trabajador
+          mensajeExito.value = t ? `Movimiento confirmado por ${t.nombre} ${t.apellido}.` : 'Movimiento confirmado.'
+          formularioAbierto.value = false
+          await obtenerResumenCaja()
+          setTimeout(() => { mensajeExito.value = '' }, 4000)
+        } else {
+          errorMovimiento.value = response.data.error || 'No se pudo confirmar el movimiento.'
+        }
+      }
+    } catch (err) {
+      // reintentar
+    }
+  }, INTERVALO_MS)
+
+  timeoutHuella = setTimeout(() => {
+    detenerEsperaHuella()
+    errorMovimiento.value = 'Tiempo agotado. No se confirmó el movimiento.'
+  }, TIMEOUT_MS)
+}
+
+const cancelarEsperaHuella = () => {
+  detenerEsperaHuella()
+}
+
+onUnmounted(() => {
+  detenerEsperaHuella()
+})
 
 onMounted(() => {
   obtenerResumenCaja()

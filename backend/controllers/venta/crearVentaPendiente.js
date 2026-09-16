@@ -2,6 +2,7 @@
 import prisma from '../../db.js'
 import { validarVenta } from './construirVenta.js'
 import { iniciarVentaPendiente, hayVentaPendiente } from '../../lib/ventaPendienteState.js'
+import { hayMovimientoPendiente } from '../../lib/movimientoPendienteState.js'
 
 // POST /api/ventas/pendiente
 // Lo llama VentasView.vue cuando el cajero aprieta "Confirmar pago" en una
@@ -33,9 +34,12 @@ export const crearVentaPendiente = async (req, res) => {
       })
     }
 
-    if (hayVentaPendiente()) {
+    // El lector de huella es un recurso único: si ya hay una venta o un
+    // movimiento manual (ingreso/egreso) esperando confirmación, no se
+    // puede iniciar otra operación hasta que se resuelva.
+    if (hayVentaPendiente() || hayMovimientoPendiente()) {
       return res.status(409).json({
-        error: 'Ya hay una venta esperando confirmación por huella. Esperá a que se resuelva antes de iniciar otra.'
+        error: 'Ya hay una operación esperando confirmación por huella. Esperá a que se resuelva antes de iniciar otra.'
       })
     }
 

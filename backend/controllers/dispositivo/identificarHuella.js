@@ -4,12 +4,13 @@ import jwt from 'jsonwebtoken'
 import { publicarLoginPorHuella, publicarErrorLoginPorHuella } from '../../lib/loginHuellaState.js'
 import { metodoLoginPermitido, MENSAJE_LOGIN_DESHABILITADO } from '../../lib/configuracion.js'
 import { hayVentaPendiente, obtenerVentaPendiente, resolverVentaPendiente } from '../../lib/ventaPendienteState.js'
+import { hayMovimientoPendiente, obtenerMovimientoPendiente, resolverMovimientoPendiente } from '../../lib/movimientoPendienteState.js'
 import { guardarVenta } from '../venta/construirVenta.js'
 
 const JWT_SECRET = process.env.JWT_SECRET
 
 // Llamado por el ESP32 (main.cpp -> enviarHuellaAlBackend) cada vez que el
-// AS608 reconoce localmente una huella. Tiene DOS usos posibles, según el
+// AS608 reconoce localmente una huella. Tiene TRES usos posibles, según el
 // contexto en el que se identifique a alguien:
 //
 // 1) Hay una venta de caja compartida esperando confirmación (alguien
@@ -19,9 +20,15 @@ const JWT_SECRET = process.env.JWT_SECRET
 //    caso: el gesto significa "autorizo esta venta", no "iniciá mi sesión
 //    web".
 //
-// 2) No hay ninguna venta pendiente: comportamiento de siempre, login por
-//    huella (identifica al trabajador y publica el resultado para que la
-//    pantalla de login web lo recoja).
+// 2) Hay un ingreso/egreso manual de caja compartida esperando
+//    confirmación (alguien apretó "Confirmar" en el mini formulario de
+//    Dinero en Caja): esa huella CONFIRMA ese movimiento puntual,
+//    atribuyéndoselo a quien la puso. Mismo criterio que el caso 1: no
+//    se publica login.
+//
+// 3) No hay ninguna venta ni movimiento pendiente: comportamiento de
+//    siempre, login por huella (identifica al trabajador y publica el
+//    resultado para que la pantalla de login web lo recoja).
 export const identificarHuella = async (req, res) => {
   try {
     const { fingerprintId } = req.body
@@ -92,7 +99,43 @@ export const identificarHuella = async (req, res) => {
       }
     }
 
-    // --- CASO 2: comportamiento normal, login por huella ---
+    // --- CASO 2: hay un movimiento manual (ingreso/egreso) de caja ---
+    // --- compartida esperando huella                               ---
+    if (hayMovimientoPendiente()) {
+      const pendiente = obtenerMovimientoPendiente()
+
+      try {
+        const movimiento = await prisma.movimiento_Caja.create({
+          data: {
+            id_caja: pendiente.id_caja,
+            tipo_movimiento: pendiente.tipo,
+            monto: pendiente.monto,
+            descripcion: pendiente.descripcion,
+            id_trabajador_registra: trabajador.id_trabajador
+          }
+        })
+
+        resolverMovimientoPendiente({
+          success: true,
+          movimiento,
+          trabajador: { nombre: trabajador.nombre, apellido: trabajador.apellido }
+        })
+
+        return res.json({
+          success: true,
+          message: `Movimiento confirmado por ${trabajador.nombre} ${trabajador.apellido}.`
+        })
+      } catch (errorMovimiento) {
+        console.error('Error confirmando movimiento pendiente:', errorMovimiento)
+        resolverMovimientoPendiente({
+          success: false,
+          error: 'Error al registrar el movimiento. Volvé a intentar desde cero.'
+        })
+        return res.status(500).json({ error: 'No se pudo confirmar el movimiento pendiente.' })
+      }
+    }
+
+    // --- CASO 3: comportamiento normal, login por huella ---
 
     // El admin puede restringir el sistema a un solo método de acceso
     // desde Administración -> Configuración. El botón "Usar lector de
@@ -111,7 +154,7 @@ export const identificarHuella = async (req, res) => {
         tipo_autenticacion: 'huella'
       }
     })
-    
+
     const funcionalidades = trabajador.rol?.roles_funcionalidades
       ?.map(rf => rf.funcionalidad.nombre_func) || []
 

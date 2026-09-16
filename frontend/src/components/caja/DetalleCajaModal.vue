@@ -89,6 +89,13 @@
                 </span>
               </div>
 
+              <div v-if="detalle.resumen.totalIngresosManuales > 0" class="col-span-2 flex justify-between items-center">
+                <span class="text-sm font-semibold text-gray-700">Ingresos manuales</span>
+                <span class="text-sm font-bold px-3 py-1.5 rounded bg-emerald-50 text-emerald-700">
+                  +${{ formatMonto(detalle.resumen.totalIngresosManuales) }}
+                </span>
+              </div>
+
               <div class="col-span-2 flex justify-between items-center">
                 <span class="text-sm font-semibold text-gray-700">Total egresos de caja</span>
                 <span class="text-sm font-bold px-3 py-1.5 rounded bg-pink-50 text-pink-700">
@@ -135,15 +142,20 @@
               </p>
             </div>
 
-            <!-- Egresos manuales -->
-            <div v-if="detalle.egresos.length > 0" class="border-t border-gray-100 pt-4 mt-4">
-              <h3 class="text-sm font-bold text-gray-700 mb-2">Egresos manuales</h3>
-              <div v-for="egreso in detalle.egresos" :key="egreso.id_movimiento" class="flex justify-between text-sm py-1">
+            <!-- Movimientos manuales: ingresos y egresos -->
+            <div v-if="detalle.movimientos.length > 0" class="border-t border-gray-100 pt-4 mt-4">
+              <h3 class="text-sm font-bold text-gray-700 mb-2">Movimientos manuales</h3>
+              <div v-for="mov in detalle.movimientos" :key="mov.id_movimiento" class="flex justify-between text-sm py-1">
                 <span class="text-gray-600">
-                  {{ formatearFecha(egreso.fecha_hora) }} — {{ egreso.descripcion || 'Sin descripción' }}
-                  <span class="text-gray-400 text-xs">({{ egreso.trabajador?.nombre }} {{ egreso.trabajador?.apellido }})</span>
+                  {{ formatearFecha(mov.fecha_hora) }} — {{ mov.descripcion || 'Sin descripción' }}
+                  <span class="text-gray-400 text-xs">({{ mov.trabajador?.nombre }} {{ mov.trabajador?.apellido }})</span>
                 </span>
-                <span class="text-red-500 font-medium">-${{ formatMonto(egreso.monto) }}</span>
+                <span
+                  class="font-medium"
+                  :class="mov.tipo_movimiento === 'ingreso' ? 'text-emerald-600' : 'text-red-500'"
+                >
+                  {{ mov.tipo_movimiento === 'ingreso' ? '+' : '-' }}${{ formatMonto(mov.monto) }}
+                </span>
               </div>
             </div>
           </div>

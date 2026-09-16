@@ -9,7 +9,7 @@ function redondear2(numero) {
 // Devuelve todo lo necesario para el popup de detalle de una caja:
 // - Datos generales de la caja (igual que en el historial)
 // - Resumen de ingresos desglosado por método de pago
-// - Egresos manuales registrados durante esa caja
+// - Movimientos manuales (ingresos y egresos) registrados durante esa caja
 // - Saldo esperado (total y solo efectivo) vs. lo que realmente se contó
 // - El listado completo de ventas de esa caja, con sus productos y pagos
 export const getCajaDetalle = async (req, res) => {
@@ -74,23 +74,28 @@ export const getCajaDetalle = async (req, res) => {
     const totalEfectivo = ingresosPorMetodo.get('Efectivo') || 0
 
     // --------------------------------------------------------
-    // Egresos manuales hechos durante la caja
+    // Movimientos manuales hechos durante la caja (ingresos y egresos,
+    // no ligados a ninguna venta)
     // --------------------------------------------------------
     const egresos = movimientos.filter(m => m.tipo_movimiento === 'egreso')
+    const ingresosManuales = movimientos.filter(m => m.tipo_movimiento === 'ingreso')
     const totalEgresos = redondear2(egresos.reduce((sum, m) => sum + Number(m.monto), 0))
+    const totalIngresosManuales = redondear2(ingresosManuales.reduce((sum, m) => sum + Number(m.monto), 0))
 
     // --------------------------------------------------------
     // Saldos: si la caja ya está cerrada usamos lo que se guardó al
     // cerrarla (monto_final_esperado / monto_final_real), que es el
-    // registro "oficial". Si sigue abierta, lo calculamos en vivo.
+    // registro "oficial". Si sigue abierta, lo calculamos en vivo,
+    // sumando también los ingresos manuales (antes no se sumaban acá,
+    // a diferencia de obtenerResumenCajaActiva.js).
     // --------------------------------------------------------
     const montoInicial = Number(caja.monto_inicial)
 
     const saldoEfectivoEsperado = caja.estado === 'cerrada' && caja.monto_final_esperado !== null
       ? Number(caja.monto_final_esperado)
-      : redondear2(montoInicial + totalEfectivo - totalEgresos)
+      : redondear2(montoInicial + totalEfectivo + totalIngresosManuales - totalEgresos)
 
-    const saldoTotalEsperado = redondear2(montoInicial + totalIngresos - totalEgresos)
+    const saldoTotalEsperado = redondear2(montoInicial + totalIngresos + totalIngresosManuales - totalEgresos)
 
     const montoContado = caja.monto_final_real !== null ? Number(caja.monto_final_real) : null
     const diferencia = caja.arqueos_caja?.[0]?.diferencia !== undefined && caja.arqueos_caja?.[0] !== null
@@ -114,6 +119,7 @@ export const getCajaDetalle = async (req, res) => {
       resumen: {
         ingresosPorMetodo: Object.fromEntries(ingresosPorMetodo),
         totalIngresos,
+        totalIngresosManuales,
         totalEgresos,
         saldoEfectivoEsperado,
         saldoTotalEsperado,
@@ -138,8 +144,10 @@ export const getCajaDetalle = async (req, res) => {
           monto: Number(p.monto)
         }))
       })),
-      egresos: egresos.map(m => ({
+      // Ingresos y egresos manuales juntos, ordenados cronológicamente.
+      movimientos: movimientos.map(m => ({
         id_movimiento: m.id_movimiento,
+        tipo_movimiento: m.tipo_movimiento,
         fecha_hora: m.fecha_hora,
         monto: Number(m.monto),
         descripcion: m.descripcion,

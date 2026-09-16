@@ -140,6 +140,15 @@ const routes = [
     }
   },
   {
+    path: '/movimientos-caja',
+    name: 'HistorialMovimientosCaja',
+    component: () => import('../views/HistorialMovimientosCajaView.vue'),
+    meta: {
+      requiereAuth: true,
+      permiso: 'Ver_Movimientos_Caja'
+    }
+  },
+  {
     path: '/administracion',
     name: 'Administracion',
     component: () => import('../views/AdminView.vue'),
