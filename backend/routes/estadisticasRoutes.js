@@ -4,6 +4,7 @@ import { getTopProductosVendidos } from '../controllers/estadisticas/getTopProdu
 import { getTopProductosGanancia } from '../controllers/estadisticas/getTopProductosGanancia.js'
 import { getTopVendedores } from '../controllers/estadisticas/getTopVendedores.js'
 import { getTopEtiquetas } from '../controllers/estadisticas/getTopEtiquetas.js'
+import { getResumenDia } from '../controllers/estadisticas/getResumenDia.js'
 // Si tus otras rutas pasan por un middleware de auth, importalo y agregalo
 // a cada router.get() como hacen tus rutas de producto/etiqueta.
 // import { verificarToken } from '../middlewares/auth.js'
@@ -14,7 +15,7 @@ router.get('/productos-mas-vendidos', getTopProductosVendidos)
 router.get('/productos-mas-ganancia', getTopProductosGanancia)
 router.get('/vendedores-top', getTopVendedores)
 router.get('/etiquetas-top', getTopEtiquetas)
-
+router.get('/resumen-dia', getResumenDia)
 export default router
 
 // En tu archivo principal (app.js / server.js), donde montás las demás
