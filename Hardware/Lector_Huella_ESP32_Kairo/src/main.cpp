@@ -7,7 +7,7 @@
 // --- Prototipos de Funciones (Requeridos en PlatformIO) ---
 void encenderRGB(int r, int g, int b);
 int getFingerprintIDez();
-bool ejecutarRegistroPorTerminal(int id);
+bool registrarHuellaEnSensor(int id);
 void conectarWiFi();
 bool enviarHuellaAlBackend(int fingerprintId);
 bool consultarHuellaPendiente(int &idOut, String &nombreOut);
@@ -25,7 +25,7 @@ const char* BACKEND_URL    = "http://172.16.68.225:3000";
 const char* DEVICE_API_KEY = "3jK8dFgH9lM2nBvC5xZqWpErTyUiOpAsDfGhJkLzXcVbNmQwErTyUiOpAsDfGhJkLYTljZWZlNTYtZmRkNi00NTBjLWFlNGYtZWJkYmQ4NDZiZTYyNTcyYWIzMjYtY2Y4NS00YWQ0LThhNDEtOTIwZjgxNGJkZTgx"; // debe coincidir con DEVICE_API_KEY del .env del backend
 
 // --- Configuración del Módulo LED RGB ---
-const int PIN_RGB_ROJO  = 12; 
+const int PIN_RGB_ROJO  = 12;
 const int PIN_RGB_VERDE = 13;
 const int PIN_RGB_AZUL  = 14;
 
@@ -38,68 +38,44 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
 enum Estados { MODO_LECTURA, MODO_REGISTRO };
 Estados estadoActual = MODO_LECTURA;
 
+// ID que el panel admin reservó para la huella que hay que grabar (1 a 127)
 int idSeleccionado = 1;
-bool registroEsAutomatico = false; // true si vino de "huellas-pendientes" (panel admin), false si vino del comando 'R' manual
 
 // Cada cuánto se consulta al backend si hay una huella nueva para capturar
 const unsigned long INTERVALO_CONSULTA_PENDIENTES_MS = 4000;
 unsigned long ultimaConsultaPendientes = 0;
 
-void setup()  
+void setup()
 {
-  Serial.begin(9600); // Velocidad recomendada para ESP32
-  while (!Serial); 
-  delay(1000); 
+  delay(1000); // Tiempo para que el sensor arranque antes de comunicarse con él
 
   mySerial.begin(9600, SERIAL_8N1, 16, 17);
-  
+
   // Configuración de pines RGB
   pinMode(PIN_RGB_ROJO, OUTPUT);
   pinMode(PIN_RGB_VERDE, OUTPUT);
   pinMode(PIN_RGB_AZUL, OUTPUT);
 
-  Serial.println(F("\n=== SISTEMA DE HUELLA + RGB POR TERMINAL ==="));
-  Serial.println(F("Comando disponible: Envía 'R' para registrar una huella manualmente."));
-  Serial.println(F("También se registran solas las huellas pendientes que cargue el admin desde el panel."));
-
   conectarWiFi();
 
   finger.begin(57600);
   if (finger.verifyPassword()) {
-    Serial.println(F("[OK] Sensor AS608 detectado de forma correcta."));
     encenderRGB(0, 0, 50); // Azul tenue: Esperando huella
   } else {
-    Serial.println(F("[ERROR] No se encontró el sensor. Revisa las conexiones."));
-    while (1) { 
-      encenderRGB(255, 0, 0); delay(500); 
-      encenderRGB(0, 0, 0); delay(500); 
+    // Sensor no detectado: el LED parpadea en rojo indefinidamente
+    while (1) {
+      encenderRGB(255, 0, 0); delay(500);
+      encenderRGB(0, 0, 0); delay(500);
     }
   }
-
-  finger.getTemplateCount();
-  Serial.print(F("[INFO] Huellas guardadas en memoria: ")); Serial.println(finger.templateCount);
-  Serial.println(F("-> Coloca tu dedo para verificar acceso...\n"));
 }
 
-void loop()                     
+void loop()
 {
-  // Escuchar si el usuario envía comandos por el Monitor Serial
-  if (Serial.available() > 0) {
-    char comando = Serial.read();
-    
-    // Limpiar saltos de línea del búfer
-    while(Serial.available() > 0) { Serial.read(); } 
-
-    if (comando == 'R' || comando == 'r') {
-      registroEsAutomatico = false;
-      estadoActual = MODO_REGISTRO;
-    }
-  }
-
   // Cada INTERVALO_CONSULTA_PENDIENTES_MS, si estamos libres en modo
   // lectura, preguntamos al backend si hay que capturar una huella nueva
   // (esto es lo que dispara el registro cuando el admin crea un trabajador
-  // desde el panel web, sin que nadie toque el Monitor Serial).
+  // o solicita una huella desde el panel web).
   if (estadoActual == MODO_LECTURA &&
       millis() - ultimaConsultaPendientes > INTERVALO_CONSULTA_PENDIENTES_MS) {
     ultimaConsultaPendientes = millis();
@@ -107,77 +83,47 @@ void loop()
     int idPendiente;
     String nombrePendiente;
     if (consultarHuellaPendiente(idPendiente, nombrePendiente)) {
-      Serial.print(F("\n[PANEL ADMIN] Huella pendiente para: "));
-      Serial.print(nombrePendiente);
-      Serial.print(F(" (ID #")); Serial.print(idPendiente); Serial.println(F(")"));
       idSeleccionado = idPendiente;
-      registroEsAutomatico = true;
       estadoActual = MODO_REGISTRO;
     }
   }
 
   // LÓGICA SEGÚN EL ESTADO ACTUAL
   switch (estadoActual) {
-    
+
     case MODO_LECTURA:
       getFingerprintIDez();
-      delay(50); 
+      delay(50);
       break;
 
     case MODO_REGISTRO:
-      encenderRGB(80, 0, 80); // Violeta/Cian: Modo configuración activo
+      encenderRGB(80, 0, 80); // Violeta: Modo registro activo
 
-      if (registroEsAutomatico) {
-        // Ya sabemos el ID (vino del panel admin): no hace falta tipearlo
-        Serial.print(F("\n[MODO REGISTRO AUTOMÁTICO] Coloca el dedo del nuevo empleado (ID #"));
-        Serial.print(idSeleccionado); Serial.println(F(")..."));
-      } else {
-        Serial.println(F("\n[MODO REGISTRO MANUAL] Ingresa el número de ID (1 a 127) y presiona Enter:"));
-        while (Serial.available() == 0) { delay(10); }
-        idSeleccionado = Serial.parseInt();
-      }
-
-      // Validar ID
-      if (idSeleccionado < 1 || idSeleccionado > 127) {
-        Serial.println(F("[!] ID inválido. Debe ser entre 1 y 127. Abortando registro."));
-      } else {
-        bool ok = ejecutarRegistroPorTerminal(idSeleccionado);
-        if (ok && registroEsAutomatico) {
-          confirmarHuellaEnBackend(idSeleccionado);
-        }
+      // Si la huella se grabó en el sensor, se avisa al backend para que
+      // el panel admin la deje de mostrar como pendiente
+      if (registrarHuellaEnSensor(idSeleccionado)) {
+        confirmarHuellaEnBackend(idSeleccionado);
       }
 
       // Al terminar (éxito o fallo), regresa automáticamente a lectura
-      registroEsAutomatico = false;
       estadoActual = MODO_LECTURA;
-      Serial.println(F("\n[SISTEMA] Regresando a MODO LECTURA. Esperando dedo..."));
       encenderRGB(0, 0, 50); // Volver al azul de espera
       break;
   }
 }
 
 // --- Conexión WiFi ---
+// Si no logra conectarse tras ~10 s, el lector sigue funcionando en modo local
+// (reconoce dedos), pero no puede identificar trabajadores en el backend
+// ni recibir huellas pendientes del panel admin.
 void conectarWiFi() {
-  Serial.print(F("[WiFi] Conectando a ")); Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   int intentos = 0;
   while (WiFi.status() != WL_CONNECTED && intentos < 20) {
     delay(500);
-    Serial.print(F("."));
     intentos++;
-  }
-
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println();
-    Serial.print(F("[WiFi] Conectado. IP: "));
-    Serial.println(WiFi.localIP());
-  } else {
-    Serial.println();
-    Serial.println(F("[WiFi] No se pudo conectar. El lector seguirá funcionando en modo local"));
-    Serial.println(F("       (verificación offline), pero no podrá identificar trabajadores en el backend"));
-    Serial.println(F("       ni recibir huellas pendientes del panel admin."));
   }
 }
 
@@ -185,14 +131,11 @@ void conectarWiFi() {
 // (la reservó el admin al crear/editar un trabajador desde el panel web)
 bool consultarHuellaPendiente(int &idOut, String &nombreOut) {
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println(F("[DEBUG] consultarHuellaPendiente: sin WiFi, no consulto."));
     return false;
   }
 
   HTTPClient http;
   String url = String(BACKEND_URL) + "/api/dispositivo/huellas-pendientes";
-
-  Serial.print(F("[DEBUG] Consultando: ")); Serial.println(url);
 
   http.begin(url);
   http.addHeader("x-device-key", DEVICE_API_KEY);
@@ -201,45 +144,24 @@ bool consultarHuellaPendiente(int &idOut, String &nombreOut) {
   int codigoHttp = http.GET();
   bool hayPendiente = false;
 
-  // SIEMPRE mostramos el código HTTP y el cuerpo de la respuesta,
-  // así vemos exactamente qué está pasando (sacar estas líneas
-  // cuando ya funcione).
-  Serial.print(F("[DEBUG] Código HTTP recibido: ")); Serial.println(codigoHttp);
-
-  if (codigoHttp > 0) {
+  if (codigoHttp == 200) {
     String respuesta = http.getString();
-    Serial.print(F("[DEBUG] Cuerpo de la respuesta: ")); Serial.println(respuesta);
 
-    if (codigoHttp == 200) {
-      JsonDocument doc;
-      DeserializationError err = deserializeJson(doc, respuesta);
+    JsonDocument doc;
+    DeserializationError err = deserializeJson(doc, respuesta);
 
-      if (err) {
-        Serial.print(F("[DEBUG] Error parseando JSON: ")); Serial.println(err.c_str());
-      } else {
-        JsonArray pendientes = doc["pendientes"].as<JsonArray>();
-        Serial.print(F("[DEBUG] Cantidad de pendientes: ")); Serial.println(pendientes.size());
+    if (!err) {
+      JsonArray pendientes = doc["pendientes"].as<JsonArray>();
 
-        if (pendientes.size() > 0) {
-          JsonObject primero = pendientes[0];
-          idOut = primero["fingerprintId"] | 0;
-          const char* nombre = primero["nombre"] | "";
-          const char* apellido = primero["apellido"] | "";
-          nombreOut = String(nombre) + " " + String(apellido);
-          hayPendiente = (idOut >= 1 && idOut <= 127);
-        }
+      if (pendientes.size() > 0) {
+        JsonObject primero = pendientes[0];
+        idOut = primero["fingerprintId"] | 0;
+        const char* nombre = primero["nombre"] | "";
+        const char* apellido = primero["apellido"] | "";
+        nombreOut = String(nombre) + " " + String(apellido);
+        hayPendiente = (idOut >= 1 && idOut <= 127);
       }
-    } else if (codigoHttp == 401) {
-      Serial.println(F("[BACKEND] Clave de dispositivo (DEVICE_API_KEY) inválida."));
-    } else if (codigoHttp == 404) {
-      Serial.println(F("[BACKEND] Ruta no encontrada. ¿La URL del backend y el router están bien montados?"));
     }
-  } else {
-    // codigoHttp negativo = error de conexión (no llegó ni a hablar con el servidor)
-    Serial.print(F("[DEBUG] Error de conexión HTTPClient: "));
-    Serial.println(http.errorToString(codigoHttp));
-    Serial.println(F("[DEBUG] Revisá: ¿la IP en BACKEND_URL es correcta? ¿el backend está prendido?"));
-    Serial.println(F("[DEBUG] ¿el ESP32 y el backend están en la MISMA red WiFi/LAN?"));
   }
 
   http.end();
@@ -247,10 +169,10 @@ bool consultarHuellaPendiente(int &idOut, String &nombreOut) {
 }
 
 // --- Avisa al backend que la huella ya se grabó físicamente en el sensor ---
+// Si falla (sin WiFi, etc.), la huella queda grabada en el sensor pero el
+// panel la seguirá viendo como pendiente.
 bool confirmarHuellaEnBackend(int fingerprintId) {
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println(F("[HTTP] Sin WiFi, no se pudo confirmar la huella en el backend."));
-    Serial.println(F("       Quedó grabada en el sensor pero el panel la seguirá viendo como pendiente."));
     return false;
   }
 
@@ -270,12 +192,6 @@ bool confirmarHuellaEnBackend(int fingerprintId) {
   int codigoHttp = http.POST(body);
   bool exito = (codigoHttp == 200);
 
-  if (exito) {
-    Serial.println(F("[BACKEND] Huella confirmada. Ya figura completa en el panel admin."));
-  } else {
-    Serial.print(F("[BACKEND] No se pudo confirmar la huella. Código HTTP: ")); Serial.println(codigoHttp);
-  }
-
   http.end();
   return exito;
 }
@@ -284,9 +200,9 @@ bool confirmarHuellaEnBackend(int fingerprintId) {
 // El backend traduce ese ID local del sensor al trabajador real y devuelve
 // su nombre + token, igual que en el login por usuario/contraseña. Además,
 // deja el resultado "publicado" para que la página de login web lo recoja.
+// Devuelve true solo si el backend respondió 200 con un JSON válido.
 bool enviarHuellaAlBackend(int fingerprintId) {
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println(F("[HTTP] Sin WiFi, no se pudo consultar al backend."));
     return false;
   }
 
@@ -312,28 +228,10 @@ bool enviarHuellaAlBackend(int fingerprintId) {
     JsonDocument respDoc;
     DeserializationError err = deserializeJson(respDoc, respuesta);
 
-    if (!err) {
-      const char* nombre   = respDoc["trabajador"]["nombre"]   | "??";
-      const char* apellido = respDoc["trabajador"]["apellido"] | "";
-      const char* rol      = respDoc["trabajador"]["rol"]["nombre_rol"] | "";
-
-      Serial.print(F("[BACKEND] Trabajador identificado: "));
-      Serial.print(nombre); Serial.print(F(" ")); Serial.print(apellido);
-      Serial.print(F(" (")); Serial.print(rol); Serial.println(F(")"));
-      Serial.println(F("[BACKEND] Podés iniciar sesión en la web ahora: la página de login lo va a detectar solo."));
-      exito = true;
-    } else {
-      Serial.println(F("[BACKEND] Respuesta OK pero no se pudo parsear el JSON."));
-    }
-  } else if (codigoHttp == 404) {
-    Serial.println(F("[BACKEND] Esa huella no está vinculada a ningún trabajador."));
-  } else if (codigoHttp == 401) {
-    Serial.println(F("[BACKEND] Clave de dispositivo (DEVICE_API_KEY) inválida."));
-  } else if (codigoHttp == 409) {
-    Serial.println(F("[BACKEND] Esta huella todavía no fue confirmada por el sistema."));
-  } else {
-    Serial.print(F("[BACKEND] Error HTTP: ")); Serial.println(codigoHttp);
+    exito = !err;
   }
+  // Cualquier otro código (404 no vinculada, 401 clave inválida,
+  // 409 pendiente, 403, 5xx, error de conexión) se trata como fallo.
 
   http.end();
   return exito;
@@ -356,8 +254,7 @@ int getFingerprintIDez() {
 
   p = finger.fingerFastSearch();
   if (p == FINGERPRINT_NOTFOUND) {
-    Serial.println(F("[-] Huella NO reconocida."));
-    encenderRGB(255, 0, 0); // Rojo de error
+    encenderRGB(255, 0, 0); // Rojo: huella no reconocida
     delay(1500);
     encenderRGB(0, 0, 50);  // Volver a azul
     return -1;
@@ -365,11 +262,8 @@ int getFingerprintIDez() {
     return -1;
   }
 
-  Serial.print(F("[+] ¡HUELLA RECONOCIDA LOCALMENTE! ID #")); Serial.print(finger.fingerID);
-  Serial.print(F(" | Confianza: ")); Serial.println(finger.confidence);
-
-  // Consultar al backend quién es este ID (esto también habilita el login
-  // web "solo con huella")
+  // Huella reconocida localmente. Consultar al backend quién es este ID
+  // (esto también habilita el login web "solo con huella")
   bool identificadoEnBackend = enviarHuellaAlBackend(finger.fingerID);
 
   if (identificadoEnBackend) {
@@ -384,13 +278,13 @@ int getFingerprintIDez() {
   return finger.fingerID;
 }
 
-// --- MODO REGISTRO (manual por terminal, o automático por huella pendiente) ---
-// Devuelve true si el modelo quedó grabado con éxito en el sensor.
-bool ejecutarRegistroPorTerminal(int id) {
-  Serial.print(F("\n[REGISTRO] Iniciando proceso para el ID #")); Serial.println(id);
-  
+// --- MODO REGISTRO (huella pendiente reservada desde el panel admin) ---
+// Captura el dedo dos veces y guarda la plantilla en la memoria del sensor
+// en la posición "id". Devuelve true si quedó grabada con éxito.
+bool registrarHuellaEnSensor(int id) {
   int p = -1;
-  Serial.println(F("[REGISTRO] Coloca el dedo firmemente en el sensor..."));
+
+  // Primera captura
   while (p != FINGERPRINT_OK) {
     p = finger.getImage();
     if (p == FINGERPRINT_PACKETRECIEVEERR) return false;
@@ -398,19 +292,18 @@ bool ejecutarRegistroPorTerminal(int id) {
 
   p = finger.image2Tz(1);
   if (p != FINGERPRINT_OK) {
-    Serial.println(F("[!] Error en rasgos de imagen. Abortando."));
     encenderRGB(255, 0, 0); delay(1000);
     return false;
   }
 
-  Serial.println(F("[REGISTRO] Quita el dedo."));
+  // Esperar que quite el dedo
   encenderRGB(0, 0, 0);
   delay(2000);
   p = 0;
   while (p != FINGERPRINT_NOFINGER) { p = finger.getImage(); }
 
+  // Segunda captura (el mismo dedo)
   p = -1;
-  Serial.println(F("[REGISTRO] Coloca el MISMO dedo otra vez..."));
   encenderRGB(80, 0, 80);
   while (p != FINGERPRINT_OK) {
     p = finger.getImage();
@@ -418,27 +311,23 @@ bool ejecutarRegistroPorTerminal(int id) {
 
   p = finger.image2Tz(2);
   if (p != FINGERPRINT_OK) {
-    Serial.println(F("[!] Error en segunda imagen. Abortando."));
     encenderRGB(255, 0, 0); delay(1000);
     return false;
   }
 
+  // Las dos capturas deben coincidir
   p = finger.createModel();
-  if (p == FINGERPRINT_OK) {
-    Serial.println(F("[OK] Las capturas coinciden perfectamente."));
-  } else {
-    Serial.println(F("[!] Error: Las huellas no coinciden."));
+  if (p != FINGERPRINT_OK) {
     encenderRGB(255, 0, 0); delay(1500);
     return false;
   }
 
+  // Grabar la plantilla en la memoria del AS608
   p = finger.storeModel(id);
   if (p == FINGERPRINT_OK) {
-    Serial.print(F("[¡ÉXITO!] Huella grabada localmente en el ID #")); Serial.println(id);
     encenderRGB(0, 255, 0); delay(2000);
     return true;
   } else {
-    Serial.println(F("[!] Error físico de escritura en la memoria del AS608."));
     encenderRGB(255, 0, 0); delay(1500);
     return false;
   }
