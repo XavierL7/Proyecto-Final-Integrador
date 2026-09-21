@@ -47,22 +47,22 @@ import Header from '../components/Header.vue'
 // Datos de los integrantes
 const teamMembers = [
   {
-    name: 'Andrey Khusid',
-    role: 'Cofundador y director general',
+    name: 'Xavier Lacunza',
+    role: 'Desarrollador full stack (Enfoque en base de datos y backend)',
     image: new URL('../assets/xavier.png', import.meta.url).href,
-    bgColor: '#facc15' // Amarillo
+    bgColor: '#14b8a6' // verde agua
   },
   {
-    name: 'Jeff Chow',
-    role: 'Director de Producto y tecnología',
+    name: 'Lara Veloso',
+    role: 'Desarrolladora full stack (Enfoque en frontend y diseño)',
     image: 'https://via.placeholder.com/400x300', // Reemplazá con la ruta/src de tu imagen
-    bgColor: '#facc15' // Amarillo
+    bgColor: '#11161d' // azul oscuro
   },
   {
-    name: 'Justin Coulombe',
-    role: 'Director financiero',
+    name: 'Lautaro Sanchez Rosalín',
+    role: 'Desarrollador full stack (Enfoque en hardware y maquetación)',
     image: 'https://via.placeholder.com/400x300', // Reemplazá con la ruta/src de tu imagen
-    bgColor: '#a78bfa' // Lila / Violeta
+    bgColor: '#14b8a6' // verde agua
   }
 ]
 </script>
