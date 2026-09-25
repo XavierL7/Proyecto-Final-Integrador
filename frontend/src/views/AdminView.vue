@@ -226,26 +226,41 @@ z<!-- frontend/src/views/AdminView.vue -->
           opción simplemente no va a funcionar y se le avisará al usuario
           que fue deshabilitada por el administrador.
         </p>
-        <div class="space-y-2">
-          <label
-            v-for="opcion in opcionesMetodoLogin"
-            :key="opcion.valor"
-            class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
-            :class="metodoLogin === opcion.valor ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'"
-          >
-            <input
-              type="radio"
-              name="metodoLogin"
-              :value="opcion.valor"
-              v-model="metodoLogin"
-              class="mt-1 w-4 h-4 text-blue-500"
-            />
-            <span>
-              <span class="block text-sm font-medium">{{ opcion.titulo }}</span>
-              <span class="block text-xs text-gray-500">{{ opcion.descripcion }}</span>
-            </span>
-          </label>
-        </div>
+          <div class="space-y-2">
+            <label
+              v-for="opcion in opcionesMetodoLogin"
+              :key="opcion.valor"
+              class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
+              :class="metodoLogin === opcion.valor 
+                ? 'border-blue-500 bg-blue-900/40' 
+                : 'border-slate-700/80 bg-slate-900/30 hover:border-slate-600'"
+            >
+              <input
+                type="radio"
+                name="metodoLogin"
+                :value="opcion.valor"
+                v-model="metodoLogin"
+                class="mt-1 w-4 h-4 text-blue-500 accent-blue-500"
+              />
+              <span>
+                <!-- Título siempre visible en blanco/claro -->
+                <span 
+                  class="block text-sm font-semibold transition-colors"
+                  :class="metodoLogin === opcion.valor ? 'text-blue-400' : 'text-slate-100'"
+                >
+                  {{ opcion.titulo }}
+                </span>
+
+                <!-- Descripción legible sobre fondo oscuro -->
+                <span 
+                  class="block text-xs transition-colors"
+                  :class="metodoLogin === opcion.valor ? 'text-blue-200' : 'text-slate-400'"
+                >
+                  {{ opcion.descripcion }}
+                </span>
+              </span>
+            </label>
+          </div>
         <button
           @click="guardarMetodoLogin"
           :disabled="guardandoMetodoLogin"

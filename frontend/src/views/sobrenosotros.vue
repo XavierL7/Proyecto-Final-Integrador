@@ -1,15 +1,17 @@
 <template>
-  <div class="min-h-screen bg-slate-50">
+  <div class="min-h-screen bg-slate-50 flex flex-col">
     <!-- Header Reutilizable -->
     <Header />
 
-    <!-- Sección de Equipo Directivo -->
-    <main class="max-w-7xl mx-auto px-4 py-16">
-      <h1 class="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-12">
+    <!-- Sección de Equipo Directivo Centrada -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 flex flex-col justify-center items-center py-12">
+      
+      <!-- Título en su posición actual -->
+      <h1 class="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-24">
         Equipo directivo
       </h1>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full" style="margin-top: 60px;">
         <div 
           v-for="(member, index) in teamMembers" 
           :key="index" 
@@ -41,7 +43,7 @@
 </template>
 
 <script setup>
-// Importación del Header (Ajustá la ruta según la ubicación exacta de tu Header.vue)
+// Importación del Header
 import Header from '../components/Header.vue' 
 
 // Datos de los integrantes
