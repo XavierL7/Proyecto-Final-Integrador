@@ -22,9 +22,9 @@ export const loginTrabajador = async (req, res) => {
     // login sigue mostrándose siempre igual (no lo deshabilitamos ni lo
     // ocultamos); acá simplemente no dejamos que el intento funcione y le
     // avisamos al usuario por qué.
-    const [permitido, trabajador] = await Promise.all([
-      metodoLoginPermitido('contrasena'),
-      prisma.trabajador.findFirst({
+    const [permitido, trabajador] = await Promise.all([ //busca permitido y trabajdor a la vez
+      /* permitido = */metodoLoginPermitido('contrasena'),
+      /* trabajador = */prisma.trabajador.findFirst({
         where: {
           nombre: nombre,
           apellido: apellido,

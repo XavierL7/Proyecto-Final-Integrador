@@ -15,13 +15,11 @@ bool confirmarHuellaEnBackend(int fingerprintId);
 
 // --- Configuración de Red / Backend ---
 // Reemplazá estos valores con los de tu red y tu servidor Express.
-const char* WIFI_SSID     = "Aula68";
-const char* WIFI_PASSWORD = "alumnos24";
+const char* WIFI_SSID     = "rodri_phone";
+const char* WIFI_PASSWORD = "Quemirabobo";
 
-// Ej: "http://192.168.1.100:3000" si el backend corre en tu LAN,
-// o el dominio público si está desplegado.
 
-const char* BACKEND_URL    = "http://172.16.68.225:3000";
+const char* BACKEND_URL    = "http://10.67.41.83:3000";
 const char* DEVICE_API_KEY = "3jK8dFgH9lM2nBvC5xZqWpErTyUiOpAsDfGhJkLzXcVbNmQwErTyUiOpAsDfGhJkLYTljZWZlNTYtZmRkNi00NTBjLWFlNGYtZWJkYmQ4NDZiZTYyNTcyYWIzMjYtY2Y4NS00YWQ0LThhNDEtOTIwZjgxNGJkZTgx"; // debe coincidir con DEVICE_API_KEY del .env del backend
 
 // --- Configuración del Módulo LED RGB ---
@@ -49,22 +47,23 @@ void setup()
 {
   delay(1000); // Tiempo para que el sensor arranque antes de comunicarse con él
 
-  mySerial.begin(9600, SERIAL_8N1, 16, 17);
+  mySerial.begin(9600, SERIAL_8N1, 16, 17); //Serial  8N1 significa que los paquetes de comunicacion son de 8 bits 
+  //(un byte),sin bit de paridad (bit para detectar errores) y con 1 bit de parada (bit que dice cuando termina el paquete)
 
   // Configuración de pines RGB
   pinMode(PIN_RGB_ROJO, OUTPUT);
   pinMode(PIN_RGB_VERDE, OUTPUT);
   pinMode(PIN_RGB_AZUL, OUTPUT);
 
-  conectarWiFi();
+  conectarWiFi(); //funcion en la linea 117
 
   finger.begin(57600);
-  if (finger.verifyPassword()) {
+  if (finger.verifyPassword()) { //esta es una funcion de la libreria del lector, solo se asegura que hubo conexion 
     encenderRGB(0, 0, 50); // Azul tenue: Esperando huella
   } else {
     // Sensor no detectado: el LED parpadea en rojo indefinidamente
     while (1) {
-      encenderRGB(255, 0, 0); delay(500);
+      encenderRGB(255, 0, 0); delay(500); //funcion de la linea 243
       encenderRGB(0, 0, 0); delay(500);
     }
   }
@@ -78,11 +77,14 @@ void loop()
   // o solicita una huella desde el panel web).
   if (estadoActual == MODO_LECTURA &&
       millis() - ultimaConsultaPendientes > INTERVALO_CONSULTA_PENDIENTES_MS) {
-    ultimaConsultaPendientes = millis();
+    ultimaConsultaPendientes = millis(); //codigo para que le pregunte al backend
+    // cada 4 seg y no cada loop (eplotaria mi backend)
+
+
 
     int idPendiente;
     String nombrePendiente;
-    if (consultarHuellaPendiente(idPendiente, nombrePendiente)) {
+    if (consultarHuellaPendiente(idPendiente, nombrePendiente)) { //consultarHuellaPendiente esta en la linea 134
       idSeleccionado = idPendiente;
       estadoActual = MODO_REGISTRO;
     }
@@ -92,7 +94,7 @@ void loop()
   switch (estadoActual) {
 
     case MODO_LECTURA:
-      getFingerprintIDez();
+      getFingerprintIDez(); //funcin de linea 250
       delay(50);
       break;
 
@@ -135,7 +137,7 @@ bool consultarHuellaPendiente(int &idOut, String &nombreOut) {
   }
 
   HTTPClient http;
-  String url = String(BACKEND_URL) + "/api/dispositivo/huellas-pendientes";
+  String url = String(BACKEND_URL) + "/api/dispositivo/huellas-pendientes"; //linea 22 + "/api/dispositivo/huellas-pendientes"
 
   http.begin(url);
   http.addHeader("x-device-key", DEVICE_API_KEY);
@@ -264,7 +266,7 @@ int getFingerprintIDez() {
 
   // Huella reconocida localmente. Consultar al backend quién es este ID
   // (esto también habilita el login web "solo con huella")
-  bool identificadoEnBackend = enviarHuellaAlBackend(finger.fingerID);
+  bool identificadoEnBackend = enviarHuellaAlBackend(finger.fingerID); //funcion en 206
 
   if (identificadoEnBackend) {
     encenderRGB(0, 255, 0); // Verde: éxito confirmado por el backend

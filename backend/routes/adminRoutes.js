@@ -12,8 +12,6 @@ import {
   solicitarHuella,
   cancelarHuella,
   getFuncionalidades,
-  createFuncionalidad,
-  deleteFuncionalidad
 } from '../controllers/adminController.js'
 import { verificarToken } from '../middleware/auth.js'
 import { checkPermission } from '../middleware/permisos.js'
@@ -47,7 +45,6 @@ router.put('/trabajadores/:id/huella/cancelar', checkPermission('Editar_Trabajad
 // gestión de roles -> si se necesita separarlas más adelante, se agrega
 // Ver/Agregar/Borrar_Funcionalidades como funcionalidades propias.
 router.get('/funcionalidades', checkPermission('Ver_Roles'), getFuncionalidades)
-router.post('/funcionalidades', checkPermission('Agregar_Roles'), createFuncionalidad)
-router.delete('/funcionalidades/:id', checkPermission('Borrar_Roles'), deleteFuncionalidad)
+
 
 export default router

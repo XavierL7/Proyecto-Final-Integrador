@@ -10,7 +10,7 @@ export const abrirCaja = async (req, res) => {
     const userId = req.userId
     const { monto_inicial, compartida } = req.body
 
-    if (monto_inicial === undefined || monto_inicial === null || isNaN(monto_inicial)) {
+    if (monto_inicial === undefined || monto_inicial === null || isNaN(monto_inicial)) { //NaN = Not a Number
       return res.status(400).json({ error: 'El monto inicial es obligatorio y debe ser un número.' })
     }
 
@@ -45,7 +45,7 @@ export const abrirCaja = async (req, res) => {
     }
 
     const { caja } = await prisma.$transaction(async (tx) => {
-      const caja = await tx.caja.create({
+      const caja = await tx.caja.create({ //Esta línea abre una transacción de base de datos usando Prisma: agrupa varias operaciones para que se ejecuten como una sola unidad, todo o nada.
         data: {
           id_trabajador_apertura: userId,
           monto_inicial: Number(monto_inicial),

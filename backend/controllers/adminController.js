@@ -23,5 +23,4 @@ export { cancelarHuella } from './admin/trabajadores/cancelarHuella.js'
 // FUNCIONALIDADES
 // ============================================================
 export { getFuncionalidades } from './admin/funcionalidades/getFuncionalidades.js'
-export { createFuncionalidad } from './admin/funcionalidades/createFuncionalidad.js'
-export { deleteFuncionalidad } from './admin/funcionalidades/deleteFuncionalidad.js'
+

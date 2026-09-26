@@ -58,6 +58,7 @@ export const getCajaDetalle = async (req, res) => {
     // Desglose de ingresos por método de pago
     // --------------------------------------------------------
     const ingresosPorMetodo = new Map() // nombre -> monto acumulado
+    // Un Map es una estructura de datos de JavaScript parecida a un objeto ({}), pero pensada específicamente para pares clave-valor
 
     for (const venta of ventas) {
       for (const pago of venta.detalle_pago_venta) {
