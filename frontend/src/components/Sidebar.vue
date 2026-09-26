@@ -163,6 +163,35 @@
         <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Historial</span>
       </router-link>
 
+      <!-- ESTADÍSTICAS -->
+      <router-link
+        to="/estadisticas"
+        class="flex items-center px-3.5 py-3 rounded-lg transition-all duration-200"
+        :class="[isOpen ? 'justify-start gap-3' : 'justify-center']"
+        :style="{
+          color: $route.path === '/estadisticas' ? '#4a8db7' : '#8ab4d6',
+          backgroundColor: $route.path === '/estadisticas' ? 'rgba(74, 141, 183, 0.15)' : 'transparent'
+        }"
+        @mouseenter="(e) => {
+          if ($route.path !== '/estadisticas') {
+            e.currentTarget.style.backgroundColor = 'rgba(74, 141, 183, 0.08)'
+            e.currentTarget.style.color = '#6aaec9'
+          }
+        }"
+        @mouseleave="(e) => {
+          if ($route.path !== '/estadisticas') {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = '#8ab4d6'
+          }
+        }"
+        title="Estadísticas"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Estadísticas</span>
+      </router-link>
+
       <!-- CLIENTES -->
       <router-link
         v-if="authStore.tienePermiso('Ver_Clientes')"
@@ -317,7 +346,7 @@
 
       <!-- CERRAR SESIÓN -->
       <button
-        @click="handleLogout"
+        @click="mostrarConfirmacionLogout = true"
         class="flex items-center px-3.5 py-3 rounded-lg transition-all duration-200 w-full"
         :class="[isOpen ? 'justify-start gap-3' : 'justify-center']"
         style="color: #8ab4d6;"
@@ -337,11 +366,41 @@
         <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Cerrar Sesión</span>
       </button>
     </nav>
+
+    <!-- ======================================================== -->
+    <!-- MODAL: CONFIRMAR CIERRE DE SESIÓN                        -->
+    <!-- ======================================================== -->
+    <Teleport to="body">
+      <div
+        v-if="mostrarConfirmacionLogout"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
+        @click.self="mostrarConfirmacionLogout = false"
+      >
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-gray-800">
+          <h3 class="text-lg font-bold mb-2">Cerrar sesión</h3>
+          <p class="text-sm text-gray-500 mb-6">¿Estás seguro de que querés cerrar sesión?</p>
+          <div class="flex justify-end gap-3">
+            <button
+              @click="mostrarConfirmacionLogout = false"
+              class="px-5 py-2.5 text-gray-600 hover:text-gray-800 rounded-xl hover:bg-gray-100 transition"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="handleLogout"
+              class="px-5 py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition"
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </aside>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useThemeStore } from '../stores/theme'
@@ -350,6 +409,8 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+
+const mostrarConfirmacionLogout = ref(false)
 
 const mostrarAdministracion = computed(() =>
   ['Ver_Roles', 'Ver_Trabajadores', 'Ver_Configuracion'].some(p => authStore.tienePermiso(p))
@@ -386,6 +447,7 @@ const toggleSidebar = () => {
 }
 
 const handleLogout = () => {
+  mostrarConfirmacionLogout.value = false
   authStore.logout()
   router.push('/pagina')
 }

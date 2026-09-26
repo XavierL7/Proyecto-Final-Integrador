@@ -110,27 +110,56 @@
           </div>
  
           <!-- Contraseña -->
-          <div class="relative flex items-center">
-            <span class="absolute left-3.5 text-gray-600">
+          <!-- Contraseña -->
+          <div class="relative flex items-center w-full">
+            <!-- Icono candado (Izquierda) -->
+            <span class="absolute text-gray-600 pointer-events-none" style="left: 14px;">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
               </svg>
             </span>
+
+            <!-- Input con padding a ambos lados -->
             <input
-              type="password"
+              :type="mostrarPassword ? 'text' : 'password'"
               v-model="credentials.password"
               placeholder="Contraseña"
               required
-              class="w-full bg-gray-300 text-gray-800 placeholder-gray-500 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+              class="w-full bg-gray-300 text-gray-800 placeholder-gray-500 rounded-full py-2.5 pl-10 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
             />
+
+            <!-- Botón del Ojo (Derecha forzada) -->
+            <button
+              type="button"
+              @click="mostrarPassword = !mostrarPassword"
+              class="absolute text-gray-600 hover:text-gray-800 focus:outline-none cursor-pointer"
+              style="right: 14px; top: 50%; transform: translateY(-50%); z-index: 20;"
+              :title="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <svg
+                v-if="!mostrarPassword"
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+
+              <svg
+                v-else
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/>
+              </svg>
+            </button>
           </div>
- 
-          <div class="text-right pt-1">
-            <a href="#" class="text-xs font-semibold text-indigo-300 hover:underline">
-              ¿Olvidaste tu contraseña?
-            </a>
-          </div>
- 
           <!-- Botón de Envío -->
           <button
             type="submit"
@@ -186,7 +215,7 @@
       <div class="hidden md:flex md:w-7/12 bg-[] relative items-center justify-center p-8 overflow-hidden">
         <div class="w-full h-full flex items-center justify-center">
           <img
-            src="https://illustrations.popsy.co/teal/work-from-home.svg"
+            src="../assets/imglogin.svg"
             alt="Ilustración equipo"
             class="w-full max-w-md object-contain filter drop-shadow-xl"
           />
@@ -206,6 +235,8 @@ const authStore = useAuthStore(); //autorizacion de ponia
 const router = useRouter(); //para acceder a otras rutas
  
 const modo = ref('password') // 'password' | 'huella'
+const mostrarPassword = ref(false)
+
  
 // ============================================================
 // LOGIN CON CONTRASEÑA
