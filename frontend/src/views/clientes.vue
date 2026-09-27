@@ -162,7 +162,7 @@
           </div>
 
           <div class="flex justify-end gap-3 mt-6">
-            <button type="button" @click="modalVisible = false" class="px-5 py-2.5 text-gray-600 hover:text-gray-800 rounded-xl hover:bg-gray-100 transition">
+            <button type="button" @click="modalVisible = false" class="px-5 py-2.5 text-gray-600 hover:text-gray-800 dark:hover:bg-slate-700 rounded-xl hover:bg-gray-100 transition">
               Cancelar
             </button>
             <button

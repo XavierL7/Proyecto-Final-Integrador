@@ -234,7 +234,6 @@ const handleSubmit = async () => {
   loading.value = true
   statusMessage.value = ''
 
-  // REEMPLAZA ESTOS 3 VALORES CON LOS DE TU CUENTA EN EMAILJS
   const SERVICE_ID = 'service_20968cm'
   const TEMPLATE_ID = 'template_vaugrdx'
   const PUBLIC_KEY = 'ChJDFaEzkRyMbd9zM'

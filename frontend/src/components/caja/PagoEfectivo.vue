@@ -25,7 +25,7 @@
         <button
           @click="$emit('cancelar')"
           :disabled="cargando"
-          class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50"
+          class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg dark:hover:bg-slate-700 hover:bg-red-600 transition disabled:opacity-50"
         >
           Cancelar
         </button>

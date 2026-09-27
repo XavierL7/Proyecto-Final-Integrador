@@ -169,7 +169,7 @@ z<!-- frontend/src/views/AdminView.vue -->
             <button
               v-else-if="trabajador.huella_pendiente"
               @click="cancelarHuella(trabajador)"
-              class="block text-red-500 hover:text-red-700 text-xs mt-1"
+              class="block text-red-500 dark:hover:bg-slate-700 hover:text-red-700 text-xs mt-1"
             >
               Cancelar
             </button>
@@ -280,7 +280,7 @@ z<!-- frontend/src/views/AdminView.vue -->
           v-model="modoCaja"
           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="sesion_inicial">Sesión inicial (huella una vez, al abrir caja)</option>
+          <option value="sesion_inicial">Sesión inicial (abrir caja con un click)</option>
           <option value="por_venta">Por venta (huella en cada venta)</option>
         </select>
         <button
@@ -340,7 +340,7 @@ z<!-- frontend/src/views/AdminView.vue -->
             <button
               type="button"
               @click="modalRol = false"
-              class="px-4 py-2 hover:text-gray-800"
+              class="px-4 py-2 hover:text-gray-800 dark:hover:bg-slate-700"
             >
               Cancelar
             </button>
@@ -447,7 +447,7 @@ z<!-- frontend/src/views/AdminView.vue -->
             <button
               type="button"
               @click="modalTrabajador = false"
-              class="px-4 py-2 hover:text-gray-300"
+              class="px-4 py-2 hover:text-gray-300 dark:hover:bg-slate-700"
             >
               Cancelar
             </button>

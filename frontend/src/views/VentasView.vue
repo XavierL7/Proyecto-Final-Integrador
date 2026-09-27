@@ -106,7 +106,7 @@
           </p>
           <button
             @click="cancelarEsperaHuella"
-            class="text-sm text-purple-600 hover:underline"
+            class="text-sm text-purple-600 dark:hover:bg-slate-700 hover:underline"
           >
             Cancelar
           </button>

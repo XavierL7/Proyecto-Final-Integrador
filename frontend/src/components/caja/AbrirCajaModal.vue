@@ -32,7 +32,7 @@
       </p>
       <div v-else class="mb-4"></div>
 
-      <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg mb-5 cursor-pointer hover:bg-gray-50">
+      <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg mb-5 cursor-pointer hover:bg-gray-50  dark:hover:bg-slate-700">
         <input type="checkbox" v-model="cajaCompartida" class="mt-1 w-4 h-4 text-teal-500" />
         <div>
           <p class="text-sm font-medium text-gray-800">Caja compartida</p>
@@ -51,7 +51,7 @@
         <button
           @click="$emit('cancelar')"
           type="button"
-          class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm text-gray-700"
+          class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 text-sm text-gray-700"
         >
           Volver al inicio
         </button>

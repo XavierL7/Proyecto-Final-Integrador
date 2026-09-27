@@ -295,7 +295,7 @@
         <div class="flex justify-end gap-3">
           <button
             @click="modalAbierto = false"
-            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 text-sm"
+            class="px-4 py-2 border border-gray-300 rounded-lg dark:hover:bg-slate-700 text-gray-600 hover:bg-gray-50 text-sm"
           >
             Cancelar
           </button>

@@ -29,7 +29,8 @@ const routes = [
     path: '/clientes',
     name: 'clientes',
     component: () => import('../views/clientes.vue'), 
-    meta: { requiereAuth: false }
+    meta: { requiereAuth: true, 
+    permiso: 'Ver_Clientes' }
   },
   {
     path: '/stock',
@@ -93,7 +94,8 @@ const routes = [
     path: '/estadisticas',
     name: 'estadisticas',
     component: () => import('../views/estadisticas.vue'),
-    meta: { requiereAuth: false } 
+    meta: { requiereAuth: true,
+    permiso: 'Ver_Estadisticas' } 
   },
 
 
@@ -121,15 +123,6 @@ const routes = [
     }
   },
 
-  {
-    path: '/crear-roles',
-    name: 'CrearRoles',
-    component: () => import('../views/CrearRolesView.vue'),
-    meta: { 
-      requiereAuth: true,
-      permiso: 'Ver_Roles' // antes: 'crear_roles'
-    }
-  },
   {
     path: '/cajas',
     name: 'Cajas',
