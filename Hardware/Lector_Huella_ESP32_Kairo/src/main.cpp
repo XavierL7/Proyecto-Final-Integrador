@@ -15,8 +15,10 @@ bool confirmarHuellaEnBackend(int fingerprintId);
 
 // --- Configuración de Red / Backend ---
 // Reemplazá estos valores con los de tu red y tu servidor Express.
+
 const char* WIFI_SSID     = "L4uty";
 const char* WIFI_PASSWORD = "6Noviembre";
+
 
 
 

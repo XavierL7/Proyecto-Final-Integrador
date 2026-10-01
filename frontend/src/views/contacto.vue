@@ -3,10 +3,10 @@
     <div class="max-w-6xl mx-auto space-y-6">
       <Header />
 
-      <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-20">
+      <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-24">
         
         <!-- COLUMNA IZQUIERDA -->
-        <section class="lg:col-span-5 flex flex-col justify-between space-y-6">
+        <section class="lg:col-span-5 flex flex-col justify-center space-y-6">
           <div class="space-y-3">
             <h1 class="text-3xl md:text-4xl font-extrabold text-black leading-tight">
               Únete a la Red de Administradores 
@@ -48,29 +48,6 @@
                   <p class="text-base text-white">Asistencia en la instalación de hardware y sistema.</p>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-2">
-            <div class="bg-[#131b2e] border border-slate-800 rounded-lg py-3 px-3 flex flex-col items-center justify-center text-center">
-              <svg class="w-6 h-6 text-[#34e5eb] mb-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
-              </svg>
-              <span class="text-sm font-black uppercase text-slate-200 tracking-tight leading-none">SOPORTE 24/7</span>
-            </div>
-
-            <div class="bg-[#131b2e] border border-slate-800 rounded-lg py-3 px-1 flex flex-col items-center justify-center text-center">
-              <svg class="w-6 h-6 text-[#34e5eb] mb-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-              </svg>
-              <span class="text-sm font-black uppercase text-slate-200 tracking-tight leading-tight">SEGURIDAD<br>ENCRIPTADA</span>
-            </div>
-
-            <div class="bg-[#131b2e] border border-slate-800 rounded-lg py-3 px-1 flex flex-col items-center justify-center text-center">
-              <svg class="w-6 h-6 text-[#34e5eb] mb-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-              <span class="text-sm font-black uppercase text-slate-200 tracking-tight leading-tight">IMPLEMENTACIÓN<br>RÁPIDA</span>
             </div>
           </div>
         </section>
@@ -174,39 +151,9 @@
             </form>
           </div>
 
-          <p class="text-base text-white/80 text-center mt-6">
-            Al enviar esta solicitud, aceptas nuestros 
-            <a href="#" class="text-white font-bold hover:underline">Términos de Servicio</a> 
-            y 
-            <a href="#" class="text-white font-bold hover:underline">Política de Privacidad</a>.
-          </p>
-
         </section>
 
       </main>
-
-      <footer class="bg-[#131b2e] border rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          <h3 class="text-base font-bold text-white">¿Necesitas ayuda inmediata?</h3>
-          <p class="text-base text-slate-400 mt-0.5">Nuestro equipo de soporte está disponible para guiarte en tu proceso de registro.</p>
-        </div>
-
-        <div class="flex items-center gap-3 shrink-0 w-full sm:w-auto">
-          <div class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#0a0f1d] border border-slate-800 text-slate-300 px-3.5 py-2 rounded-lg text-xs font-semibold">
-            <svg class="w-6 h-6 text-[#34e5eb]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-            kairo@gmail.com
-          </div>
-
-          <button type="button" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#0a0f1d] border border-[#34e5eb]/40 text-[#34e5eb] hover:bg-[#34e5eb]/10 px-4 py-2 rounded-lg text-xs font-bold transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-            </svg>
-            Chat with us
-          </button>
-        </div>
-      </footer>
 
     </div>
   </div>
@@ -216,6 +163,7 @@
 import { reactive, ref } from 'vue'
 import emailjs from '@emailjs/browser'
 import Header from '../components/Header.vue'
+
 
 const loading = ref(false)
 const statusMessage = ref('')
@@ -234,9 +182,9 @@ const handleSubmit = async () => {
   loading.value = true
   statusMessage.value = ''
 
-  const SERVICE_ID = 'service_20968cm'
-  const TEMPLATE_ID = 'template_vaugrdx'
-  const PUBLIC_KEY = 'ChJDFaEzkRyMbd9zM'
+  const SERVICE_ID = import.meta.env.VITE_SERVICE_ID 
+  const TEMPLATE_ID = import.meta.env.VITE_TEMPLATE_ID
+  const PUBLIC_KEY = import.meta.env.VITE_PUBLIC_KEY
 
   try {
     await emailjs.send(
