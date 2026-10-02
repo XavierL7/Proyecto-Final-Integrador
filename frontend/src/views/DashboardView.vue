@@ -89,42 +89,6 @@
         </div>
       </div>
     </div>
- 
- 
-    <div class="dashboard-grid">
-      <!-- solo admin -->
-      <button 
-        v-if="authStore.tienePermiso('crear_roles')"
-        class="btn-admin"
-        @click="navigateTo('/administracion')"
-      >
-      Panel Admin
-      </button>
- 
-      <!-- boton quelleva a Ventas -->
-      <button 
-        class="btn-ventas"
-        @click="navigateTo('/ventas')"
-      >
-       Ventas
-      </button>
- 
-      <!-- boton que lleva a Cajas -->
-      <button 
-        class="btn-cajas"
-        @click="navigateTo('/cajas')"
-      >
-       Cajas
-      </button>
- 
-      <!-- boton que lleva al perfil del usuario (datos, rol, permisos y cambio de contraseña) -->
-      <button 
-        class="btn-perfil"
-        @click="navigateTo('/perfil')"
-      >
-       Perfil
-      </button>
-    </div>
   </div>
 </template>
  

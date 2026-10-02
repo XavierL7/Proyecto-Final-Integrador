@@ -88,6 +88,8 @@ const emit = defineEmits(['cerrada', 'cancelar'])
 
 const authStore = useAuthStore()
 
+const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+
 const headers = () => ({ headers: { 'Authorization': `Bearer ${authStore.token}` } })
 
 const montoFinalReal = ref('')
