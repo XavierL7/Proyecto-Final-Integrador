@@ -5,6 +5,7 @@ import { getTopProductosGanancia } from '../controllers/estadisticas/getTopProdu
 import { getTopVendedores } from '../controllers/estadisticas/getTopVendedores.js'
 import { getTopEtiquetas } from '../controllers/estadisticas/getTopEtiquetas.js'
 import { getResumenDia } from '../controllers/estadisticas/getResumenDia.js'
+
 // Si tus otras rutas pasan por un middleware de auth, importalo y agregalo
 // a cada router.get() como hacen tus rutas de producto/etiqueta.
 // import { verificarToken } from '../middlewares/auth.js'

@@ -258,7 +258,7 @@ const actualizarCantidad = (index, cantidad) => {
 
 const eliminarDelCarrito = (index) => {
   carrito.value.splice(index, 1)
-}
+} 
 
 const seleccionarMetodoPago = (metodo) => {
   metodoSeleccionado.value = metodo
