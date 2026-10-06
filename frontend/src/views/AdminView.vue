@@ -232,8 +232,8 @@ z<!-- frontend/src/views/AdminView.vue -->
               :key="opcion.valor"
               class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
               :class="metodoLogin === opcion.valor 
-                ? 'border-blue-500 bg-blue-900/40' 
-                : 'border-slate-700/80 bg-slate-900/30 hover:border-slate-600'"
+                ? 'border-blue-500 bg-blue-500/15' 
+                : 'border-slate-400/40 bg-slate-500/10 hover:border-slate-500/20'"
             >
               <input
                 type="radio"
@@ -246,7 +246,7 @@ z<!-- frontend/src/views/AdminView.vue -->
                 <!-- Título siempre visible en blanco/claro -->
                 <span 
                   class="block text-sm font-semibold transition-colors"
-                  :class="metodoLogin === opcion.valor ? 'text-blue-400' : 'text-slate-100'"
+                  :class="metodoLogin === opcion.valor ? 'text-blue-700' : 'text-slate-500'"
                 >
                   {{ opcion.titulo }}
                 </span>
@@ -254,7 +254,7 @@ z<!-- frontend/src/views/AdminView.vue -->
                 <!-- Descripción legible sobre fondo oscuro -->
                 <span 
                   class="block text-xs transition-colors"
-                  :class="metodoLogin === opcion.valor ? 'text-blue-200' : 'text-slate-400'"
+                  :class="metodoLogin === opcion.valor ? 'text-blue-300' : 'text-slate-400'"
                 >
                   {{ opcion.descripcion }}
                 </span>
