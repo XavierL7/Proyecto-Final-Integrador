@@ -230,7 +230,7 @@ const obtenerHistorial = async () => {
 
 const cargarTrabajadores = async () => {
   try {
-    const response = await axios.get(`${baseUrl}/api/admin/trabajadores`, getHeaders())
+    const response = await axios.get(`${baseUrl}/api/admin/trabajadores/basico`, getHeaders())
     listaTrabajadores.value = response.data
   } catch (error) {
     console.error('Error cargando lista de trabajadores:', error)

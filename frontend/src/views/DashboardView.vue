@@ -10,7 +10,7 @@
     </div>
  
     <!-- Resumen de hoy -->
-    <div class="resumen-hoy">
+    <div v-if="puedeVerResumen" class="resumen-hoy">
       <h2 class="resumen-titulo">Cómo va hoy</h2>
  
       <div class="kpi-grid">
@@ -144,7 +144,12 @@ const segmentosDonut = computed(() => {
   })
 })
  
+// El resumen es de Estadísticas: sin ese permiso ni lo pedimos (daría 403)
+// ni mostramos el bloque, para no enseñar ceros que parecen datos reales.
+const puedeVerResumen = computed(() => authStore.tienePermiso('Ver_Estadisticas'))
+
 const cargarResumenHoy = async () => {
+  if (!puedeVerResumen.value) return
   try {
     const { data } = await axios.get(`${baseUrl}/api/estadisticas/resumen-dia`, {
       headers: { Authorization: `Bearer ${authStore.token}` }

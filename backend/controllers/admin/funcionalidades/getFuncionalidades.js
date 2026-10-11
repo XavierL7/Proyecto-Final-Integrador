@@ -3,7 +3,9 @@ import prisma from '../../../db.js'
 
 export const getFuncionalidades = async (req, res) => {
   try {
-    const funcionalidades = await prisma.funcionalidad.findMany()
+    const funcionalidades = await prisma.funcionalidad.findMany({
+      orderBy: { nombre_func: 'asc' }
+    })
     res.json(funcionalidades)
   } catch (error) {
     console.error('Error obteniendo funcionalidades:', error)

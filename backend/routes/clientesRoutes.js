@@ -13,7 +13,8 @@ const router = express.Router()
 
 router.use(verificarToken)
 
-router.get('/', checkPermission('Ver_Clientes'), obtenerClientes)
+// Ventas lo usa para el selector de cliente
+router.get('/', checkPermission(['Ver_Clientes', 'Ver_Ventas']), obtenerClientes)
 router.post('/', checkPermission('Agregar_Clientes'), crearCliente)
 router.put('/:id', checkPermission('Editar_Clientes'), actualizarCliente)
 

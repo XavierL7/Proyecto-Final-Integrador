@@ -32,7 +32,8 @@ const checkPermisoApertura = (req, res, next) => {
 router.get('/', checkPermission('Ver_Cajas'), getCajas)
 
 // GET /api/cajas/activa - La caja abierta ahora mismo (o null)
-router.get('/activa', checkPermission('Ver_Cajas'), getCajaActiva)
+// Ventas necesita saber si hay caja abierta, aunque el cajero no pueda ver el historial de cajas
+router.get('/activa', checkPermission(['Ver_Cajas', 'Ver_Ventas']), getCajaActiva)
 
 // GET /api/cajas/:id/detalle - Detalle completo de una caja (resumen + ventas)
 router.get('/:id/detalle', checkPermission('Ver_Cajas'), getCajaDetalle)

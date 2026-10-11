@@ -151,7 +151,7 @@ const routes = [
       // Configuración: entra si tiene el permiso de VER cualquiera de
       // ellas. Cada pestaña adentro debe ocultarse sola según cuál de
       // estos permisos tenga realmente (eso se hace en AdminView.vue).
-      permiso: ['Ver_Roles', 'Ver_Trabajadores', 'Ver_configuracion']
+      permiso: ['Ver_Roles', 'Ver_Trabajadores', 'Ver_Configuracion']
     }
   },
 
@@ -160,7 +160,7 @@ const routes = [
     name: 'Etiquetas',
     component: () => import('../views/EtiquetasView.vue'),
     meta: { 
-      requiereAuth: true,
+      requiereAuth: true, 
       permiso: 'Ver_Etiquetas' // antes: 'gestionar_etiquetas'
     }
   },

@@ -6,6 +6,7 @@ z<!-- frontend/src/views/AdminView.vue -->
     <!-- Tabs -->
     <div class="flex gap-2 border-b border-gray-200 mb-6">
       <button
+        v-if="puedeVerRoles"
         @click="tabActivo = 'roles'"
         class="px-4 py-2 font-medium transition-colors"
         :class="tabActivo === 'roles' 
@@ -15,6 +16,7 @@ z<!-- frontend/src/views/AdminView.vue -->
         Roles
       </button>
       <button
+        v-if="puedeVerTrabajadores"
         @click="tabActivo = 'trabajadores'"
         class="px-4 py-2 font-medium transition-colors"
         :class="tabActivo === 'trabajadores' 
@@ -24,6 +26,7 @@ z<!-- frontend/src/views/AdminView.vue -->
         Trabajadores
       </button>
       <button
+        v-if="puedeVerConfiguracion"
         @click="tabActivo = 'configuracion'"
         class="px-4 py-2 font-medium transition-colors"
         :class="tabActivo === 'configuracion' 
@@ -470,7 +473,19 @@ import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
-const tabActivo = ref('roles')
+
+// Cada pestaña depende de su propio permiso "Ver_". El router deja entrar
+// con cualquiera de los tres, así que acá mostramos solo las pestañas que
+// corresponden y arrancamos en la primera disponible.
+const puedeVerRoles = authStore.tienePermiso('Ver_Roles')
+const puedeVerTrabajadores = authStore.tienePermiso('Ver_Trabajadores')
+const puedeVerConfiguracion = authStore.tienePermiso('Ver_Configuracion')
+
+const tabActivo = ref(
+  puedeVerRoles ? 'roles'
+    : puedeVerTrabajadores ? 'trabajadores'
+    : 'configuracion'
+)
 
 // ============================================================
 // CONFIGURACIÓN
@@ -555,11 +570,13 @@ const cargarFuncionalidades = async () => {
   }
 }
 
+// Solo pedimos lo que el usuario puede ver (si no, serían 403 en consola).
+// Trabajadores también necesita la lista de roles para asignarlos.
 const cargarTodo = () => {
-  cargarRoles()
-  cargarTrabajadores()
-  cargarFuncionalidades()
-  cargarConfiguracion()
+  if (puedeVerRoles || puedeVerTrabajadores) cargarRoles()
+  if (puedeVerTrabajadores) cargarTrabajadores()
+  if (puedeVerRoles) cargarFuncionalidades()
+  if (puedeVerConfiguracion) cargarConfiguracion()
 }
 
 onMounted(cargarTodo)

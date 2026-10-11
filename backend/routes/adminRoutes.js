@@ -6,6 +6,7 @@ import {
   updateRol,
   deleteRol,
   getTrabajadores,
+  getTrabajadoresBasico,
   createTrabajador,
   updateTrabajador,
   deleteTrabajador,
@@ -24,13 +25,17 @@ const router = express.Router()
 router.use(verificarToken)
 
 // Roles
-router.get('/roles', checkPermission('Ver_Roles'), getRoles)
+router.get('/roles', checkPermission(['Ver_Roles', 'Ver_Trabajadores']), getRoles)
 router.post('/roles', checkPermission('Agregar_Roles'), createRol)
 router.put('/roles/:id', checkPermission('Editar_Roles'), updateRol)
 router.delete('/roles/:id', checkPermission('Borrar_Roles'), deleteRol)
 
 // Trabajadores
 router.get('/trabajadores', checkPermission('Ver_Trabajadores'), getTrabajadores)
+
+// Lista mínima (id, nombre, apellido) para filtros/desplegables de otras
+// pantallas, ej. Asistencias. No expone DNI, huella ni rol.
+router.get('/trabajadores/basico', checkPermission(['Ver_Trabajadores', 'Ver_Historial_Trabajadores']), getTrabajadoresBasico)
 router.post('/trabajadores', checkPermission('Agregar_Trabajadores'), createTrabajador) // acepta { ..., registrarHuella: true }
 router.put('/trabajadores/:id', checkPermission('Editar_Trabajadores'), updateTrabajador)
 router.delete('/trabajadores/:id', checkPermission('Borrar_Trabajadores'), deleteTrabajador)

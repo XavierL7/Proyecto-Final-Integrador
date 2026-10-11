@@ -106,7 +106,7 @@
       <!-- STOCK -->
       <router-link
         v-if="mostrarStock"
-        to="/stock"
+        :to="destinoStock"
         class="flex items-center px-3.5 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start gap-3' : 'justify-center']"
         :style="{
@@ -136,7 +136,7 @@
       <!-- HISTORIAL -->
       <router-link
         v-if="mostrarHistorial"
-        to="/cajas"
+        :to="destinoHistorial"
         class="flex items-center px-3.5 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start gap-3' : 'justify-center']"
         :style="{
@@ -389,20 +389,38 @@ const mostrarAdministracion = computed(() =>
   ['Ver_Roles', 'Ver_Trabajadores', 'Ver_Configuracion'].some(p => authStore.tienePermiso(p))
 )
 
-const mostrarStock = computed(() =>
-  ['Ver_Stock', 'Ver_Etiquetas', 'Ver_Descuentos'].some(p => authStore.tienePermiso(p))
-)
+// Cada sección del Sidebar (Stock, Historial) agrupa varias páginas con
+// permisos distintos. Definimos las páginas en orden de prioridad: el
+// enlace del Sidebar apunta a la PRIMERA a la que el usuario tiene
+// acceso, así nunca lo mandamos a una ruta que el guard del router le
+// rebotaría al Dashboard.
+const paginasStock = [
+  { ruta: '/stock', permiso: 'Ver_Stock' },
+  { ruta: '/etiquetas', permiso: 'Ver_Etiquetas' },
+  { ruta: '/descuentos', permiso: 'Ver_Descuentos' }
+]
 
+const paginasHistorial = [
+  { ruta: '/cajas', permiso: 'Ver_Cajas' },
+  { ruta: '/movimientos-caja', permiso: 'Ver_Movimientos_Caja' },
+  { ruta: '/historial', permiso: 'Ver_Historial_Ventas' },
+  { ruta: '/asistencias', permiso: 'Ver_Historial_Trabajadores' }
+]
+
+const primeraRutaPermitida = (paginas) =>
+  paginas.find(p => authStore.tienePermiso(p.permiso))?.ruta || null
+
+const destinoStock = computed(() => primeraRutaPermitida(paginasStock))
+const destinoHistorial = computed(() => primeraRutaPermitida(paginasHistorial))
+
+const mostrarStock = computed(() => !!destinoStock.value)
 const seccionStockActiva = computed(() =>
-  ['/stock', '/etiquetas', '/descuentos'].includes(route.path)
+  paginasStock.some(p => p.ruta === route.path)
 )
 
-const mostrarHistorial = computed(() =>
-  ['Ver_Cajas', 'Ver_Historial_Ventas', 'Ver_Historial_Trabajadores'].some(p => authStore.tienePermiso(p))
-)
-
+const mostrarHistorial = computed(() => !!destinoHistorial.value)
 const seccionHistorialActiva = computed(() =>
-  ['/cajas', '/historial', '/asistencias'].includes(route.path)
+  paginasHistorial.some(p => p.ruta === route.path)
 )
 const mostrarEstadisticas = computed(() =>
   ['Ver_Estadisticas'].some(p => authStore.tienePermiso(p))
