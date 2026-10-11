@@ -17,7 +17,7 @@ Agregar trasparencia a la hora de elegir metodo de pago
 
 modificar style de varias alertas js
 
-Controlar los permisos de roles y las secciones que te dejan ver
+---Controlar los permisos de roles y las secciones que te dejan ver---
 
 Se debe paginar toda las seciones de historial, stock, estadisticas y clientes 
 
