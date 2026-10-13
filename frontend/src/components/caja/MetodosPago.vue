@@ -12,7 +12,7 @@
         :class="[
           seleccionado === metodo.nombre
             ? 'border-blue-500 bg-blue-50 text-blue-600'
-            : 'border-gray-200 hover:border-blue-300'
+            : 'border-gray-200 hover:border-blue-300 dark:hover:bg-slate-700'
         ]"
       >
         {{ metodo.nombre }}

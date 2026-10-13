@@ -21,7 +21,7 @@
           v-model="busqueda"
           type="text"
           placeholder="Nombre o código de barras..."
-          class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full px-3 py-1.5 text-sm bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
@@ -32,6 +32,7 @@
           v-model="etiquetasFiltro"
           :etiquetas="etiquetas"
           placeholder="Buscar etiquetas para filtrar..."
+          
         />
       </div>
     </div>
@@ -289,7 +290,7 @@
           </p>
 
           <div class="flex justify-end gap-3 mt-6">
-            <button type="button" @click="modalSumarStockVisible = false" class="px-5 py-2.5 text-gray-600 hover:text-gray-800 rounded-xl hover:bg-gray-100 transition">
+            <button type="button" @click="modalSumarStockVisible = false" class="px-5 py-2.5 text-gray-600 hover:text-gray-800 dark:hover:bg-slate-700 rounded-xl hover:bg-gray-100 transition">
               Cancelar
             </button>
             <button type="submit" class="px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition">
@@ -402,7 +403,7 @@
           </div>
 
           <div class="flex justify-end gap-3 mt-6">
-            <button type="button" @click="modalVisible = false" class="px-5 py-2.5 text-gray-600 hover:text-gray-800 rounded-xl hover:bg-gray-100 transition">
+            <button type="button" @click="modalVisible = false" class="px-5 py-2.5 text-gray-600 hover:text-gray-800 rounded-xl dark:hover:bg-slate-700 hover:bg-gray-100 transition">
               Cancelar
             </button>
             <button type="submit" class="px-5 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition">

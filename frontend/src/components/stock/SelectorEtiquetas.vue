@@ -14,36 +14,31 @@
   <div class="relative" ref="contenedor">
     <!-- Caja única: chips + input adentro del mismo contorno, para que se
          vea como un solo campo y no una caja chica perdida bajo el título -->
-    <div
-      class="w-full flex flex-wrap items-center gap-1.5 px-2 py-1.5 border border-gray-300 rounded-lg bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500"
-      @click="focoInput"
-    >
-      <span
-        v-for="etiqueta in seleccionadas"
-        :key="etiqueta.id_etiqueta"
-        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 whitespace-nowrap"
-      >
-        {{ etiqueta.nombre_etiqueta }}
-        <button
-          type="button"
-          @click.stop="quitar(etiqueta.id_etiqueta)"
-          class="text-blue-500 hover:text-blue-800 font-bold leading-none"
-          title="Quitar etiqueta"
-        >
-          ×
-        </button>
-      </span>
+      <div
+        class="flex flex-col sm:flex-row gap-3 mb-4 w-full px-3 py-1.5 text-sm bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg focus-within:ring-2 focus-within:ring-blue-500"
+        @click="focoInput"
+      >     
+                    <span v-for="etiqueta in seleccionadas" :key="etiqueta.id_etiqueta" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 whitespace-nowrap">
+                    {{ etiqueta.nombre_etiqueta }}
+                    <button
+                      type="button"
+                      @click.stop="quitar(etiqueta.id_etiqueta)"
+                      class="text-blue-500 hover:text-blue-800 font-bold leading-none"
+                      title="Quitar etiqueta"
+                    >
+                      ×
+                    </button>
+                  </span>
 
-      <!-- Campo de búsqueda, sin su propio borde: el contorno lo pone la caja de afuera -->
-      <input
-        ref="input"
-        type="text"
-        v-model="busqueda"
-        @focus="desplegado = true"
-        :placeholder="seleccionadas.length === 0 ? placeholder : ''"
-        class="flex-1 min-w-[120px] border-none outline-none text-sm py-0.5"
-      />
-    </div>
+                  <input
+                    ref="input"
+                    type="text"
+                    v-model="busqueda"
+                    @focus="desplegado = true"
+                    :placeholder="seleccionadas.length === 0 ? placeholder : ''"
+                    class="flex-1 min-w-[120px] bg-transparent border-none outline-none"
+                  />
+                </div>
 
     <!-- Dropdown de resultados (se limita a unos pocos para no sobrecargar) -->
     <div

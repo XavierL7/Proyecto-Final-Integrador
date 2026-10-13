@@ -6,6 +6,7 @@ z<!-- frontend/src/views/AdminView.vue -->
     <!-- Tabs -->
     <div class="flex gap-2 border-b border-gray-200 mb-6">
       <button
+        v-if="puedeVerRoles"
         @click="tabActivo = 'roles'"
         class="px-4 py-2 font-medium transition-colors"
         :class="tabActivo === 'roles' 
@@ -15,6 +16,7 @@ z<!-- frontend/src/views/AdminView.vue -->
         Roles
       </button>
       <button
+        v-if="puedeVerTrabajadores"
         @click="tabActivo = 'trabajadores'"
         class="px-4 py-2 font-medium transition-colors"
         :class="tabActivo === 'trabajadores' 
@@ -24,6 +26,7 @@ z<!-- frontend/src/views/AdminView.vue -->
         Trabajadores
       </button>
       <button
+        v-if="puedeVerConfiguracion"
         @click="tabActivo = 'configuracion'"
         class="px-4 py-2 font-medium transition-colors"
         :class="tabActivo === 'configuracion' 
@@ -169,7 +172,7 @@ z<!-- frontend/src/views/AdminView.vue -->
             <button
               v-else-if="trabajador.huella_pendiente"
               @click="cancelarHuella(trabajador)"
-              class="block text-red-500 hover:text-red-700 text-xs mt-1"
+              class="block text-red-500 dark:hover:bg-slate-700 hover:text-red-700 text-xs mt-1"
             >
               Cancelar
             </button>
@@ -232,8 +235,8 @@ z<!-- frontend/src/views/AdminView.vue -->
               :key="opcion.valor"
               class="flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors"
               :class="metodoLogin === opcion.valor 
-                ? 'border-blue-500 bg-blue-900/40' 
-                : 'border-slate-700/80 bg-slate-900/30 hover:border-slate-600'"
+                ? 'border-blue-500 bg-blue-500/15' 
+                : 'border-slate-400/40 bg-slate-500/10 hover:border-slate-500/20'"
             >
               <input
                 type="radio"
@@ -246,7 +249,7 @@ z<!-- frontend/src/views/AdminView.vue -->
                 <!-- Título siempre visible en blanco/claro -->
                 <span 
                   class="block text-sm font-semibold transition-colors"
-                  :class="metodoLogin === opcion.valor ? 'text-blue-400' : 'text-slate-100'"
+                  :class="metodoLogin === opcion.valor ? 'text-blue-700' : 'text-slate-500'"
                 >
                   {{ opcion.titulo }}
                 </span>
@@ -254,7 +257,7 @@ z<!-- frontend/src/views/AdminView.vue -->
                 <!-- Descripción legible sobre fondo oscuro -->
                 <span 
                   class="block text-xs transition-colors"
-                  :class="metodoLogin === opcion.valor ? 'text-blue-200' : 'text-slate-400'"
+                  :class="metodoLogin === opcion.valor ? 'text-blue-300' : 'text-slate-400'"
                 >
                   {{ opcion.descripcion }}
                 </span>
@@ -280,7 +283,7 @@ z<!-- frontend/src/views/AdminView.vue -->
           v-model="modoCaja"
           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="sesion_inicial">Sesión inicial (huella una vez, al abrir caja)</option>
+          <option value="sesion_inicial">Sesión inicial (abrir caja con un click)</option>
           <option value="por_venta">Por venta (huella en cada venta)</option>
         </select>
         <button
@@ -340,7 +343,7 @@ z<!-- frontend/src/views/AdminView.vue -->
             <button
               type="button"
               @click="modalRol = false"
-              class="px-4 py-2 hover:text-gray-800"
+              class="px-4 py-2 hover:text-gray-800 dark:hover:bg-slate-700"
             >
               Cancelar
             </button>
@@ -447,7 +450,7 @@ z<!-- frontend/src/views/AdminView.vue -->
             <button
               type="button"
               @click="modalTrabajador = false"
-              class="px-4 py-2 hover:text-gray-300"
+              class="px-4 py-2 hover:text-gray-300 dark:hover:bg-slate-700"
             >
               Cancelar
             </button>
@@ -470,7 +473,19 @@ import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
-const tabActivo = ref('roles')
+
+// Cada pestaña depende de su propio permiso "Ver_". El router deja entrar
+// con cualquiera de los tres, así que acá mostramos solo las pestañas que
+// corresponden y arrancamos en la primera disponible.
+const puedeVerRoles = authStore.tienePermiso('Ver_Roles')
+const puedeVerTrabajadores = authStore.tienePermiso('Ver_Trabajadores')
+const puedeVerConfiguracion = authStore.tienePermiso('Ver_Configuracion')
+
+const tabActivo = ref(
+  puedeVerRoles ? 'roles'
+    : puedeVerTrabajadores ? 'trabajadores'
+    : 'configuracion'
+)
 
 // ============================================================
 // CONFIGURACIÓN
@@ -555,11 +570,13 @@ const cargarFuncionalidades = async () => {
   }
 }
 
+// Solo pedimos lo que el usuario puede ver (si no, serían 403 en consola).
+// Trabajadores también necesita la lista de roles para asignarlos.
 const cargarTodo = () => {
-  cargarRoles()
-  cargarTrabajadores()
-  cargarFuncionalidades()
-  cargarConfiguracion()
+  if (puedeVerRoles || puedeVerTrabajadores) cargarRoles()
+  if (puedeVerTrabajadores) cargarTrabajadores()
+  if (puedeVerRoles) cargarFuncionalidades()
+  if (puedeVerConfiguracion) cargarConfiguracion()
 }
 
 onMounted(cargarTodo)

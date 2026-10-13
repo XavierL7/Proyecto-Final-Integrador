@@ -56,7 +56,7 @@
         <button
           @click="$emit('cancelar')"
           type="button"
-          class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm text-gray-700"
+          class="px-4 py-2 border border-gray-300 rounded-lg dark:hover:bg-slate-700 hover:bg-gray-50 text-sm text-gray-700"
         >
           Cancelar
         </button>
@@ -87,7 +87,9 @@ const props = defineProps({
 const emit = defineEmits(['cerrada', 'cancelar'])
 
 const authStore = useAuthStore()
+
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+
 const headers = () => ({ headers: { 'Authorization': `Bearer ${authStore.token}` } })
 
 const montoFinalReal = ref('')

@@ -25,7 +25,7 @@ const limiterGeneral = rateLimit({
 // contraseñas sin castigar la navegación normal del resto de la app.
 const limiterLogin = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,                  // hasta 10 intentos de login por IP cada 15 min
+  max: 50,                  // hasta 50 intentos de login por IP cada 15 min
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Demasiados intentos de inicio de sesión. Esperá unos minutos antes de volver a intentar.' }

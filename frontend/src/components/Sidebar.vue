@@ -106,7 +106,7 @@
       <!-- STOCK -->
       <router-link
         v-if="mostrarStock"
-        to="/stock"
+        :to="destinoStock"
         class="flex items-center px-3.5 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start gap-3' : 'justify-center']"
         :style="{
@@ -136,7 +136,7 @@
       <!-- HISTORIAL -->
       <router-link
         v-if="mostrarHistorial"
-        to="/cajas"
+        :to="destinoHistorial"
         class="flex items-center px-3.5 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start gap-3' : 'justify-center']"
         :style="{
@@ -162,6 +162,7 @@
         </svg>
         <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Historial</span>
       </router-link>
+
 
       <!-- CLIENTES -->
       <router-link
@@ -195,6 +196,7 @@
 
       <!-- ESTADÍSTICAS -->
       <router-link
+      v-if="mostrarEstadisticas"
         to="/estadisticas"
         class="flex items-center px-3.5 py-3 rounded-lg transition-all duration-200"
         :class="[isOpen ? 'justify-start gap-3' : 'justify-center']"
@@ -215,7 +217,7 @@
           }
         }"
         title="Estadísticas"
-      >
+      > 
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
@@ -317,7 +319,7 @@
 
       <!-- CERRAR SESIÓN -->
       <button
-        @click="handleLogout"
+        @click="mostrarConfirmacionLogout = true"
         class="flex items-center px-3.5 py-3 rounded-lg transition-all duration-200 w-full"
         :class="[isOpen ? 'justify-start gap-3' : 'justify-center']"
         style="color: #8ab4d6;"
@@ -337,11 +339,41 @@
         <span v-if="isOpen" class="text-sm font-medium whitespace-nowrap">Cerrar Sesión</span>
       </button>
     </nav>
+
+    <!-- ======================================================== -->
+    <!-- MODAL: CONFIRMAR CIERRE DE SESIÓN                        -->
+    <!-- ======================================================== -->
+    <Teleport to="body">
+      <div
+        v-if="mostrarConfirmacionLogout"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
+        @click.self="mostrarConfirmacionLogout = false"
+      >
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-gray-800">
+          <h3 class="text-lg font-bold mb-2">Cerrar sesión</h3>
+          <p class="text-sm text-gray-500 mb-6">¿Estás seguro de que querés cerrar sesión?</p>
+          <div class="flex justify-end gap-3">
+            <button
+              @click="mostrarConfirmacionLogout = false"
+              class="px-5 py-2.5 text-gray-600 hover:text-gray-800 dark:hover:bg-slate-700  rounded-xl hover:bg-gray-100 transition"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="handleLogout"
+              class="px-5 py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition"
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </aside>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useThemeStore } from '../stores/theme'
@@ -351,24 +383,47 @@ const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 
+const mostrarConfirmacionLogout = ref(false)
+
 const mostrarAdministracion = computed(() =>
   ['Ver_Roles', 'Ver_Trabajadores', 'Ver_Configuracion'].some(p => authStore.tienePermiso(p))
 )
 
-const mostrarStock = computed(() =>
-  ['Ver_Stock', 'Ver_Etiquetas', 'Ver_Descuentos'].some(p => authStore.tienePermiso(p))
-)
+// Cada sección del Sidebar (Stock, Historial) agrupa varias páginas con
+// permisos distintos. Definimos las páginas en orden de prioridad: el
+// enlace del Sidebar apunta a la PRIMERA a la que el usuario tiene
+// acceso, así nunca lo mandamos a una ruta que el guard del router le
+// rebotaría al Dashboard.
+const paginasStock = [
+  { ruta: '/stock', permiso: 'Ver_Stock' },
+  { ruta: '/etiquetas', permiso: 'Ver_Etiquetas' },
+  { ruta: '/descuentos', permiso: 'Ver_Descuentos' }
+]
 
+const paginasHistorial = [
+  { ruta: '/cajas', permiso: 'Ver_Cajas' },
+  { ruta: '/movimientos-caja', permiso: 'Ver_Movimientos_Caja' },
+  { ruta: '/historial', permiso: 'Ver_Historial_Ventas' },
+  { ruta: '/asistencias', permiso: 'Ver_Historial_Trabajadores' }
+]
+
+const primeraRutaPermitida = (paginas) =>
+  paginas.find(p => authStore.tienePermiso(p.permiso))?.ruta || null
+
+const destinoStock = computed(() => primeraRutaPermitida(paginasStock))
+const destinoHistorial = computed(() => primeraRutaPermitida(paginasHistorial))
+
+const mostrarStock = computed(() => !!destinoStock.value)
 const seccionStockActiva = computed(() =>
-  ['/stock', '/etiquetas', '/descuentos'].includes(route.path)
+  paginasStock.some(p => p.ruta === route.path)
 )
 
-const mostrarHistorial = computed(() =>
-  ['Ver_Cajas', 'Ver_Historial_Ventas', 'Ver_Historial_Trabajadores'].some(p => authStore.tienePermiso(p))
-)
-
+const mostrarHistorial = computed(() => !!destinoHistorial.value)
 const seccionHistorialActiva = computed(() =>
-  ['/cajas', '/historial', '/asistencias'].includes(route.path)
+  paginasHistorial.some(p => p.ruta === route.path)
+)
+const mostrarEstadisticas = computed(() =>
+  ['Ver_Estadisticas'].some(p => authStore.tienePermiso(p))
 )
 
 const props = defineProps({
@@ -386,6 +441,7 @@ const toggleSidebar = () => {
 }
 
 const handleLogout = () => {
+  mostrarConfirmacionLogout.value = false
   authStore.logout()
   router.push('/pagina')
 }

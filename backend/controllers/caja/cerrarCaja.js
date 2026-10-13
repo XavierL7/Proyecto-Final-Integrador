@@ -23,8 +23,8 @@ export const cerrarCaja = async (req, res) => {
     // Monto esperado en el cajón = monto inicial + lo que entró en
     // efectivo durante esta caja (tarjeta/transferencia no mueven billetes
     // físicos, así que no suman al conteo del cajón).
-    const pagosEfectivo = await prisma.detalle_Pago_Venta.aggregate({
-      _sum: { monto: true },
+    const pagosEfectivo = await prisma.detalle_Pago_Venta.aggregate({//aggregate es un método de Prisma para hacer cálculos agregados directamente en la base de datos, en vez de traer todas las filas y calcularlo en JavaScript.
+      _sum: { monto: true }, //Le pide a Prisma que sume la columna monto de todas las filas que matcheen el where
       where: {
         venta: { id_caja: caja.id_caja },
         metodo_pago: { nombre: 'Efectivo' }

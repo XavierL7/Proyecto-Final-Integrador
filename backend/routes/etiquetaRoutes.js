@@ -14,7 +14,7 @@ const router = express.Router()
 
 router.use(verificarToken)
 
-router.get('/', checkPermission('Ver_Etiquetas'), getEtiquetas)
+router.get('/', checkPermission(['Ver_Etiquetas', 'Ver_Stock', 'Ver_Descuentos']), getEtiquetas)
 router.post('/', checkPermission('Agregar_Etiquetas'), createEtiqueta)
 router.put('/:id', checkPermission('Editar_Etiquetas'), updateEtiqueta)
 

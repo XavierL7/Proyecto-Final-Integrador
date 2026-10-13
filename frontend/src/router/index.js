@@ -29,7 +29,8 @@ const routes = [
     path: '/clientes',
     name: 'clientes',
     component: () => import('../views/clientes.vue'), 
-    meta: { requiereAuth: false }
+    meta: { requiereAuth: true, 
+    permiso: 'Ver_Clientes' }
   },
   {
     path: '/stock',
@@ -93,7 +94,8 @@ const routes = [
     path: '/estadisticas',
     name: 'estadisticas',
     component: () => import('../views/estadisticas.vue'),
-    meta: { requiereAuth: false } 
+    meta: { requiereAuth: true,
+    permiso: 'Ver_Estadisticas' } 
   },
 
 
@@ -122,15 +124,6 @@ const routes = [
   },
 
   {
-    path: '/crear-roles',
-    name: 'CrearRoles',
-    component: () => import('../views/CrearRolesView.vue'),
-    meta: { 
-      requiereAuth: true,
-      permiso: 'Ver_Roles' // antes: 'crear_roles'
-    }
-  },
-  {
     path: '/cajas',
     name: 'Cajas',
     component: () => import('../views/CajasView.vue'),
@@ -158,7 +151,7 @@ const routes = [
       // Configuración: entra si tiene el permiso de VER cualquiera de
       // ellas. Cada pestaña adentro debe ocultarse sola según cuál de
       // estos permisos tenga realmente (eso se hace en AdminView.vue).
-      permiso: ['Ver_Roles', 'Ver_Trabajadores', 'Ver_configuracion']
+      permiso: ['Ver_Roles', 'Ver_Trabajadores', 'Ver_Configuracion']
     }
   },
 
@@ -167,7 +160,7 @@ const routes = [
     name: 'Etiquetas',
     component: () => import('../views/EtiquetasView.vue'),
     meta: { 
-      requiereAuth: true,
+      requiereAuth: true, 
       permiso: 'Ver_Etiquetas' // antes: 'gestionar_etiquetas'
     }
   },

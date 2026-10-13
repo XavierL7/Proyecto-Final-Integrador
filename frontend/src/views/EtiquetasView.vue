@@ -202,7 +202,7 @@
             <button
               type="button"
               @click="modalVisible = false"
-              class="px-5 py-2.5 text-gray-600 hover:text-gray-800 transition rounded-xl hover:bg-gray-100"
+              class="px-5 py-2.5 text-gray-600 hover:text-gray-800 transition dark:hover:bg-slate-700 rounded-xl hover:bg-gray-100"
             >
               Cancelar
             </button>

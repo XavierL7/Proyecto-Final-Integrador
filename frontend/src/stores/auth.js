@@ -163,7 +163,8 @@ export const useAuthStore = defineStore('auth', () => {
     loginConContrasena,
     consultarLoginPorHuella,
     cambiarPassword,
-    logout
+    logout,
+    limpiarSesion
   }
 })
 

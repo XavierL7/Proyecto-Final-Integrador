@@ -14,7 +14,7 @@ export const registrarTrabajador = async (req, res) => {
     }
 
     // Validar formato de DNI (8 dígitos)
-    if (!/^\d{8}$/.test(String(dni))) {
+    if (!/^\d{8}$/.test(String(dni))) { // aca comienza la regla (^), revisa si es un digito (\d), repeti esa revision en los siguientes 8 ({8})digitos, hasta aca sigue la regla ($)
       return res.status(400).json({
         error: 'DNI inválido. Debe tener 8 dígitos numéricos.'
       })

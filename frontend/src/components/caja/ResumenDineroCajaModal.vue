@@ -141,7 +141,7 @@
           </p>
           <button
             @click="cancelarEsperaHuella"
-            class="text-sm text-purple-600 hover:underline"
+            class="text-sm text-purple-600 dark:hover:bg-slate-700 hover:underline"
           >
             Cancelar
           </button>
@@ -170,7 +170,7 @@
             <button
               @click="cancelarFormulario"
               type="button"
-              class="flex-1 py-2 border border-gray-300 rounded-lg text-xs text-gray-700 hover:bg-gray-50"
+              class="flex-1 py-2 border border-gray-300 rounded-lg text-xs text-gray-700 dark:hover:bg-slate-700hover:bg-gray-50"
             >
               Cancelar
             </button>

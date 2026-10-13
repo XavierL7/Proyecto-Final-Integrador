@@ -12,16 +12,9 @@ export const createTrabajador = async (req, res) => {
       return res.status(400).json({ error: 'Todos los campos son obligatorios' })
     }
 
-    const existe = await prisma.trabajador.findFirst({
-      where: { dni: parseInt(dni) }
-    })
-
-    if (existe) {
-      return res.status(400).json({ error: 'Ya existe un trabajador con ese DNI' })
-    }
-
-    const salt = await bcrypt.genSalt(10)
-    const contraseña_hash = await bcrypt.hash(password, salt)
+    const salt = await bcrypt.genSalt(10) //crea una cadena aleatoria única (sal) combinada con un factor de coste. Esto asegura que dos contraseñas iguales tengan hashes diferentes
+    //el diez es elfactor de coste, dice que para que bcrypt lo desencripte necesita 1,024 iteraciones internas. Esto hace que aunque me roben los hashes tarde muchisimo tiempo en descifrarlo a fuerza bruta.
+    const contraseña_hash = await bcrypt.hash(password, salt) //la contraseña la encripta y le pone el costo
 
     let hash_huella = null
     let huella_pendiente = false

@@ -2,7 +2,7 @@ import prisma from '../../db.js';
 
 export const registrarSalida = async (req, res) => {
   try {
-    const userId = req.userId; // Extraído por verificarToken
+    const userId = req.userId; // Extraído por verificarToken en midlleware/auth.js
 
     const asistenciaActiva = await prisma.asistencia.findFirst({
       where: {

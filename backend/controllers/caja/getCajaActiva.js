@@ -5,7 +5,8 @@ import prisma from '../../db.js'
 // Devuelve LA CAJA ABIERTA DE ESTE TRABAJADOR (no "la" caja abierta del
 // sistema: puede haber varias en paralelo, una por cada cajero logueado
 // en su propia PC). Se identifica a través de su Sesion_Vendedor activa
-// (la que todavía no tiene fecha_hora_fin).
+// (la que todavía no tiene fecha_hora_fin). Se usa para saber si hay que 
+// pedirte que abras caja o no
 export const getCajaActiva = async (req, res) => {
   try {
     const userId = req.userId

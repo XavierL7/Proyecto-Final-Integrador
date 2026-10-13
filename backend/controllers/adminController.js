@@ -13,6 +13,7 @@ export { deleteRol } from './admin/roles/deleteRol.js'
 // TRABAJADORES
 // ============================================================
 export { getTrabajadores } from './admin/trabajadores/getTrabajadores.js'
+export { getTrabajadoresBasico } from './admin/trabajadores/getTrabajadoresBasico.js'
 export { createTrabajador } from './admin/trabajadores/createTrabajador.js'
 export { updateTrabajador } from './admin/trabajadores/updateTrabajador.js'
 export { deleteTrabajador } from './admin/trabajadores/deleteTrabajador.js'
@@ -23,5 +24,4 @@ export { cancelarHuella } from './admin/trabajadores/cancelarHuella.js'
 // FUNCIONALIDADES
 // ============================================================
 export { getFuncionalidades } from './admin/funcionalidades/getFuncionalidades.js'
-export { createFuncionalidad } from './admin/funcionalidades/createFuncionalidad.js'
-export { deleteFuncionalidad } from './admin/funcionalidades/deleteFuncionalidad.js'
+

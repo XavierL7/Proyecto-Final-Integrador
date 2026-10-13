@@ -50,7 +50,7 @@
       <div class="flex gap-3">
         <button
           @click="$emit('cancelar')"
-          class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-red-600 transition"
+          class="flex-1 px-4 py-2 bg-gray-500 text-white dark:hover:bg-slate-700 rounded-lg hover:bg-red-600 transition"
         >
           Cancelar
         </button>
