@@ -19,7 +19,7 @@ modificar style de varias alertas js
 
 ---Controlar los permisos de roles y las secciones que te dejan ver---
 
-Se debe paginar toda las seciones de historial, stock, estadisticas y clientes 
+--Se debe paginar toda las seciones de historial, stock, estadisticas y clientes--
 
 En estadisticas se debe quitar el filtro de top 10
 
