@@ -35,7 +35,11 @@
             <tr v-else-if="promociones.length === 0">
               <td colspan="8" class="px-4 py-6 text-center">Todavía no creaste ninguna promoción.</td>
             </tr>
-            <tr v-for="promo in promociones" :key="promo.id_promocion" class="hover:bg-gray-50">
+            <tr
+              v-for="promo in promociones"
+              :key="promo.id_promocion"
+              :class="promo.activa ? 'hover:bg-gray-50' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
+            >
 
               <td class="px-4 py-3 font-medium">{{ promo.nombre_promo }}</td>
               <td class="px-4 py-3">{{ etiquetaTipo(promo.tipo_promo) }}</td>
@@ -51,7 +55,7 @@
                 <div class="flex flex-col gap-1">
                   <span
                     class="text-xs font-semibold px-2 py-1 rounded w-fit"
-                    :class="promo.activa ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+                    :class="promo.activa ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
                   >
                     {{ promo.activa ? 'Activa' : 'Inactiva' }}
                   </span>
@@ -105,6 +109,29 @@
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- Controles de paginación -->
+    <div class="flex justify-between items-center mt-4">
+      <span class="text-sm text-gray-500">
+        Página {{ paginaActual }} de {{ totalPaginas }} ({{ totalPromociones }} promociones)
+      </span>
+      <div class="flex gap-2">
+        <button
+          @click="irAPaginaAnterior"
+          :disabled="paginaActual === 1"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          ← Anterior
+        </button>
+        <button
+          @click="irAPaginaSiguiente"
+          :disabled="paginaActual === totalPaginas"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          Siguiente →
+        </button>
       </div>
     </div>
 
@@ -331,11 +358,38 @@ const productos = ref([])
 const etiquetas = ref([])
 const metodosPago = ref([])
 
+// ============================================================
+// PAGINACIÓN
+// ============================================================
+const paginaActual = ref(1)
+const totalPaginas = ref(1)
+const totalPromociones = ref(0)
+const porPagina = 10
+
+const irAPaginaAnterior = () => {
+  if (paginaActual.value > 1) {
+    paginaActual.value--
+    cargarPromociones()
+  }
+}
+
+const irAPaginaSiguiente = () => {
+  if (paginaActual.value < totalPaginas.value) {
+    paginaActual.value++
+    cargarPromociones()
+  }
+}
+
 const cargarPromociones = async () => {
   cargando.value = true
   try {
-    const response = await axios.get(`${baseUrl}/api/promociones`, headers())
-    promociones.value = response.data
+    const response = await axios.get(`${baseUrl}/api/promociones`, {
+      ...headers(),
+      params: { page: paginaActual.value, limit: porPagina }
+    })
+    promociones.value = response.data.promociones
+    totalPaginas.value = response.data.totalPages
+    totalPromociones.value = response.data.total
   } catch (error) {
     console.error('Error cargando promociones:', error)
   } finally {
@@ -549,6 +603,9 @@ const eliminarPromocion = async (promo) => {
   if (!confirm(`¿Eliminar la promoción "${promo.nombre_promo}"?`)) return
   try {
     await axios.delete(`${baseUrl}/api/promociones/${promo.id_promocion}`, headers())
+    if (promociones.value.length === 1 && paginaActual.value > 1) {
+      paginaActual.value--
+    }
     cargarPromociones()
   } catch (error) {
     alert(error.response?.data?.error || 'Error al eliminar la promoción')

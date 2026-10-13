@@ -13,6 +13,31 @@
       </button>
     </div>
 
+    <!-- Búsqueda y filtros (los resuelve el backend sobre todos los registros) -->
+    <div class="flex flex-wrap items-center gap-2 mb-3">
+      <input
+        v-model="filtros.q"
+        type="text"
+        placeholder="N° de venta o caja, trabajador, cliente, DNI, método de pago..."
+        class="h-8 px-2.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 flex-1 min-w-[220px]"
+      />
+      <label class="flex items-center gap-1 text-xs text-gray-500">
+        Desde
+        <input v-model="filtros.desde" type="date" class="h-8 px-2.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500" />
+      </label>
+      <label class="flex items-center gap-1 text-xs text-gray-500">
+        Hasta
+        <input v-model="filtros.hasta" type="date" class="h-8 px-2.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500" />
+      </label>
+      <button
+        v-if="hayFiltros"
+        @click="limpiarFiltros"
+        class="h-8 px-2.5 text-xs text-gray-500 hover:text-red-600 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+      >
+        ✕ Limpiar
+      </button>
+    </div>
+
     <div class="rounded-lg shadow overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
@@ -33,7 +58,9 @@
               <td colspan="8" class="px-4 py-6 text-center">Cargando ventas...</td>
             </tr>
             <tr v-else-if="ventas.length === 0">
-              <td colspan="8" class="px-4 py-6 text-center">No hay ventas registradas todavía.</td>
+              <td colspan="8" class="px-4 py-6 text-center">
+                {{ hayFiltros ? 'No se encontraron ventas con esos filtros.' : 'No hay ventas registradas todavía.' }}
+              </td>
             </tr>
             <tr
               v-for="venta in ventas"
@@ -74,6 +101,29 @@
       </div>
     </div>
 
+    <!-- Controles de paginación -->
+    <div class="flex justify-between items-center mt-4">
+      <span class="text-sm text-gray-500">
+        Página {{ paginaActual }} de {{ totalPaginas }} ({{ totalVentas }} ventas)
+      </span>
+      <div class="flex gap-2">
+        <button
+          @click="irAPaginaAnterior"
+          :disabled="paginaActual === 1"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          ← Anterior
+        </button>
+        <button
+          @click="irAPaginaSiguiente"
+          :disabled="paginaActual === totalPaginas"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </div>
+
     <DetalleVentaModal
       :visible="modalDetalleVisible"
       :venta="ventaSeleccionada"
@@ -83,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 import DetalleVentaModal from '../components/caja/DetalleVentaModal.vue'
@@ -94,6 +144,54 @@ const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 const ventas = ref([])
 const cargando = ref(false)
+
+// ============================================================
+// PAGINACIÓN Y FILTROS (los resuelve el backend)
+// ============================================================
+const paginaActual = ref(1)
+const totalPaginas = ref(1)
+const totalVentas = ref(0)
+const porPagina = 10
+
+const filtrosVacios = () => ({ q: '', desde: '', hasta: '' })
+const filtros = ref(filtrosVacios())
+const hayFiltros = computed(() => Object.values(filtros.value).some(v => v !== ''))
+
+const irAPaginaAnterior = () => {
+  if (paginaActual.value > 1) {
+    paginaActual.value--
+    cargarVentas()
+  }
+}
+
+const irAPaginaSiguiente = () => {
+  if (paginaActual.value < totalPaginas.value) {
+    paginaActual.value++
+    cargarVentas()
+  }
+}
+
+// Cada cambio de búsqueda o filtro vuelve a la página 1 (el resultado
+// cambia el total de páginas). Esperamos 300 ms para no pedirle al
+// servidor en cada tecla.
+const aplicarFiltros = () => {
+  paginaActual.value = 1
+  cargarVentas()
+}
+
+let temporizadorFiltros = null
+watch(filtros, () => {
+  clearTimeout(temporizadorFiltros)
+  temporizadorFiltros = setTimeout(aplicarFiltros, 300)
+}, { deep: true })
+
+const limpiarFiltros = () => {
+  filtros.value = filtrosVacios()
+}
+
+// Si el usuario escribe rápido pueden llegar respuestas fuera de orden:
+// nos quedamos solo con la de la última petición.
+let ultimaPeticion = 0
 
 // Cada venta trae "detalle_pago_venta" (array). Hoy el front de caja solo
 // permite un método de pago por venta, así que usamos el primero.
@@ -153,16 +251,27 @@ const formatearFechaHora = (fecha) => {
 }
 
 const cargarVentas = async () => {
+  const numeroPeticion = ++ultimaPeticion
   cargando.value = true
   try {
     const response = await axios.get(`${baseUrl}/api/ventas`, {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
+      headers: { 'Authorization': `Bearer ${authStore.token}` },
+      params: {
+        page: paginaActual.value,
+        limit: porPagina,
+        q: filtros.value.q.trim() || undefined,
+        desde: filtros.value.desde || undefined,
+        hasta: filtros.value.hasta || undefined
+      }
     })
-    ventas.value = response.data
+    if (numeroPeticion !== ultimaPeticion) return
+    ventas.value = response.data.ventas
+    totalPaginas.value = response.data.totalPages
+    totalVentas.value = response.data.total
   } catch (error) {
     console.error('Error cargando historial de ventas:', error)
   } finally {
-    cargando.value = false
+    if (numeroPeticion === ultimaPeticion) cargando.value = false
   }
 }
 

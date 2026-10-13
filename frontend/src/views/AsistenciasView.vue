@@ -27,7 +27,7 @@
           v-model="filtros.desde" 
           type="date" 
           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          @change="obtenerHistorial"
+          @change="aplicarFiltros"
         />
       </div>
 
@@ -37,7 +37,7 @@
           v-model="filtros.hasta" 
           type="date" 
           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          @change="obtenerHistorial"
+          @change="aplicarFiltros"
         />
       </div>
 
@@ -46,7 +46,7 @@
         <select 
           v-model="filtros.id_trabajador" 
           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          @change="obtenerHistorial"
+          @change="aplicarFiltros"
         >
           <option value="">Todos los trabajadores</option>
           <option v-for="t in listaTrabajadores" :key="t.id_trabajador" :value="t.id_trabajador">
@@ -60,7 +60,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
       <div class="bg-white p-5 rounded-lg shadow border-l-4 border-blue-500">
         <span class="text-xs font-bold text-gray-600 uppercase">Registros Totales</span>
-        <div class="text-2xl font-bold text-gray-800 mt-1">{{ historial.length }}</div>
+        <div class="text-2xl font-bold text-gray-800 mt-1">{{ resumen.total_registros }}</div>
       </div>
 
       <div class="bg-white p-5 rounded-lg shadow border-l-4 border-indigo-500">
@@ -159,6 +159,29 @@
         </table>
       </div>
     </div>
+
+    <!-- Controles de paginación -->
+    <div class="flex justify-between items-center mt-4">
+      <span class="text-sm text-gray-500">
+        Página {{ paginaActual }} de {{ totalPaginas }} ({{ totalRegistros }} registros)
+      </span>
+      <div class="flex gap-2">
+        <button
+          @click="irAPaginaAnterior"
+          :disabled="paginaActual === 1"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          ← Anterior
+        </button>
+        <button
+          @click="irAPaginaSiguiente"
+          :disabled="paginaActual === totalPaginas"
+          class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -177,18 +200,53 @@ const historial = ref([])
 const listaTrabajadores = ref([])
 const cargando = ref(false)
 
-const hoy = new Date().toISOString().split('T')[0]
+// Resumen de TODO el rango filtrado (lo calcula el backend): las tarjetas
+// de arriba no dependen de la página que se esté viendo.
+const resumen = ref({ total_registros: 0, minutos_totales: 0, total_facturado: 0 })
+
+// Fecha de hoy en hora local (toISOString da la fecha en UTC, que después
+// de las 21:00 en Argentina ya es "mañana").
+const hoy = new Date().toLocaleDateString('en-CA')
 const filtros = ref({
   desde: hoy,
   hasta: hoy,
   id_trabajador: ''
 })
 
-// COMPUTED CORREGIDO
+// ============================================================
+// PAGINACIÓN
+// ============================================================
+const paginaActual = ref(1)
+const totalPaginas = ref(1)
+const totalRegistros = ref(0)
+const porPagina = 10
+
+const irAPaginaAnterior = () => {
+  if (paginaActual.value > 1) {
+    paginaActual.value--
+    obtenerHistorial()
+  }
+}
+
+const irAPaginaSiguiente = () => {
+  if (paginaActual.value < totalPaginas.value) {
+    paginaActual.value++
+    obtenerHistorial()
+  }
+}
+
+// Cambiar un filtro vuelve a la página 1 (cambia el total de páginas).
+const aplicarFiltros = () => {
+  paginaActual.value = 1
+  obtenerHistorial()
+}
+
+// Si llegan respuestas fuera de orden, nos quedamos con la de la última petición.
+let ultimaPeticion = 0
+
+// TARJETAS (a partir del resumen del backend)
 const totalHorasAcumuladas = computed(() => {
-  // Sumamos los minutos_trabajados enteros que vienen del backend
-  const totalMinutos = historial.value.reduce((sum, item) => sum + (item.minutos_trabajados || 0), 0)
-  
+  const totalMinutos = resumen.value.minutos_totales || 0
   const horas = Math.floor(totalMinutos / 60)
   const minutos = totalMinutos % 60
 
@@ -196,8 +254,7 @@ const totalHorasAcumuladas = computed(() => {
 })
 
 const totalFacturadoFormat = computed(() => {
-  const total = historial.value.reduce((sum, item) => sum + (item.metricas_turno?.total_facturado || 0), 0)
-  return total.toLocaleString('es-AR', { minimumFractionDigits: 2 })
+  return (resumen.value.total_facturado || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })
 })
 
 // MÉTODOS Y FORMATO
@@ -212,19 +269,26 @@ const formatearHora = (strFecha) => {
 }
 
 const obtenerHistorial = async () => {
+  const numeroPeticion = ++ultimaPeticion
   cargando.value = true
   try {
     const params = new URLSearchParams()
+    params.append('page', paginaActual.value)
+    params.append('limit', porPagina)
     if (filtros.value.desde) params.append('desde', filtros.value.desde)
     if (filtros.value.hasta) params.append('hasta', filtros.value.hasta)
     if (filtros.value.id_trabajador) params.append('id_trabajador', filtros.value.id_trabajador)
 
     const response = await axios.get(`${baseUrl}/api/asistencias/historial?${params.toString()}`, getHeaders())
-    historial.value = response.data
+    if (numeroPeticion !== ultimaPeticion) return
+    historial.value = response.data.asistencias
+    totalPaginas.value = response.data.totalPages
+    totalRegistros.value = response.data.total
+    resumen.value = response.data.resumen
   } catch (error) {
     console.error('Error al obtener el historial de asistencias:', error)
   } finally {
-    cargando.value = false
+    if (numeroPeticion === ultimaPeticion) cargando.value = false
   }
 }
 

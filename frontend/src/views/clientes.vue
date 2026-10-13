@@ -98,7 +98,29 @@
 
         <!-- Tabla / Lista de Clientes -->
         <div class="lg:col-span-2 p-6 rounded-2xl shadow-md border border-slate-200/80 overflow-hidden">
-          <h2 class="text-xl font-bold mb-4">Listado de Clientes</h2>
+          <h2 class="text-xl font-bold mb-3">Listado de Clientes</h2>
+
+          <!-- Búsqueda y filtros (los resuelve el backend sobre todos los clientes) -->
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <input
+              v-model="filtros.q"
+              type="text"
+              placeholder="Buscar por nombre, apellido, DNI o teléfono..."
+              class="h-8 px-2.5 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500 flex-1 min-w-[200px]"
+            />
+            <select v-model="filtros.estado" class="h-8 px-2.5 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500">
+              <option value="">Todos los estados</option>
+              <option value="activo">Activos</option>
+              <option value="inactivo">Deshabilitados</option>
+            </select>
+            <button
+              v-if="hayFiltros"
+              @click="limpiarFiltros"
+              class="h-8 px-2.5 text-xs text-slate-500 hover:text-red-600 border border-slate-300 rounded-md hover:bg-slate-50 transition"
+            >
+              ✕ Limpiar
+            </button>
+          </div>
 
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
@@ -113,7 +135,9 @@
               </thead>
               <tbody class="divide-y divide-slate-100 text-sm">
                 <tr v-if="clientes.length === 0">
-                  <td colspan="5" class="p-4 text-center">No hay clientes registrados aún.</td>
+                  <td colspan="5" class="p-4 text-center">
+                    {{ hayFiltros ? 'No se encontraron clientes con esos filtros.' : 'No hay clientes registrados aún.' }}
+                  </td>
                 </tr>
                 <tr v-for="cliente in clientes" :key="cliente.id_cliente" class="hover:bg-slate-50/80 transition-colors" :class="{ 'opacity-50': cliente.activo === false }">
                   <td class="p-3 font-medium">{{ cliente.dni }}</td>
@@ -126,7 +150,8 @@
                     {{ cliente.fecha_ultima_compra ? new Date(cliente.fecha_ultima_compra).toLocaleDateString('es-AR', { timeZone: 'UTC' }) : '-' }}
                   </td>
 
-                  <td class="p-3 text-right space-x-2">
+                  <td class="p-3">
+                    <div class="flex items-center justify-end gap-2">
                     <button
                       v-if="authStore.tienePermiso('Editar_Clientes')"
                         @click="seleccionarParaEditar(cliente)"
@@ -162,11 +187,34 @@
                           <line x1="14" x2="14" y1="11" y2="17"/>
                         </svg>
                     </button>
-
+                    </div>
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- Controles de paginación -->
+          <div class="flex justify-between items-center mt-4">
+            <span class="text-sm text-slate-500">
+              Página {{ paginaActual }} de {{ totalPaginas }} ({{ totalClientes }} clientes)
+            </span>
+            <div class="flex gap-2">
+              <button
+                @click="irAPaginaAnterior"
+                :disabled="paginaActual === 1"
+                class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                ← Anterior
+              </button>
+              <button
+                @click="irAPaginaSiguiente"
+                :disabled="paginaActual === totalPaginas"
+                class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                Siguiente →
+              </button>
+            </div>
           </div>
         </div>
 
@@ -176,7 +224,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 
@@ -203,13 +251,79 @@ const nuevoCliente = ref({
 // FUNCIONES API (NODE.JS)
 // ============================================================
 
-// Cargar listado de clientes
+// ============================================================
+// PAGINACIÓN Y FILTROS (los resuelve el backend)
+// ============================================================
+const paginaActual = ref(1)
+const totalPaginas = ref(1)
+const totalClientes = ref(0)
+const porPagina = 10
+
+const filtrosVacios = () => ({ q: '', estado: '' })
+const filtros = ref(filtrosVacios())
+const hayFiltros = computed(() => Object.values(filtros.value).some(v => v !== ''))
+
+const irAPaginaAnterior = () => {
+  if (paginaActual.value > 1) {
+    paginaActual.value--
+    obtenerClientes()
+  }
+}
+
+const irAPaginaSiguiente = () => {
+  if (paginaActual.value < totalPaginas.value) {
+    paginaActual.value++
+    obtenerClientes()
+  }
+}
+
+// Cada cambio de búsqueda o filtro vuelve a la página 1 (el resultado
+// cambia el total de páginas). Esperamos 300 ms para no pedirle al
+// servidor en cada tecla.
+const aplicarFiltros = () => {
+  paginaActual.value = 1
+  obtenerClientes()
+}
+
+let temporizadorFiltros = null
+watch(filtros, () => {
+  clearTimeout(temporizadorFiltros)
+  temporizadorFiltros = setTimeout(aplicarFiltros, 300)
+}, { deep: true })
+
+const limpiarFiltros = () => {
+  filtros.value = filtrosVacios()
+}
+
+// Si el usuario escribe rápido pueden llegar respuestas fuera de orden:
+// nos quedamos solo con la de la última petición.
+let ultimaPeticion = 0
+
+// Cargar listado de clientes (página actual + filtros)
 const obtenerClientes = async () => {
+  const numeroPeticion = ++ultimaPeticion
   try {
     const response = await axios.get(`${baseUrl}/api/clientes`, {
-      headers: { 'Authorization': `Bearer ${authStore.token}` }
+      headers: { 'Authorization': `Bearer ${authStore.token}` },
+      params: {
+        page: paginaActual.value,
+        limit: porPagina,
+        q: filtros.value.q.trim() || undefined,
+        estado: filtros.value.estado || undefined
+      }
     })
-    clientes.value = response.data
+    if (numeroPeticion !== ultimaPeticion) return
+
+    // Si la página quedó vacía (ej: se eliminó o deshabilitó el último
+    // cliente de la última página), volvemos a la última que exista.
+    if (response.data.clientes.length === 0 && paginaActual.value > 1) {
+      paginaActual.value = Math.max(1, response.data.totalPages)
+      return obtenerClientes()
+    }
+
+    clientes.value = response.data.clientes
+    totalPaginas.value = response.data.totalPages
+    totalClientes.value = response.data.total
   } catch (error) {
     console.error('Error cargando clientes:', error)
   }

@@ -59,6 +59,14 @@
           Ventas
           <span v-if="detalle" class="ml-1 text-xs text-gray-400">({{ detalle.resumen.cantidadVentas }})</span>
         </button>
+        <button
+          @click="tab = 'movimientos'"
+          class="px-4 py-2 text-sm font-semibold rounded-t-lg border-b-2 transition"
+          :class="tab === 'movimientos' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-600'"
+        >
+          Movimientos
+          <span v-if="detalle" class="ml-1 text-xs text-gray-400">({{ detalle.movimientos.length }})</span>
+        </button>
       </div>
 
       <div class="p-6 pt-4">
@@ -141,29 +149,12 @@
                 "{{ detalle.caja.observaciones }}"
               </p>
             </div>
-
-            <!-- Movimientos manuales: ingresos y egresos -->
-            <div v-if="detalle.movimientos.length > 0" class="border-t border-gray-100 pt-4 mt-4">
-              <h3 class="text-sm font-bold text-gray-700 mb-2">Movimientos manuales</h3>
-              <div v-for="mov in detalle.movimientos" :key="mov.id_movimiento" class="flex justify-between text-sm py-1">
-                <span class="text-gray-600">
-                  {{ formatearFecha(mov.fecha_hora) }} — {{ mov.descripcion || 'Sin descripción' }}
-                  <span class="text-gray-400 text-xs">({{ mov.trabajador?.nombre }} {{ mov.trabajador?.apellido }})</span>
-                </span>
-                <span
-                  class="font-medium"
-                  :class="mov.tipo_movimiento === 'ingreso' ? 'text-emerald-600' : 'text-red-500'"
-                >
-                  {{ mov.tipo_movimiento === 'ingreso' ? '+' : '-' }}${{ formatMonto(mov.monto) }}
-                </span>
-              </div>
-            </div>
           </div>
 
           <!-- ============================================ -->
           <!-- TAB: VENTAS -->
           <!-- ============================================ -->
-          <div v-else>
+          <div v-else-if="tab === 'ventas'">
             <div v-if="detalle.ventas.length === 0" class="text-center text-gray-400 text-sm py-10">
               Todavía no hay ventas registradas en esta caja.
             </div>
@@ -198,6 +189,42 @@
                     </span>
                   </li>
                 </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================ -->
+          <!-- TAB: MOVIMIENTOS (ingresos y egresos manuales) -->
+          <!-- ============================================ -->
+          <div v-else>
+            <div v-if="detalle.movimientos.length === 0" class="text-center text-gray-400 text-sm py-10">
+              Todavía no hay movimientos manuales registrados en esta caja.
+            </div>
+            <div v-else class="space-y-3">
+              <div
+                v-for="mov in detalle.movimientos"
+                :key="mov.id_movimiento"
+                class="border border-gray-100 rounded-lg p-3 flex justify-between items-start gap-3"
+              >
+                <div>
+                  <span
+                    class="text-xs font-semibold px-2 py-0.5 rounded"
+                    :class="mov.tipo_movimiento === 'ingreso' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'"
+                  >
+                    {{ mov.tipo_movimiento === 'ingreso' ? 'Ingreso' : 'Egreso' }}
+                  </span>
+                  <span class="text-xs text-gray-400 ml-2">{{ formatearFecha(mov.fecha_hora) }}</span>
+                  <p class="text-sm text-gray-800 mt-1">{{ mov.descripcion || 'Sin descripción' }}</p>
+                  <p class="text-xs text-gray-500 mt-0.5">
+                    Registrado por {{ mov.trabajador?.nombre }} {{ mov.trabajador?.apellido }}
+                  </p>
+                </div>
+                <div
+                  class="text-sm font-bold shrink-0"
+                  :class="mov.tipo_movimiento === 'ingreso' ? 'text-emerald-600' : 'text-red-600'"
+                >
+                  {{ mov.tipo_movimiento === 'ingreso' ? '+' : '-' }}${{ formatMonto(mov.monto) }}
+                </div>
               </div>
             </div>
           </div>

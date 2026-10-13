@@ -53,12 +53,12 @@
           <tr v-if="cargando">
             <td colspan="6" class="px-4 py-6 text-center">Cargando productos...</td>
           </tr>
-          <tr v-else-if="productosFiltrados.length === 0">
+          <tr v-else-if="productos.length === 0">
             <td colspan="6" class="px-4 py-6 text-center">No se encontraron productos.</td>
           </tr>
           <tr
             v-else
-            v-for="producto in productosFiltrados"
+            v-for="producto in productos"
             :key="producto.id_producto"
             class="hover:bg-blue-50/60 dark:hover:bg-slate-800 transition-colors duration-150"
           >
@@ -446,15 +446,6 @@ const totalPaginas = ref(1)
 const totalProductos = ref(0)
 const porPagina = 10
 
-const productosFiltrados = computed(() => {
-  if (!busqueda.value) return productos.value
-  const q = busqueda.value.toLowerCase()
-  return productos.value.filter(p =>
-    p.nombre_producto.toLowerCase().includes(q) ||
-    p.codigo_barras?.includes(q)
-  )
-})
-
 const irAPaginaAnterior = () => {
   if (paginaActual.value > 1) {
     paginaActual.value--
@@ -504,6 +495,7 @@ const cargarProductos = async () => {
       params: {
         page: paginaActual.value,
         limit: porPagina,
+        q: busqueda.value.trim() || undefined,
         etiquetas: etiquetasFiltro.value.length > 0 ? etiquetasFiltro.value.join(',') : undefined
       }
     })
@@ -648,6 +640,19 @@ onMounted(() => {
 watch(etiquetasFiltro, () => {
   paginaActual.value = 1
   cargarProductos()
+})
+
+// La búsqueda por texto la resuelve el backend (sobre TODOS los
+// productos, no solo la página visible). Esperamos 300 ms después de la
+// última tecla para no pedirle al servidor en cada letra, y volvemos a la
+// página 1 porque el resultado cambia el total de páginas.
+let temporizadorBusqueda = null
+watch(busqueda, () => {
+  clearTimeout(temporizadorBusqueda)
+  temporizadorBusqueda = setTimeout(() => {
+    paginaActual.value = 1
+    cargarProductos()
+  }, 300)
 })
 </script>
 
