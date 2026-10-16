@@ -12,11 +12,10 @@ import prisma from '../../db.js'
  * precio_unitario_momento (el precio real al momento de esa venta).
  */
 
-// GET /api/estadisticas/productos-mas-ganancia?desde=&hasta=&limit=10
+// GET /api/estadisticas/productos-mas-ganancia?desde=&hasta=
 export const getTopProductosGanancia = async (req, res) => {
   try {
     const { desde, hasta } = req.query
-    const limit = Math.min(parseInt(req.query.limit) || 10, 50)
 
     const filtroFecha = {}
     if (desde) filtroFecha.gte = new Date(desde)
@@ -66,7 +65,6 @@ export const getTopProductosGanancia = async (req, res) => {
         ganancia: Number(p.ganancia.toFixed(2))
       }))
       .sort((a, b) => b.ganancia - a.ganancia)
-      .slice(0, limit)
 
     res.json(resultado)
   } catch (error) {

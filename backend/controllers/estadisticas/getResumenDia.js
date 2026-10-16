@@ -101,7 +101,7 @@ export const getResumenDia = async (req, res) => {
     const totalUnidadesEtiquetadas = Array.from(porEtiquetaMap.values())
       .reduce((sum, e) => sum + e.unidades, 0)
 
-    const porEtiqueta = Array.from(porEtiquetaMap.values())
+    const todasEtiquetas = Array.from(porEtiquetaMap.values())
       .map(e => ({
         ...e,
         porcentaje: totalUnidadesEtiquetadas > 0
@@ -109,6 +109,24 @@ export const getResumenDia = async (req, res) => {
           : 0
       }))
       .sort((a, b) => b.unidades - a.unidades)
+
+    // Top 10 (el % de cada una sigue calculado sobre el total de todas)
+    const porEtiqueta = todasEtiquetas.slice(0, 10)
+
+    // El resto se agrupa en "Otras" para que la dona se complete al 100%
+    const resto = todasEtiquetas.slice(10)
+    if (resto.length > 0) {
+      const unidadesResto = resto.reduce((sum, e) => sum + e.unidades, 0)
+      porEtiqueta.push({
+        id_etiqueta: null,
+        nombre_etiqueta: 'Otras',
+        unidades: unidadesResto,
+        porcentaje: totalUnidadesEtiquetadas > 0
+          ? redondear2((unidadesResto / totalUnidadesEtiquetadas) * 100)
+          : 0,
+        es_otras: true
+      })
+    }
 
     res.json({
       fecha: inicio.toISOString().slice(0, 10),

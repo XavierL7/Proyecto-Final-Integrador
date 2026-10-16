@@ -2,11 +2,14 @@
 <!-- dashboard para acceder slo a ventas por ahora -->
 <template>
   <div class="dashboard">
-    <h1>Panel de Control - Kairo</h1>
-    
-    <!-- muestra info basica del vendedor, nombre y apellido. rol y permisos ahora viven en /perfil -->
-    <div class="user-info">
-      <p>Usuario: {{ authStore.trabajador?.nombre }} {{ authStore.trabajador?.apellido }}</p>
+    <!-- título a la izquierda y usuario a la derecha, a la misma altura -->
+    <div class="dashboard-header">
+      <h1>Panel de Control - Kairo</h1>
+
+      <!-- muestra info basica del vendedor, nombre y apellido. rol y permisos ahora viven en /perfil -->
+      <div class="user-info">
+        <p>Usuario: {{ authStore.trabajador?.nombre }} {{ authStore.trabajador?.apellido }}</p>
+      </div>
     </div>
  
     <!-- Resumen de hoy -->
@@ -68,7 +71,7 @@
             <svg viewBox="0 0 42 42" class="dona-svg">
               <circle
                 v-for="seg in segmentosDonut"
-                :key="seg.id_etiqueta"
+                :key="seg.id_etiqueta ?? 'otras'"
                 cx="21" cy="21" r="15.9"
                 fill="transparent"
                 :stroke="seg.color"
@@ -78,13 +81,23 @@
                 :stroke-dashoffset="seg.dashoffset"
               />
             </svg>
-            <ul class="dona-leyenda">
-              <li v-for="seg in segmentosDonut" :key="seg.id_etiqueta">
-                <span class="dona-punto" :style="{ backgroundColor: seg.color }"></span>
-                <span class="dona-nombre">{{ seg.nombre_etiqueta }}</span>
-                <span class="dona-porcentaje">{{ seg.porcentaje }}%</span>
-              </li>
-            </ul>
+            <!-- leyenda en dos columnas: las primeras 5 y, al lado, el resto -->
+            <div class="dona-leyendas">
+              <ul class="dona-leyenda">
+                <li v-for="seg in leyendaIzquierda" :key="seg.id_etiqueta ?? 'otras'">
+                  <span class="dona-punto" :style="{ backgroundColor: seg.color }"></span>
+                  <span class="dona-nombre">{{ seg.nombre_etiqueta }}</span>
+                  <span class="dona-porcentaje">{{ seg.porcentaje }}%</span>
+                </li>
+              </ul>
+              <ul v-if="leyendaDerecha.length" class="dona-leyenda">
+                <li v-for="seg in leyendaDerecha" :key="seg.id_etiqueta ?? 'otras'">
+                  <span class="dona-punto" :style="{ backgroundColor: seg.color }"></span>
+                  <span class="dona-nombre">{{ seg.nombre_etiqueta }}</span>
+                  <span class="dona-porcentaje">{{ seg.porcentaje }}%</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -93,7 +106,7 @@
 </template>
  
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
@@ -129,14 +142,15 @@ const maxTotalVendedor = computed(() => {
  
 const anchoBarra = (valor, maximo) => Math.max(4, Math.round((valor / maximo) * 100))
  
-const coloresEtiquetas = ['#4a8db7', '#a78bfa', '#f472b6', '#34d399', '#fbbf24', '#fb923c', '#f87171', '#60a5fa']
+const coloresEtiquetas = ['#4a8db7', '#a78bfa', '#f472b6', '#34d399', '#fbbf24', '#fb923c', '#f87171', '#60a5fa', '#2dd4bf', '#a3e635']
+const colorOtras = '#9ca3af' // gris para el grupo "Otras"
  
 const segmentosDonut = computed(() => {
   let acumulado = 0
   return resumenHoy.value.porEtiqueta.map((e, i) => {
     const seg = {
       ...e,
-      color: coloresEtiquetas[i % coloresEtiquetas.length],
+      color: e.es_otras ? colorOtras : coloresEtiquetas[i % coloresEtiquetas.length],
       dashoffset: -acumulado
     }
     acumulado += e.porcentaje
@@ -144,6 +158,10 @@ const segmentosDonut = computed(() => {
   })
 })
  
+// Leyenda en dos columnas: 5 a la izquierda y el resto (hasta 6) a la derecha
+const leyendaIzquierda = computed(() => segmentosDonut.value.slice(0, 5))
+const leyendaDerecha = computed(() => segmentosDonut.value.slice(5))
+
 // El resumen es de Estadísticas: sin ese permiso ni lo pedimos (daría 403)
 // ni mostramos el bloque, para no enseñar ceros que parecen datos reales.
 const puedeVerResumen = computed(() => authStore.tienePermiso('Ver_Estadisticas'))
@@ -161,6 +179,11 @@ const cargarResumenHoy = async () => {
 }
  
 onMounted(cargarResumenHoy)
+
+// Oculta la barra de scroll de la página (se sigue pudiendo scrollear) solo mientras
+// este dashboard está abierto
+onMounted(() => document.documentElement.classList.add('sin-scrollbar'))
+onUnmounted(() => document.documentElement.classList.remove('sin-scrollbar'))
 </script>
  
 <style scoped> 
@@ -174,16 +197,28 @@ h1 {
   font-size: 2rem;
 }
  
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin-bottom: 28px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+}
+
 .user-info {
-  padding: 18px 24px;
+  padding: 8px 18px;
   border-radius: 10px;
-  margin-bottom: 36px;
   border: 1px solid #dee2e6;
   font-size: 1.05rem;
 }
  
 .user-info p {
-  margin: 5px 0;
+  margin: 0;
 }
  
 .dashboard-grid {
@@ -379,6 +414,11 @@ button:hover {
   transform: rotate(-90deg);
 }
  
+.dona-leyendas {
+  display: flex;
+  gap: 28px;
+}
+
 .dona-leyenda {
   list-style: none;
   padding: 0;
@@ -396,6 +436,7 @@ button:hover {
 .dona-punto {
   width: 12px;
   height: 12px;
+  flex-shrink: 0; /* evita que el punto se achique cuando el nombre ocupa 2 líneas */
   border-radius: 50%;
   display: inline-block;
 }
@@ -407,5 +448,16 @@ button:hover {
  
 .dona-porcentaje {
   color: #6b7280;
+}
+</style>
+
+<!-- Estilo global (no scoped): apunta al <html>, que queda fuera del componente -->
+<style>
+html.sin-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+}
+html.sin-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Edge, Safari */
 }
 </style>

@@ -1,11 +1,10 @@
 // backend/controllers/stats/getTopProductosVendidos.js
 import prisma from '../../db.js'
 
-// GET /api/estadisticas/productos-mas-vendidos?desde=YYYY-MM-DD&hasta=YYYY-MM-DD&limit=10
+// GET /api/estadisticas/productos-mas-vendidos?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
 export const getTopProductosVendidos = async (req, res) => {
   try {
     const { desde, hasta } = req.query
-    const limit = Math.min(parseInt(req.query.limit) || 10, 50)
 
     const filtroFecha = {}
     if (desde) filtroFecha.gte = new Date(desde)
@@ -52,7 +51,6 @@ export const getTopProductosVendidos = async (req, res) => {
     const resultado = Array.from(acumulado.values())
       .map(p => ({ ...p, ingresos: Number(p.ingresos.toFixed(2)) }))
       .sort((a, b) => b.unidades_vendidas - a.unidades_vendidas)
-      .slice(0, limit)
 
     res.json(resultado)
   } catch (error) {

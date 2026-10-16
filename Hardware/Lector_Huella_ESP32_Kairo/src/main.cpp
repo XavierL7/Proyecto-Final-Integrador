@@ -22,7 +22,7 @@ const char* WIFI_PASSWORD = "6Noviembre";
 
 
 
-const char* BACKEND_URL    = "http://10.41.86.83:3000";
+const char* BACKEND_URL    = "http://10.99.33.83:3000";
 
 const char* DEVICE_API_KEY = "3jK8dFgH9lM2nBvC5xZqWpErTyUiOpAsDfGhJkLzXcVbNmQwErTyUiOpAsDfGhJkLYTljZWZlNTYtZmRkNi00NTBjLWFlNGYtZWJkYmQ4NDZiZTYyNTcyYWIzMjYtY2Y4NS00YWQ0LThhNDEtOTIwZjgxNGJkZTgx"; // debe coincidir con DEVICE_API_KEY del .env del backend
 

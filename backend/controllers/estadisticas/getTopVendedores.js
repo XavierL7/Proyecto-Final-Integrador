@@ -9,11 +9,10 @@ import prisma from '../../db.js'
  * HistorialVentasView.vue: `venta.trabajador?.nombre`).
  */
 
-// GET /api/estadisticas/vendedores-top?desde=&hasta=&limit=10
+// GET /api/estadisticas/vendedores-top?desde=&hasta=
 export const getTopVendedores = async (req, res) => {
   try {
     const { desde, hasta } = req.query
-    const limit = Math.min(parseInt(req.query.limit) || 10, 50)
 
     const filtroFecha = {}
     if (desde) filtroFecha.gte = new Date(desde)
@@ -28,8 +27,7 @@ export const getTopVendedores = async (req, res) => {
       where: Object.keys(filtroFecha).length ? { fecha_hora: filtroFecha } : undefined,
       _sum: { total_neto: true },
       _count: { id_venta: true },
-      orderBy: { _sum: { total_neto: 'desc' } },
-      take: limit
+      orderBy: { _sum: { total_neto: 'desc' } }
     })
 
     if (agrupado.length === 0) return res.json([])

@@ -11,11 +11,10 @@ import prisma from '../../db.js'
  * SQL cruda con prisma.$queryRaw haciendo los JOINs y el GROUP BY en la base.
  */
 
-// GET /api/estadisticas/etiquetas-top?desde=&hasta=&limit=10
+// GET /api/estadisticas/etiquetas-top?desde=&hasta=
 export const getTopEtiquetas = async (req, res) => {
   try {
     const { desde, hasta } = req.query
-    const limit = Math.min(parseInt(req.query.limit) || 10, 50)
 
     const filtroFecha = {}
     if (desde) filtroFecha.gte = new Date(desde)
@@ -71,7 +70,6 @@ export const getTopEtiquetas = async (req, res) => {
     const resultado = Array.from(acumulado.values())
       .map(e => ({ ...e, ingresos: Number(e.ingresos.toFixed(2)) }))
       .sort((a, b) => b.unidades_vendidas - a.unidades_vendidas)
-      .slice(0, limit)
 
     res.json(resultado)
   } catch (error) {
